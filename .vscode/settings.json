@@ -11,7 +11,8 @@
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
     "powershell.scriptAnalysis.settingsPath": ".vscode\\analyzersettings.psd1",
-    "cSpell.words": [
-        "gitignore"
-    ]
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false,
+        "files.encoding": "utf8"
+    }
 }
