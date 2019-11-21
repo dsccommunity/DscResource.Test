@@ -8,6 +8,7 @@
 # OutputDirectory: ../output/Sampler
 CopyDirectories:
   - en-US
+  - Tests
 # SemVer: '1.2.3'
 # Suffix to add to Root module PSM1 after merge (here, the Set-Alias exporting IB tasks)
 # suffix: suffix.ps1
@@ -36,6 +37,14 @@ BuildWorkflow:
     - build
     - test
 
+  DscTest: |
+    {
+      Import-Module -force DscResource.Test
+      Invoke-DscResourceTest
+    }
+  t:
+    - build
+    - DscTest
   build:
     - Clean
     - Build_Module_ModuleBuilder
@@ -65,12 +74,14 @@ Pester: #Passthru, OutputFile, CodeCoverageOutputFile not supported
   ExcludeFromCodeCoverage:
     - tasks
     - Template
+    - Tests
   # Default is to use the tests folder in the project folder or source folder (if present)
   # can use it to prioritize: tests/QA, tests/Unit, tests/Integration
   Script:
+    - tests/Unit/
+  # - tests/Unit/Public
   # - tests/QA/module.tests.ps1
   # - tests/QA
-  # - tests/Unit
   # - tests/Integration
   ExcludeTag:
   Tag:
