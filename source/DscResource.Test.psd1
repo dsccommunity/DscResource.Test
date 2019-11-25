@@ -53,11 +53,7 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules   = @(
         'Pester',
-        'xDscResourceDesigner',
-        @{
-            ModuleName    = 'DscResource.AnalyzerRules'
-            ModuleVersion = '0.1.0'
-        }
+        'xDscResourceDesigner'
         )
 
     # Assemblies that must be loaded prior to importing this module
