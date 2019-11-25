@@ -53,11 +53,8 @@
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules   = @(
         'Pester',
-        'xDscResourceDesigner',
-        @{
-            ModuleName    = 'DscResource.AnalyzerRules'
-            ModuleVersion = '0.1.0'
-        })
+        'xDscResourceDesigner'
+        )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -101,7 +98,12 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @()
+            Tags = @(
+                @{
+                    ModuleName    = 'DscResource.AnalyzerRules'
+                    ModuleVersion = '0.1.0'
+                }
+            )
 
             # A URL to the license for this module.
             LicenseUri   = ''
@@ -109,6 +111,7 @@
             # A URL to the main website for this project.
             ProjectUri   = ''
 
+            ExternalModuleDependencies = @()
             # A URL to an icon representing this module.
             # IconUri = ''
 
