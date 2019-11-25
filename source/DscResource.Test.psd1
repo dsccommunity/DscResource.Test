@@ -51,10 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @(
-        'Pester',
-        'xDscResourceDesigner'
-        )
+    RequiredModules   = @()
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -106,7 +103,7 @@
             # A URL to the main website for this project.
             ProjectUri   = ''
 
-            ExternalModuleDependencies = @('DscResource.AnalyzerRules','Pester')
+            ExternalModuleDependencies = @('DscResource.AnalyzerRules','Pester','xDSCResourceDesigner')
             # A URL to an icon representing this module.
             # IconUri = ''
 
