@@ -257,12 +257,14 @@ function Invoke-DscResourceTest
                 {
                     $item['Parameters'] = @{ }
                 }
-                $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
-                $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
+                $item['Parameters']['ModuleBase']     = $ModuleUnderTest.ModuleBase
+                $item['Parameters']['ModuleName']     = $ModuleUnderTest.Name
                 $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
-                $item['Parameters']['ProjectPath'] = $ProjectPath
-                $item['Parameters']['SourcePath'] = $SourcePath
+                $item['Parameters']['ProjectPath']    = $ProjectPath
+                $item['Parameters']['SourcePath']     = $SourcePath
                 $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
+                $item['Parameters']['Tag']            = $PSBoundParameters['Tag']
+                $item['Parameters']['ExcludeTag']     = $PSBoundParameters['ExcludeTag']
             }
             else
             {
@@ -275,10 +277,12 @@ function Invoke-DscResourceTest
                         ProjectPath    = $ProjectPath
                         SourcePath     = $SourcePath
                         SourceManifest = $SourceManifest.FullName
+                        Tag            = $PSBoundParameters['Tag']
+                        ExcludeTag     = $PSBoundParameters['ExcludeTag']
                     }
                 }
             }
-            Write-Debug "Updating Script Param with $($item | ConvertTo-Json -Depth 4)"
+
             $item
         }
 

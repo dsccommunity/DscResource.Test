@@ -1,0 +1,48 @@
+{
+    "required_rules":  [
+                           "PSAvoidDefaultValueForMandatoryParameter",
+                           "PSAvoidDefaultValueSwitchParameter",
+                           "PSAvoidInvokingEmptyMembers",
+                           "PSAvoidNullOrEmptyHelpMessageAttribute",
+                           "PSAvoidUsingCmdletAliases",
+                           "PSAvoidUsingComputerNameHardcoded",
+                           "PSAvoidUsingDeprecatedManifestFields",
+                           "PSAvoidUsingEmptyCatchBlock",
+                           "PSAvoidUsingInvokeExpression",
+                           "PSAvoidUsingPositionalParameters",
+                           "PSAvoidShouldContinueWithoutForce",
+                           "PSAvoidUsingWMICmdlet",
+                           "PSAvoidUsingWriteHost",
+                           "PSDSCReturnCorrectTypesForDSCFunctions",
+                           "PSDSCStandardDSCFunctionsInResource",
+                           "PSDSCUseIdenticalMandatoryParametersForDSC",
+                           "PSDSCUseIdenticalParametersForDSC",
+                           "PSMissingModuleManifestField",
+                           "PSPossibleIncorrectComparisonWithNull",
+                           "PSProvideCommentHelp",
+                           "PSReservedCmdletChar",
+                           "PSReservedParams",
+                           "PSUseApprovedVerbs",
+                           "PSUseCmdletCorrectly",
+                           "PSUseOutputTypeCorrectly"
+                       ],
+    "ignore_rules":  [
+                         "PSDSCDscExamplesPresent",
+                         "PSDSCDscTestsPresent",
+                         "PSUseBOMForUnicodeEncodedFile",
+                         "PSUseShouldProcessForStateChangingFunctions",
+                         "PSUseSingularNouns",
+                         "PSUseToExportFieldsInManifest",
+                         "PSUseUTF8EncodingForHelpFile"
+                     ],
+    "flagged_rules":  [
+                          "PSAvoidGlobalVars",
+                          "PSAvoidUsingConvertToSecureStringWithPlainText",
+                          "PSAvoidUsingPlainTextForPassword",
+                          "PSAvoidUsingUsernameAndPasswordParams",
+                          "PSDSCUseVerboseMessageInDSCResource",
+                          "PSShouldProcess",
+                          "PSUseDeclaredVarsMoreThanAssignments",
+                          "PSUsePSCredentialType"
+                      ]
+}
