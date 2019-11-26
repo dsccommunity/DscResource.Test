@@ -242,7 +242,7 @@ function Invoke-DscResourceTest
         # This won't display the warning message for the skipped blocks
         #  But should save time by not running initialization code within a Describe Block
         #  And we can add such warning if we create a static list of the things we can opt-in
-        #  I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is prefered
+        #  I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is preferred
 
         # Most tests should run against the built module
         # PSSA could be run against source, or against built module & convert lines/file
