@@ -16,7 +16,7 @@ InModuleScope $ProjectName {
                 $moduleRootPath = $TestDrive
 
                 # Adds a backslash to make sure it gets trimmed.
-                $filePath += '\'
+                $filePath += [io.path]::DirectorySeparatorChar
             }
 
             It 'Should return the correct relative path' {

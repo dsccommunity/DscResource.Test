@@ -26,5 +26,5 @@ function Get-RelativePathFromModuleRoot
         Removing the module root path from the file path so that the path
         doesn't get so long in the Pester output.
     #>
-    return ($FilePath -replace [Regex]::Escape($ModuleRootFilePath), '').Trim('\')
+    return ($FilePath -replace [Regex]::Escape($ModuleRootFilePath), '').Trim([io.path]::DirectorySeparatorChar)
 }
