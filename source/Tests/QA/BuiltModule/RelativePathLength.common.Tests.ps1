@@ -17,17 +17,12 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
         $fullPathHardLimit = 129
         $allModuleFiles = Get-ChildItem -Path $ModuleBase -Recurse
 
-        $allModuleFiles = $allModuleFiles | Where-Object -FilterScript {
-            # Skip all files under DscResource.Tests.
-            $_.FullName -notmatch 'DscResource\.Tests'
-        }
-
         $testCaseModuleFile = @()
 
         $allModuleFiles | ForEach-Object -Process {
             $testCaseModuleFile += @(
                 @{
-                    FullRelativePath = $_.FullName -replace ($moduleRootFilePath -replace '\\', '\\')
+                    FullRelativePath = Get-RelativePathFromModuleRoot -FilePath $_.FullName -ModuleRootFilePath $ModuleBase
                 }
             )
         }
