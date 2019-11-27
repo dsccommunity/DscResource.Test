@@ -136,9 +136,12 @@ InModuleScope $ProjectName {
         mock Get-ChildItem -MockWith {'C:\dummy.psd1'}
 
 
-        mock Get-StructuredObjectFromFile -ParameterFilter {$Path -like '*out.json'} -MockWith {
-            param($Path)
-             @('noTag','ExcludeTag')
+        Mock Get-StructuredObjectFromFile -ParameterFilter { $Path -like '*out.json' } -MockWith {
+            param
+            (
+                $Path
+            )
+            @('noTag', 'ExcludeTag')
         }
 
         It 'overrides properly the Script parameters for Invoke-Pester' {

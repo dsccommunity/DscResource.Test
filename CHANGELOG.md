@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created module from DscResource.Tests repository.
 - Function Invoke-DscResourceTest is proxy to Invoke-Pester, with Sugar coating for
 the built-in tests.
+- Added Secret Variables for releases and using DSC Bot account
