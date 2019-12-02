@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Resets the DSC LCM by performing the following functions:
+        Clear the DSC LCM by performing the following functions:
         1. Cancel any currently executing DSC LCM operations
         2. Remove any DSC configurations that:
             - are currently applied
@@ -18,17 +18,22 @@
         test to ensure the DSC LCM is reset before another test DSC configuration
         is applied.
     .EXAMPLE
-        Reset-DSC
+        Clear-DscLcmConfiguration
 
-        This command will reset the DSC LCM and clear out any DSC configurations.
+        This command will Stop the DSC LCM and clear out any DSC configurations.
 #>
-function Reset-DSC
+function Clear-DscLcmConfiguration
 {
     [CmdletBinding()]
     param ()
 
-    Write-Verbose -Message 'Resetting the DSC LCM'
+    if ($PSVersionTable.PSVersion.Major -gt 5)
+    {
+        Write-Verbose "The LCM is a Windows PowerShell version only"
+        return
+    }
 
+    Write-Verbose -Message 'Stopping current LCM configuration and Clearing the DSC Configuration Documents'
     Stop-DscConfiguration -ErrorAction 'SilentlyContinue' -Force
     Remove-DscConfigurationDocument -Stage 'Current' -Force
     Remove-DscConfigurationDocument -Stage 'Pending' -Force
