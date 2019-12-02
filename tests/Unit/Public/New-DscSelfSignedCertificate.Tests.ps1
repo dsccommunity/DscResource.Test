@@ -66,7 +66,7 @@ InModuleScope $ProjectName {
                 }
             }
 
-            It 'Should return a certificate and call the correct mocks' -skip:(!$isWindows) {
+            It 'Should return a certificate and call the correct mocks' -skip:($PSversionTable.PSVersion.Major -gt 5) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
@@ -114,7 +114,7 @@ InModuleScope $ProjectName {
                 }
             }
 
-            It 'Should return a certificate and call the correct cmdlets' -skip:(!$isWindows) {
+            It 'Should return a certificate and call the correct cmdlets' -skip:($PSversionTable.PSVersion.Major -gt 5) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
@@ -156,7 +156,7 @@ InModuleScope $ProjectName {
                 Mock -CommandName Export-Certificate
             }
 
-            It 'Should return a certificate and call the correct cmdlets' -skip:(!$isWindows) {
+            It 'Should return a certificate and call the correct cmdlets' -skip:($PSversionTable.PSVersion.Major -gt 5) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
