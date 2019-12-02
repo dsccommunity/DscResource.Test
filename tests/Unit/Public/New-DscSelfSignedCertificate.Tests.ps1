@@ -8,7 +8,7 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
 Import-Module $ProjectName -Force
 
 InModuleScope $ProjectName {
-    Describe 'New-DscSelfSignedCertificate' {
+    Describe 'New-DscSelfSignedCertificate' -Tag WindowsOnly {
         BeforeAll {
             $mockCertificateDNSNames = @('TestDscEncryptionCert')
             $mockCertificateKeyUsage = @('KeyEncipherment', 'DataEncipherment')
@@ -66,7 +66,7 @@ InModuleScope $ProjectName {
                 }
             }
 
-            It 'Should return a certificate and call the correct mocks' {
+            It 'Should return a certificate and call the correct mocks' -skip:(!$isWindows) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
@@ -114,7 +114,7 @@ InModuleScope $ProjectName {
                 }
             }
 
-            It 'Should return a certificate and call the correct cmdlets' {
+            It 'Should return a certificate and call the correct cmdlets' -skip:(!$isWindows) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
@@ -156,7 +156,7 @@ InModuleScope $ProjectName {
                 Mock -CommandName Export-Certificate
             }
 
-            It 'Should return a certificate and call the correct cmdlets' {
+            It 'Should return a certificate and call the correct cmdlets' -skip:(!$isWindows) {
                 $result = New-DscSelfSignedCertificate
                 $result.Thumbprint | Should -Be $mockCertificateThumbprint
                 $result.Subject | Should -Be "CN=$mockCertificateSubject"
