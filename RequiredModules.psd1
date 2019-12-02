@@ -15,8 +15,9 @@
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
-
-
-    #required for DSC authoring
+    'DscResource.Test'          = 'latest'
+    # PSPKI                       = 'latest'
     xDscResourceDesigner        = 'latest'
+
+
 }

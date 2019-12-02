@@ -95,7 +95,7 @@
             # A URL to the main website for this project.
             ProjectUri   = ''
 
-            ExternalModuleDependencies = @('DscResource.AnalyzerRules','Pester','xDSCResourceDesigner')
+            ExternalModuleDependencies = @('DscResource.AnalyzerRules','Pester','xDSCResourceDesigner', 'PSPKI')
             # A URL to an icon representing this module.
             # IconUri = ''
 
