@@ -15,7 +15,7 @@
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
-    'DscResource.Test'          = 'latest'
+    # 'DscResource.Test'          = 'latest'
     # PSPKI                       = 'latest'
     xDscResourceDesigner        = 'latest'
 
