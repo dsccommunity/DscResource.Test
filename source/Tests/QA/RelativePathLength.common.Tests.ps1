@@ -4,7 +4,12 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {
@@ -15,7 +20,13 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
             able to compile configurations in Azure Automation.
         #>
         $fullPathHardLimit = 129
-        $allModuleFiles = Get-ChildItem -Path $ModuleBase -Recurse
+        $allModuleFiles = Get-ChildItem -Path $ModuleBase -Recurse | WhereModuleFileNotExcluded
+
+        if ($SourcePath)
+        {
+            $allModuleFiles += Get-ChildItem -Path $SourcePath -Recurse | WhereSourceFileNotExcluded
+        }
+
 
         $testCaseModuleFile = @()
 

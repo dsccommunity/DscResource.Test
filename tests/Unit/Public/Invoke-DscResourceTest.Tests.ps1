@@ -64,7 +64,7 @@ InModuleScope $ProjectName {
                 $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script "." -Tag nothing
                 $result.Script.Path | Should -BeExactly '.'
                 $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-                $result.Script.Parameters.keys | Should -HaveCount 8
+                $result.Script.Parameters.keys | Should -HaveCount 10
                 $result.Tag | Should -BeExactly 'nothing' `
                                 -Because 'When parameter is specified it override defaults & settings'
             }
@@ -103,7 +103,7 @@ InModuleScope $ProjectName {
             $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .
             $result.Script.Path | Should -BeExactly '.'
                 $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-                $result.Script.Parameters.keys | Should -HaveCount 8
+                $result.Script.Parameters.keys | Should -HaveCount 10
 
         }
 
@@ -148,7 +148,7 @@ InModuleScope $ProjectName {
             $result = Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets
             Assert-MockCalled Get-Command -Scope Describe
             $result.Script.Parameters.ModuleName  | Should -Not -BeExactly 'dummy'
-            $result.script.Parameters.Keys | Should -HaveCount 8
+            $result.script.Parameters.Keys | Should -HaveCount 10
             $result.Tag | Should -HaveCount 1
             $result.ExcludeTag | Should -HaveCount 1
         }
@@ -171,7 +171,7 @@ InModuleScope $ProjectName {
         It 'overrides properly the Script parameters for Invoke-Pester' {
             $result = Invoke-DscResourceTest -Script @{Path = '.'; Parameters = @{'ModuleName' = 'dummy'}} -Module 'Microsoft.PowerShell.Utility'
             $result.Script.Parameters.ModuleName  | Should -Not -BeExactly 'dummy'
-            $result.script.Parameters.Keys | Should -HaveCount 8
+            $result.script.Parameters.Keys | Should -HaveCount 10
 
         }
     }

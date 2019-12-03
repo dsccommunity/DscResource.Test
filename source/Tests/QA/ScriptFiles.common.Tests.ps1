@@ -1,15 +1,26 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
 param (
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
     $SourcePath,
-    $SourceManifest
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Validate Script Files' {
 
-    $scriptFiles = Get-ChildItem $SourcePath -Recurse -Include *.ps1
+    $scriptFiles = @(Get-ChildItem $ModuleBase -Recurse -Include *.ps1 | WhereModuleFileNotExcluded)
+
+    if ($SourcePath)
+    {
+        $scriptFiles += Get-ChildItem $SourcePath -Recurse -Include *.ps1 | WhereSourceFileNotExcluded
+    }
+
     Write-Debug -Message "Processing $($scriptFiles.Count) files..."
 
     foreach ($scriptFile in $scriptFiles)

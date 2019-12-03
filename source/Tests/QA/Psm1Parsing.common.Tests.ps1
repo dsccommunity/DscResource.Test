@@ -4,11 +4,21 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {
-    $psm1Files = Get-Psm1FileList -FilePath $ModuleBase
+
+    $psm1Files = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+    if ($SourcePath)
+    {
+        $psm1Files += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
+    }
 
     foreach ($psm1File in $psm1Files)
     {

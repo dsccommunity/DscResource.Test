@@ -4,11 +4,21 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
-    $textFiles = Get-TextFilesList $ModuleBase
+    $textFiles = @(Get-TextFilesList $ModuleBase | WhereModuleFileNotExcluded)
+
+    if ($SourcePath)
+    {
+        $textFiles += Get-TextFilesList $SourcePath | WhereSourceFileNotExcluded
+    }
 
     It "Should not contain any files with Unicode file encoding" {
         $containsUnicodeFile = $false

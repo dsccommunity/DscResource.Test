@@ -4,12 +4,21 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - Validate Module Files' -Tag 'Module','Common Tests - Validate Module Files' {
 
-    $moduleFiles = Get-Psm1FileList -FilePath $ModuleBase
+    $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+    if ($SourcePath)
+    {
+        $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
+    }
 
     foreach ($moduleFile in $moduleFiles)
     {
