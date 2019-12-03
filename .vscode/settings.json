@@ -1,6 +1,6 @@
 {
     "powershell.codeFormatting.openBraceOnSameLine": false,
-    "powershell.codeFormatting.newLineAfterOpenBrace": false,
+    "powershell.codeFormatting.newLineAfterOpenBrace": true,
     "powershell.codeFormatting.newLineAfterCloseBrace": true,
     "powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
     "powershell.codeFormatting.whitespaceBeforeOpenParen": true,

@@ -4,9 +4,12 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
+    $SourcePath,
     $SourceManifest,
     $Tag,
-    $ExcludeTag
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 
@@ -60,11 +63,16 @@ $ShouldSkipCustomPSSA   = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParam
 $ShouldSkipNewErrorPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $NewErrorPSSA
 
 $PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path (Get-CurrentModuleBase) 'Config/PSSA_rules_config.json')
-$DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru
+$DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction Stop
 
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Common Tests - PS Script Analyzer on Resource Files' {
 
-    $dscResourcesPsm1Files = Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse
+    $dscResourcesPsm1Files = Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse | WhereModuleFileNotExcluded
+
+    if ($SourcePath)
+    {
+        $dscResourcesPsm1Files += Get-ChildItem -Path $SourcePath -Include *.psm1 -Recurse | WhereSourceFileNotExcluded
+    }
 
     foreach ($dscResourcesPsm1File in $dscResourcesPsm1Files)
     {

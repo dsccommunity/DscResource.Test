@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Allow most test to optionally target Source files (under Project/SourceFolder)
+- Enable excluding file by path relative to either ModuleBase (when specifying a module) or Source Path
+
 ## [0.3.0] - 2019-12-02
 
 ### Added

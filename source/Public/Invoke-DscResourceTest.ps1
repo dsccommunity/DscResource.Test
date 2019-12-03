@@ -38,6 +38,14 @@ function Invoke-DscResourceTest
         ${ExcludeTag},
 
         [Parameter()]
+        [string[]]
+        ${ExcludeModuleFile},
+
+        [Parameter()]
+        [string[]]
+        ${ExcludeSourceFile},
+
+        [Parameter()]
         [switch]
         ${PassThru},
 
@@ -58,11 +66,11 @@ function Invoke-DscResourceTest
         [switch]
         ${Strict},
 
-        [Parameter(ParameterSetName = 'NewOutputSet', Mandatory = $true)]
+        [Parameter()]
         [string]
         ${OutputFile},
 
-        [Parameter(ParameterSetName = 'NewOutputSet')]
+        [Parameter()]
         [ValidateSet('NUnitXml', 'JUnitXml')]
         [string]
         ${OutputFormat},
@@ -98,7 +106,7 @@ function Invoke-DscResourceTest
                 Write-Verbose "Calling DscResource Test by Module Name (Or Path)"
                 if (!$PSBoundParameters.ContainsKey('Script'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests\QA\BuiltModule'
+                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
                 $null = $PSBoundParameters.Remove('Module')
                 $ModuleUnderTest = Import-Module -Name $Module -ErrorAction Stop -Force -PassThru
@@ -109,7 +117,7 @@ function Invoke-DscResourceTest
                 Write-Verbose "Calling DscResource Test by Module Specification"
                 if (!$PSBoundParameters.ContainsKey('Script'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests\QA\BuiltModule'
+                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
                 $null = $PSBoundParameters.Remove('FullyQualifiedModule')
                 $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction Stop
@@ -134,7 +142,7 @@ function Invoke-DscResourceTest
 
                 if (!$PSBoundParameters.ContainsKey('Script'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests\QA'
+                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
                 # Find the Source Manifest under ProjectPath
                 $SourceManifest = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
@@ -157,6 +165,7 @@ function Invoke-DscResourceTest
                     Recurse     = $true
                     Exclude     = 'RequiredModules'
                     ErrorAction = 'Stop'
+                    Depth       = 3
                 }
 
                 Write-Verbose (
@@ -165,9 +174,45 @@ function Invoke-DscResourceTest
                 )
 
                 $ModulePsd1 = Get-ChildItem @GetOutputModuleParams
+                Write-Verbose "Loading $ModulePsd1"
                 $ModuleUnderTest = Import-Module -Name $ModulePsd1 -ErrorAction Stop -PassThru
             }
         }
+
+        $ExcludeSourceFile = foreach ($projectFileOrFolder in $ExcludeSourceFile)
+        {
+            if (![string]::IsNullOrEmpty($projectFileOrFolder) -and !(Split-Path -IsAbsolute $projectFileOrFolder))
+            {
+                Join-Path -Path $SourcePath -ChildPath $projectFileOrFolder
+            }
+            elseif (![string]::IsNullOrEmpty($projectFileOrFolder))
+            {
+                $projectFileOrFolder
+            }
+        }
+
+        if ($PSBoundParameters.ContainsKey('ExcludeSourceFile'))
+        {
+            $null = $PSBoundParameters.Remove('ExcludeSourceFile')
+        }
+
+        $ExcludeModuleFile = foreach ($moduleFileOrFolder in $ExcludeModuleFile)
+        {
+            if (![string]::IsNullOrEmpty($moduleFileOrFolder) -and !(Split-Path -IsAbsolute $moduleFileOrFolder))
+            {
+                Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath $moduleFileOrFolder
+            }
+            elseif (![string]::IsNullOrEmpty($moduleFileOrFolder))
+            {
+                $moduleFileOrFolder
+            }
+        }
+
+        if ($PSBoundParameters.ContainsKey('ExcludeModuleFile'))
+        {
+            $null = $PSBoundParameters.Remove('ExcludeModuleFile')
+        }
+
 
         # In case of ByProjectPath Opt-ins will be done by tags:
         #   The Describe Name will be one of the Tag for the Describe block
@@ -257,28 +302,32 @@ function Invoke-DscResourceTest
                 {
                     $item['Parameters'] = @{ }
                 }
-                $item['Parameters']['ModuleBase']     = $ModuleUnderTest.ModuleBase
-                $item['Parameters']['ModuleName']     = $ModuleUnderTest.Name
+                $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
+                $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
                 $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
-                $item['Parameters']['ProjectPath']    = $ProjectPath
-                $item['Parameters']['SourcePath']     = $SourcePath
+                $item['Parameters']['ProjectPath'] = $ProjectPath
+                $item['Parameters']['SourcePath'] = $SourcePath
                 $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
-                $item['Parameters']['Tag']            = $PSBoundParameters['Tag']
-                $item['Parameters']['ExcludeTag']     = $PSBoundParameters['ExcludeTag']
+                $item['Parameters']['Tag'] = $PSBoundParameters['Tag']
+                $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTag']
+                $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
+                $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
             }
             else
             {
                 $item = @{
                     Path       = $item
                     Parameters = @{
-                        ModuleBase     = $ModuleUnderTest.ModuleBase
-                        ModuleName     = $ModuleUnderTest.Name
-                        ModuleManifest = $ModuleUnderTestManifest
-                        ProjectPath    = $ProjectPath
-                        SourcePath     = $SourcePath
-                        SourceManifest = $SourceManifest.FullName
-                        Tag            = $PSBoundParameters['Tag']
-                        ExcludeTag     = $PSBoundParameters['ExcludeTag']
+                        ModuleBase         = $ModuleUnderTest.ModuleBase
+                        ModuleName         = $ModuleUnderTest.Name
+                        ModuleManifest     = $ModuleUnderTestManifest
+                        ProjectPath        = $ProjectPath
+                        SourcePath         = $SourcePath
+                        SourceManifest     = $SourceManifest.FullName
+                        Tag                = $PSBoundParameters['Tag']
+                        ExcludeTag         = $PSBoundParameters['ExcludeTag']
+                        ExcludeModuleFile  = $ExcludeModuleFile
+                        ExcludeSourceFile = $ExcludeSourceFile
                     }
                 }
             }

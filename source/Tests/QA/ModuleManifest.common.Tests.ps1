@@ -4,7 +4,12 @@ param (
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile
 )
 
 Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' {
