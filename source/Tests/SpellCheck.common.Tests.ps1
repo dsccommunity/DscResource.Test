@@ -31,7 +31,7 @@ Describe 'Common Tests - Spellcheck Files' -Tag 'Spellcheck','Common Tests - Spe
     }
 
     Context 'When installing spellcheck dependencies' {
-        It 'Should not throw an error when installing package cSpell in global scope' -Skip:$skipDependency -Pending {
+        It 'Should not throw an error when installing package cSpell in global scope' -Skip:$skipDependency {
             {
                 # More information about cSpell: https://www.npmjs.com/package/cspell
                 $npmParametersForStartProcess['ArgumentList'] = 'install -g cspell'
@@ -45,7 +45,7 @@ Describe 'Common Tests - Spellcheck Files' -Tag 'Spellcheck','Common Tests - Spe
     Context 'When there are markdown files' {
         $errorFileName = 'SpellingErrors.txt'
 
-        It 'Should not have spelling errors in any markdown files' -Skip:($skipDependency) -Pending {
+        It 'Should not have spelling errors in any markdown files' -Skip:($skipDependency) {
             $spellcheckSettingsFilePath = Join-Path -Path $ProjectPath -ChildPath '.vscode\cSpell.json'
 
             if (Test-Path -Path $spellcheckSettingsFilePath)
@@ -118,7 +118,7 @@ https://github.com/PowerShell/DscResource.Tests/#common-tests-spellcheck-markdow
     }
 
     Context 'When uninstalling spellcheck dependencies' {
-        It 'Should not throw an error when uninstalling package cSpell in global scope' -Skip:$skipDependency -Pending {
+        It 'Should not throw an error when uninstalling package cSpell in global scope' -Skip:$skipDependency {
             {
                 $npmParametersForStartProcess['ArgumentList'] = 'uninstall -g cspell'
                 Start-Process @npmParametersForStartProcess
