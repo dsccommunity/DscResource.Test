@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Now skipping isAdmin on non-windows (because creds works differently)
+- Making SpellCheck tests as pending until fixed
+- Updating ScriptFiles tests to get different module base when from module or from project path
 
 ## [0.4.0] - 2019-12-04
 
