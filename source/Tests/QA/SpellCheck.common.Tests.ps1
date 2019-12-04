@@ -31,7 +31,7 @@ Describe 'Common Tests - Spellcheck Files' -Tag 'Spellcheck','Common Tests - Spe
     }
 
     Context 'When installing spellcheck dependencies' {
-        It 'Should not throw an error when installing package cSpell in global scope' -Skip:$skipDependency {
+        It 'Should not throw an error when installing package cSpell in global scope' -Skip:$skipDependency -Pending {
             {
                 # More information about cSpell: https://www.npmjs.com/package/cspell
                 $npmParametersForStartProcess['ArgumentList'] = 'install -g cspell'
@@ -45,7 +45,7 @@ Describe 'Common Tests - Spellcheck Files' -Tag 'Spellcheck','Common Tests - Spe
     Context 'When there are markdown files' {
         $errorFileName = 'SpellingErrors.txt'
 
-        It 'Should not have spelling errors in any markdown files' -Skip:($skipDependency) {
+        It 'Should not have spelling errors in any markdown files' -Skip:($skipDependency) -Pending {
             $spellcheckSettingsFilePath = Join-Path -Path $ProjectPath -ChildPath '.vscode\cSpell.json'
 
             if (Test-Path -Path $spellcheckSettingsFilePath)
@@ -101,7 +101,7 @@ https://github.com/PowerShell/DscResource.Tests/#common-tests-spellcheck-markdow
             Write-Host -BackgroundColor Yellow -ForegroundColor Black -Object $message
             Write-Host -ForegroundColor White -Object ''
 
-            $misspelledErrors = Get-Content -Path $errorFileName
+            $misspelledErrors = Get-Content -Path $errorFileName -ErrorAction SilentlyContinue
 
             foreach ($misspelledError in $misspelledErrors)
             {
@@ -118,7 +118,7 @@ https://github.com/PowerShell/DscResource.Tests/#common-tests-spellcheck-markdow
     }
 
     Context 'When uninstalling spellcheck dependencies' {
-        It 'Should not throw an error when uninstalling package cSpell in global scope' -Skip:$skipDependency {
+        It 'Should not throw an error when uninstalling package cSpell in global scope' -Skip:$skipDependency -Pending {
             {
                 $npmParametersForStartProcess['ArgumentList'] = 'uninstall -g cspell'
                 Start-Process @npmParametersForStartProcess
