@@ -188,7 +188,7 @@ function Initialize-TestEnvironment
     if ($TestType -ieq 'Integration')
     {
         # Making sure setting up the LCM & Machine Path makes sense...
-        if ($isWindows -and
+        if ($PSEdition -eq 'Desktop' -and
             ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         )

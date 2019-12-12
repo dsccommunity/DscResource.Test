@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Correctly detect Windows PowerShell in `Initialize-TestEnvironment`.
+
+## [0.5.0] - 2019-12-12
+
+### Fixed
+
 - Now skipping isAdmin on non-windows (because creds works differently)
 - Moving spellcheck out of the tests
 - Updating ScriptFiles tests to get different module base when from module or from project path
