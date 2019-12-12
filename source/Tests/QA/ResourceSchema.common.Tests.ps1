@@ -10,6 +10,8 @@ param (
 if ($isLinux -or $IsMacOS)
 {
     $skipTests = $true
+    Write-Warning "xDscResourceDesigner module only works on Windows at the moment."
+    Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
 }
 else
 {
@@ -21,6 +23,8 @@ else
     }
     else
     {
+        Write-Warning "xDscResourceDesigner needs your session to be running elevated."
+        Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
         $skipTests = $true
     }
 }
