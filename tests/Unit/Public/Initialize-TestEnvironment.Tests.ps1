@@ -126,8 +126,8 @@ InModuleScope $ProjectName {
                     }
                 }
 
-                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
-                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Scope It
+                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Scope It
             }
         }
 
