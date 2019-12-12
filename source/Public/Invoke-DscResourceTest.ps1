@@ -170,7 +170,7 @@ function Invoke-DscResourceTest
 
                 Write-Verbose (
                     "Finding Output Module with `r`n {0}" -f
-                    ($GetOutputModuleParams | Format-Table -AutoSize | Out-String)
+                    ($GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String)
                 )
 
                 $ModulePsd1 = Get-ChildItem @GetOutputModuleParams
