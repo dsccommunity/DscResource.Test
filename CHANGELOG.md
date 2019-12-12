@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2019-12-12
+## [Unreleased]
+
 ### Fixed
 
 - Now skipping isAdmin on non-windows (because creds works differently)
