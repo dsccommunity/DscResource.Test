@@ -51,4 +51,14 @@ function Restore-TestEnvironment
     {
         Set-ExecutionPolicy -ExecutionPolicy $TestEnvironment.OldExecutionPolicy -Scope 'Process' -Force
     }
+
+    if ($script:MachineOldPSModulePath)
+    {
+        [System.Environment]::SetEnvironmentVariable('PSModulePath', $script:MachineOldPSModulePath, 'Machine')
+    }
+
+    if ($script:MachineOldExecutionPolicy)
+    {
+        Set-ExecutionPolicy -ExecutionPolicy $script:MachineOldExecutionPolicy -Scope LocalMachine -Force -ErrorAction Stop
+    }
 }

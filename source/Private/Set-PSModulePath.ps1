@@ -21,6 +21,7 @@
 function Set-PSModulePath
 {
     [CmdletBinding()]
+    [OutputType([void])]
     param
     (
         [Parameter(Mandatory = $true)]

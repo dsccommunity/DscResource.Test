@@ -4,6 +4,11 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
         $(try { Test-ModuleManifest $_.FullName -ErrorAction Stop } catch { $false } )
     }).BaseName
 
+if ($PSVersionTable.PSVersion.Major -gt 5)
+{
+    return
+}
+
 
 Import-Module $ProjectName -Force
 

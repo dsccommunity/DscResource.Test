@@ -174,6 +174,11 @@ function Initialize-TestEnvironment
         $newPSModulePath = $oldPSModulePath
     }
 
+    $RequiredModulesPath = Join-Path -Path $moduleParentFilePath 'RequiredModules'
+    if ($newPSModulePathSplit -cnotcontains $RequiredModulesPath)
+    {
+        $newPSModulePathSplit = @($RequiredModulesPath) + $newPSModulePathSplit
+    }
 
     $newPSModulePathSplit = @($moduleParentFilePath) + $newPSModulePathSplit
     $newPSModulePath = $newPSModulePathSplit -join [io.Path]::PathSeparator
@@ -182,14 +187,44 @@ function Initialize-TestEnvironment
 
     if ($TestType -ieq 'Integration')
     {
-        <#
-            For integration tests we have to set the machine's PSModulePath because otherwise the
-            DSC LCM won't be able to find the resource module being tested or may use the wrong one.
-        #>
-        Set-PSModulePath -Path $newPSModulePath -Machine
+        # Making sure setting up the LCM & Machine Path makes sense...
+        if ($isWindows -and
+            ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
+            $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        )
+        {
+            if (!$script:MachineOldPSModulePath)
+            {
+                Write-Warning "This will change your Machine Environment Variable"
+                $script:MachineOldPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
+            }
 
-        # Clear the DSC LCM & Configurations
-        Clear-DscLcmConfiguration
+            # Preserve and set the execution policy so that the DSC MOF can be created
+            if (!$script:MachineOldExecutionPolicy)
+            {
+                $script:MachineOldExecutionPolicy = Get-ExecutionPolicy -Scope LocalMachine
+                if ($script:MachineOldExecutionPolicy -ine 'Unrestricted')
+                {
+                    Set-ExecutionPolicy -ExecutionPolicy 'Unrestricted' -Scope LocalMachine -Force -ErrorAction Stop
+                }
+            }
+
+            <#
+                For integration tests we have to set the machine's PSModulePath because otherwise the
+                DSC LCM won't be able to find the resource module being tested or may use the wrong one.
+            #>
+            Set-PSModulePath -Path $newPSModulePath -Machine
+
+            # Clear the DSC LCM & Configurations
+            Clear-DscLcmConfiguration
+            # Setup the Self signed Certificate for Integration tests & get the LCM ready
+            $null = New-DscSelfSignedCertificate
+            Initialize-DscTestLcm -DisableConsistency -Encrypt
+        }
+        else
+        {
+            Write-Warning "Setting up the DSC Integration Test Environment (LCM & Certificate) only works on Windows PS5+ as Admin"
+        }
     }
 
     # Preserve and set the execution policy so that the DSC MOF can be created

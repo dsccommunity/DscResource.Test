@@ -7,6 +7,9 @@
     "Common Tests - Validate Markdown Links",
     "Common Tests - Validate Script Files",
     "Common Tests - File Formatting",
-    "Common Tests - .psm1 File Parsing"
-
+    "Common Tests - .psm1 File Parsing",
+    "Common Tests - New Error-Level Script Analyzer Rules",
+    "Common Tests - Custom Script Analyzer Rules",
+    "Common Tests - Flagged Script Analyzer Rules",
+    "Common Tests - Required Script Analyzer Rules"
 ]

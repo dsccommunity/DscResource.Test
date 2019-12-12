@@ -18,6 +18,8 @@ InModuleScope $ProjectName {
                 Mock -CommandName 'Clear-DscLcmConfiguration'
                 Mock -CommandName 'Set-ExecutionPolicy'
                 Mock -CommandName 'Import-Module'
+                Mock -CommandName 'New-DscSelfSignedCertificate'
+                Mock -CommandName 'Initialize-DscTestLcm'
 
                 Mock -CommandName 'Split-Path' -MockWith {
                     return $TestDrive
@@ -113,10 +115,19 @@ InModuleScope $ProjectName {
                     Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
                         $PSBoundParameters.ContainsKey('Machine') -eq $true
                     } -Exactly -Times 1 -Scope It
+
+                    if ($isWindows -and
+                        ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
+                        $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+                    )
+                    {
+                        Assert-MockCalled -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
+                        Assert-MockCalled -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
+                    }
                 }
 
-                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
-                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Scope It
+                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Scope It
             }
         }
 

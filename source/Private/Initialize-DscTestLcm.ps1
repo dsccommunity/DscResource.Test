@@ -1,8 +1,8 @@
 
 <#
     .SYNOPSIS
-        This command will initialize the Local Configuration Manager. It's
-        meant to be used before running tests.
+        This command will initialize the Local Configuration Manager for Integration tests.
+        It's meant to be used before running tests.
 
     .PARAMETER DisableConsistency
         This will switch off monitoring (consistency) for the Local Configuration
@@ -18,7 +18,7 @@
         test must have CertificateFile pointing to path stored in
         $env:DscPublicCertificatePath.
 #>
-function Initialize-LocalConfigurationManager
+function Initialize-DscTestLcm
 {
     [CmdletBinding()]
     param
@@ -32,7 +32,7 @@ function Initialize-LocalConfigurationManager
         $Encrypt
     )
 
-    $disableConsistencyMofPath = Join-Path -Path $env:temp -ChildPath 'LCMConfiguration'
+    $disableConsistencyMofPath = Join-Path -Path $env:temp -ChildPath 'DscTestLCMConfiguration'
     if (-not (Test-Path -Path $disableConsistencyMofPath))
     {
         $null = New-Item -Path $disableConsistencyMofPath -ItemType Directory -Force
@@ -48,7 +48,7 @@ function Initialize-LocalConfigurationManager
 
     if ($DisableConsistency.IsPresent)
     {
-        Write-Info -Message 'Setting Local Configuration Manager property ConfigurationMode to ''ApplyOnly'', disabling consistency check.'
+        Write-Verbose -Message 'Setting Local Configuration Manager property ConfigurationMode to ''ApplyOnly'', disabling consistency check.'
         # Have LCM Apply only once.
         $configurationMetadata += '
             ConfigurationMode = ''ApplyOnly''
@@ -57,7 +57,7 @@ function Initialize-LocalConfigurationManager
 
     if ($Encrypt.IsPresent)
     {
-        Write-Info -Message ('Setting Local Configuration Manager property CertificateId to ''{0}'', enabling decryption of credentials.' -f $env:DscCertificateThumbprint)
+        Write-Verbose -Message ('Setting Local Configuration Manager property CertificateId to ''{0}'', enabling decryption of credentials.' -f $env:DscCertificateThumbprint)
         # Should use encryption.
         $configurationMetadata += ('
             CertificateId = ''{0}''

@@ -13,7 +13,10 @@
 #>
 function Get-PSHomePSModulePathItem
 {
-    param()
+    param
+    (
+
+    )
 
     return Get-PSModulePathItem -Prefix $global:PSHOME
 }
