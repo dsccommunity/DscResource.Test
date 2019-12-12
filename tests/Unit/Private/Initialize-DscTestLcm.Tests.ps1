@@ -6,13 +6,13 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
 
 
 Import-Module $ProjectName -Force
+if (!$IsWindows -or $IsCoreCLR)
+{
+    return
+}
 
 InModuleScope $ProjectName {
 
-    if ($PSVersionTable.PSVersion.Major -gt 5)
-    {
-        function Set-DscLocalConfigurationManager {}
-    }
     Describe 'Initialize-DscTestLcm' {
         BeforeAll {
             Mock -CommandName New-Item
