@@ -38,6 +38,16 @@ BuildWorkflow:
     - build
     - test
 
+  write: |
+    {
+      Write-Build Green 'This is Green'
+      Write-Build Yellow 'This is Yellow'
+      Write-Build Red 'This is Red'
+      $MetaData = New-Object System.Management.Automation.CommandMetaData(Get-Command  Write-Build)
+      [System.Management.Automation.ProxyCommand]::Create($MetaData)
+    }
+
+
   DscTest: |
     {
       Import-Module -force DscResource.Test

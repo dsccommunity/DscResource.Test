@@ -171,6 +171,50 @@ Process {
 
 Begin {
     # Bootstrapping the environment before using Invoke-Build as task runner
+    if ($Env:TF_BUILD) {
+
+        foreach ($cmd in @('Write-Host', 'Write-Build'))
+        {
+            $MetaData = New-Object System.Management.Automation.CommandMetaData (Get-Command  $cmd)
+            $functionDefinition = [System.Management.Automation.ProxyCommand]::Create($MetaData)
+            $CodeToInsert = @"
+            `$AzDoColorMap = @{
+                Black       = ''
+                DarkBlue    = '##[command]'
+                DarkGreen   = '##[section]'
+                DarkCyan    = '##[command]'
+                DarkRed     = '##[error]'
+                DarkMagenta = '##[debug]'
+                DarkYellow  = '##[warning]'
+                Gray        = '##[debug]'
+                DarkGray    = ''
+                Blue        = '##[command]'
+                Green       = '##[section]'
+                Cyan        = '##[command]'
+                Red         = '##[error]'
+                Magenta     = '##[debug]'
+                Yellow      = '##[warning]'
+                White       = ''
+            }
+            if (`$PSBoundParameters.ContainsKey('ForegroundColor')) {
+                `$lpad = 120 - `$Object.ToString().Length
+                if (`$lpad -lt 0) {`$lpad = 3}
+                `$PSBoundParameters['Object'] = `$Object + (" "*`$lpad) + `$AzDoColorMap[`$ForegroundColor.ToString()]
+            }
+            if (`$PSBoundParameters.ContainsKey('Color')) {
+                `$lpad = 120 - `$Text.Length
+                if (`$lpad -lt 0) {`$lpad = 3}
+                `$PSBoundParameters['Text'] = `$Text + (" "*`$lpad) + `$AzDoColorMap[`$Color.ToString()]
+            }
+"@
+            $functionDefinition = "`r`n" + ($functionDefinition -replace "begin`r`n{", "begin`r`n{`r`n$CodeToInsert") + "`r`n"
+            if(! (Get-Item Function:\$cmd -ErrorAction Ignore) -or $cmd -eq 'Write-Build') {
+                $f = Set-Item -Path "Function:\${cmd}Modified" -Value $functionDefinition -Force -PassThru
+                Set-Alias -Name $cmd -Value $f
+            }
+        }
+
+    }
 
     if ($MyInvocation.ScriptName -notLike '*Invoke-Build.ps1') {
         Write-Host -foregroundColor Green "[pre-build] Starting Build Init"
