@@ -187,12 +187,12 @@ function Initialize-TestEnvironment
 
     if ($TestType -ieq 'Integration')
     {
-        # Making sure setting up the LCM & Machine Path makes sense...
-        if (($IsWindows -or $PSEdition -eq 'Desktop') -and
-            ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
-            $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-        )
-        {
+        # # Making sure setting up the LCM & Machine Path makes sense...
+        # if (($IsWindows -or $PSEdition -eq 'Desktop') -and
+        #     ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
+        #     $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        # )
+        # {
             if (!$script:MachineOldPSModulePath)
             {
                 Write-Warning "This will change your Machine Environment Variable"
@@ -220,11 +220,11 @@ function Initialize-TestEnvironment
             # Setup the Self signed Certificate for Integration tests & get the LCM ready
             $null = New-DscSelfSignedCertificate
             Initialize-DscTestLcm -DisableConsistency -Encrypt
-        }
-        else
-        {
-            Write-Warning "Setting up the DSC Integration Test Environment (LCM & Certificate) only works on Windows PS5+ as Admin"
-        }
+        # }
+        # else
+        # {
+        #     Write-Warning "Setting up the DSC Integration Test Environment (LCM & Certificate) only works on Windows PS5+ as Admin"
+        # }
     }
 
     # Preserve and set the execution policy so that the DSC MOF can be created
