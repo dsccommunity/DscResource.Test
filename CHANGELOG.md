@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Temporarily remove Admin-check in `Initialize-TestEnvironment`.
+
+## [0.5.1] - 2019-12-13
+
+### Fixed
+
 - Correctly detect Windows PowerShell in `Initialize-TestEnvironment`.
 
 ## [0.5.0] - 2019-12-12
