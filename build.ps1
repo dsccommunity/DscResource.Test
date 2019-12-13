@@ -168,14 +168,19 @@ Process {
         Pop-Location -StackName BeforeBuild
     }
 }
-
+# $VerbosePreference = 'continue'; $DebugPreference = 'continue'; $ENV:TF_BUILD = $true
 Begin {
     # Bootstrapping the environment before using Invoke-Build as task runner
-    if ($Env:TF_BUILD) {
-
+    if ($Env:TF_BUILD -and $MyInvocation.ScriptName -Like '*Invoke-Build.ps1') {
+        Write-Debug "TF BUILD"
         foreach ($cmd in @('Write-Host', 'Write-Build'))
         {
-            $MetaData = New-Object System.Management.Automation.CommandMetaData (Get-Command  $cmd)
+            Write-Debug $cmd
+            if (! ($cmdFound = Get-Command $cmd -errorAction 'SilentlyContinue')) {
+                Write-Debug "continuing Loop to skip $cmd"
+                continue
+            }
+            $MetaData = New-Object System.Management.Automation.CommandMetaData ($cmdFound)
             $functionDefinition = [System.Management.Automation.ProxyCommand]::Create($MetaData)
             $CodeToInsert = @"
             `$AzDoColorMap = @{
@@ -208,7 +213,9 @@ Begin {
             }
 "@
             $functionDefinition = "`r`n" + ($functionDefinition -replace "begin`r`n{", "begin`r`n{`r`n$CodeToInsert") + "`r`n"
-            if(! (Get-Item Function:\$cmd -ErrorAction Ignore) -or $cmd -eq 'Write-Build') {
+            if (! (Get-Item "Function:\${cmd}Modified" -ErrorAction Ignore) -or $cmd)
+            {
+                Write-Debug "Setting $cmd"
                 $f = Set-Item -Path "Function:\${cmd}Modified" -Value $functionDefinition -Force -PassThru
                 Set-Alias -Name $cmd -Value $f
             }
