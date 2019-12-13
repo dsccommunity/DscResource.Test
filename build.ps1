@@ -171,7 +171,7 @@ Process {
 # $VerbosePreference = 'continue'; $DebugPreference = 'continue'; $ENV:TF_BUILD = $true
 Begin {
     # Bootstrapping the environment before using Invoke-Build as task runner
-    if ($Env:TF_BUILD -and $MyInvocation.ScriptName -Like '*Invoke-Build.ps1') {
+    if ($Env:BUILD_DEFINITIONNAME -and $MyInvocation.ScriptName -Like '*Invoke-Build.ps1') {
         Write-Debug "TF BUILD"
         foreach ($cmd in @('Write-Host', 'Write-Build'))
         {
