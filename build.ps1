@@ -222,6 +222,9 @@ Begin {
         }
 
     }
+    else {
+        Write-Warning "Not TF Build"
+    }
 
     if ($MyInvocation.ScriptName -notLike '*Invoke-Build.ps1') {
         Write-Host -foregroundColor Green "[pre-build] Starting Build Init"
