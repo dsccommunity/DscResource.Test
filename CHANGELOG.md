@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Temporarily remove Admin-check in `Initialize-TestEnvironment`.
+- Suppress output from function `Initialize-DscTestLcm`.
 
 ## [0.5.1] - 2019-12-13
 
