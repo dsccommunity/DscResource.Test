@@ -72,7 +72,7 @@ function Initialize-DscTestLcm
 
     Invoke-Command -ScriptBlock ([scriptblock]::Create($configurationMetadata)) -NoNewScope
 
-    LocalConfigurationManagerConfiguration -OutputPath $disableConsistencyMofPath
+    $null = LocalConfigurationManagerConfiguration -OutputPath $disableConsistencyMofPath
 
     Set-DscLocalConfigurationManager -Path $disableConsistencyMofPath -Force -Verbose
     $null = Remove-Item -LiteralPath $disableConsistencyMofPath -Recurse -Force -Confirm:$false
