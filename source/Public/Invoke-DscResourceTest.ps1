@@ -162,7 +162,7 @@ function Invoke-DscResourceTest
                 $GetOutputModuleParams = @{
                     Path        = (Join-Path $ProjectPath 'output')
                     Include     = $SourceManifest.Name
-                    Recurse     = $true
+                    Name        = $True # Or it doesn't behave properly on PS5.1
                     Exclude     = 'RequiredModules'
                     ErrorAction = 'Stop'
                     Depth       = 3
