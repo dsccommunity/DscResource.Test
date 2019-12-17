@@ -162,7 +162,7 @@ function Invoke-DscResourceTest
                 $GetOutputModuleParams = @{
                     Path        = (Join-Path $ProjectPath 'output')
                     Include     = $SourceManifest.Name
-                    Name        = $True # Or it doesn't behave properly on PS5.1
+                    #Name        = $True # Or it doesn't behave properly on PS5.1
                     Exclude     = 'RequiredModules'
                     ErrorAction = 'Stop'
                     Depth       = 3
@@ -173,7 +173,7 @@ function Invoke-DscResourceTest
                     ($GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String)
                 )
 
-                $ModulePsd1 = Get-ChildItem @GetOutputModuleParams
+                $ModulePsd1 = (Get-ChildItem @GetOutputModuleParams).FullName
                 Write-Verbose "Loading $ModulePsd1"
                 $ModuleUnderTest = Import-Module -Name $ModulePsd1 -ErrorAction Stop -PassThru
             }
