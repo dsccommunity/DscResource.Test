@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### fixed
+### Added
+
+- Added new QA Localization test
+
+### Fixed
 
 - Invoking the tests by ProjectPath (as well as per module)
 
