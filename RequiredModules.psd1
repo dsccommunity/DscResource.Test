@@ -1,6 +1,6 @@
 @{
     # Set up a mini virtual environment...
-    PSDependOptions      = @{
+    PSDependOptions             = @{
         AddToPath  = $True
         Target     = 'output\RequiredModules'
         Parameters = @{
@@ -18,6 +18,5 @@
     # 'DscResource.Test'          = 'latest'
     # PSPKI                       = 'latest'
     xDscResourceDesigner        = 'latest'
-
-
+    MarkdownLinkCheck           = 'latest'
 }
