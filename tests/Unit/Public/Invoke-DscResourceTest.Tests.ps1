@@ -133,7 +133,7 @@ InModuleScope $ProjectName {
                 Path       = 'TestDrive:\MyModule.psd1'
             }
         }
-        mock Get-ChildItem -MockWith {'C:\dummy.psd1'}
+        Mock Get-ChildItem -MockWith { @{FullName = 'C:\dummy.psd1' }}
 
 
         Mock Get-StructuredObjectFromFile -ParameterFilter { $Path -like '*out.json' } -MockWith {
@@ -165,6 +165,7 @@ InModuleScope $ProjectName {
                 ModuleBase = 'TestDrive:\'
                 ModuleName = 'MyModule'
                 Path       = 'TestDrive:\MyModule.psd1'
+
             }
         } -ParameterFilter {$Name -like '*.psd1'}
 
