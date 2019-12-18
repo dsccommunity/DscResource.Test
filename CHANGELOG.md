@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added new QA MarkdownLinks test
 
+### Fixed
+
+- Invoking the tests by ProjectPath (as well as per module)
+
+### Changed
+
+- Re-added the check for Initialize-TestEnvironment to check if session elevated & OS.
+
 ## [0.5.3] - 2019-12-16
 
 ### Fixed
