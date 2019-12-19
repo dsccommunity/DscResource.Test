@@ -9,11 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added new QA MarkdownLinks test
+- Added new QA MarkdownLinks test.
 
 ### Fixed
 
-- Invoking the tests by ProjectPath (as well as per module)
+- Invoking the tests by ProjectPath (as well as per module).
 
 ### Changed
 
