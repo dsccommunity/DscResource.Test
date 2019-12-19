@@ -44,17 +44,6 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                             #>
                             $existingCommandName = $null
 
-                            <#
-                            # Get the list of additional modules required by the example
-                            $requiredModules = Get-ResourceModulesInConfiguration -ConfigurationPath $example.FullName |
-                                Where-Object -Property Name -ne $moduleName
-
-                            if ($requiredModules)
-                            {
-                                Install-DependentModule -Module $requiredModules
-                            }
-                            #>
-
                             . $example.FullName
 
                             <#
