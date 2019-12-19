@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added new QA ExampleFiles test.
+- Added new QA Localization test.
 
 ### Fixed
 
-- Invoking the tests by ProjectPath (as well as per module)
+- Invoking the tests by ProjectPath (as well as per module).
 
 ### Changed
 
