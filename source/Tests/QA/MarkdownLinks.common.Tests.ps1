@@ -20,14 +20,22 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
     $markdownFileExtensions = @('.md')
 
     $markdownFiles = Get-TextFilesList $ModuleBase | `
-        Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension }
+        Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension } | `
+        WhereModuleFileNotExcluded
+
+    if ($SourcePath)
+    {
+        $markdownFiles += Get-TextFilesList $SourcePath | `
+            Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension } | `
+            WhereSourceFileNotExcluded
+    }
 
     foreach ($markdownFileToValidate in $markdownFiles)
     {
         $contextDescriptiveName = Join-Path -Path (Split-Path $markdownFileToValidate.Directory -Leaf) -ChildPath (Split-Path $markdownFileToValidate -Leaf)
 
         Context -Name $contextDescriptiveName {
-            It "Should not contain any broken links" {
+            It 'Should not contain any broken links' {
                 $getMarkdownLinkParameters = @{
                     BrokenOnly = $true
                     Path       = $markdownFileToValidate.FullName
