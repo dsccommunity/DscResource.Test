@@ -217,7 +217,7 @@ function Invoke-DscResourceTest
         # In case of ByProjectPath Opt-ins will be done by tags:
         #   The Describe Name will be one of the Tag for the Describe block
         #   If a Opt-In file is found, it will default to auto-populate -Tag (cumulative from Command parameters)
-        if ($ProjectPath)
+        if ($ProjectPath -and !$PSBoundParameters.ContainsKey('Tag') -and !$PSBoundParameters.ContainsKey('ExcludeTag'))
         {
             $ExpectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
             if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path $ExpectedMetaOptInFile))
