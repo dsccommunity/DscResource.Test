@@ -13,78 +13,93 @@ param (
 )
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
-    $allFolders = Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'DscResources') -Directory
-    $allFolders += Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'Modules') -Directory
-    $allFolders = $allFolders | Sort-Object -Property Name
+    $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+    if ($SourcePath)
+    {
+        $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
+    }
 
     Context 'When a resource or module should have localization files' {
         BeforeAll {
-            $foldersToTest = @()
+            $filesToTest = @()
 
-            foreach ($folder in $allFolders)
+            foreach ($file in $moduleFiles)
             {
-                $foldersToTest += @{
-                    Folder = $folder.Name
-                    Path   = $folder.FullName
+                Write-Verbose "$($file | ConvertTo-Json)"
+                $filesToTest += @{
+                    LocalizationFile = (Join-Path $File.Directory.FullName (Join-Path 'en-US' "$($file.BaseName).strings.psd1"))
+                    LocalizationFolder = (Join-Path $File.Directory.FullName 'en-US')
+                    File  = $file
                 }
             }
         }
 
-        It 'Should have en-US localization folder for the resource/module <Folder>' -TestCases $foldersToTest {
+        It 'Should have en-US localization folder "<LocalizationFolder>"' -TestCases $filesToTest {
             param
             (
-                [Parameter()]
-                [System.String]
-                $Folder,
 
                 [Parameter()]
                 [System.String]
-                $Path
+                $LocalizationFile,
+
+                [Parameter()]
+                [System.String]
+                $LocalizationFolder,
+
+                [Parameter()]
+                [System.IO.FileInfo]
+                $File
             )
 
-            $localizationFolderPath = Join-Path -Path $Path -ChildPath 'en-US'
-
-            Test-Path -Path $localizationFolderPath | Should -BeTrue -Because 'the en-US folder must exist'
+            Test-Path -Path $LocalizationFolder | Should -BeTrue -Because "the en-US folder $LocalizationFolder must exist"
         }
 
-        It 'Should have en-US localization folder with the correct casing for the resource/module <Folder>' -TestCases $foldersToTest {
+        It 'Should have en-US localization folder "<LocalizationFolder>" with the correct casing' -TestCases $filesToTest {
             param
             (
-                [Parameter()]
-                [System.String]
-                $Folder,
 
                 [Parameter()]
                 [System.String]
-                $Path
+                $LocalizationFile,
+
+                [Parameter()]
+                [System.String]
+                $LocalizationFolder,
+
+                [Parameter()]
+                [System.IO.FileInfo]
+                $File
             )
 
             <#
                 This will return both 'en-us' and 'en-US' folders so we can
                 evaluate casing.
             #>
-            $localizationFolderOnDisk = Get-ChildItem -Path $Path -Directory -Filter 'en-US'
+            $localizationFolderOnDisk = Get-Item -Path $LocalizationFolder -ErrorAction SilentlyContinue
             $localizationFolderOnDisk.Name | Should -MatchExactly 'en-US' -Because 'the en-US folder must have the correct casing'
         }
 
-        It 'Should have en-US localization string resource file for the resource/module <Folder>' -TestCases $foldersToTest {
+        It 'Should have en-US localization string resource file <LocalizationFile>' -TestCases $filesToTest {
             param
             (
-                [Parameter()]
-                [System.String]
-                $Folder,
 
                 [Parameter()]
                 [System.String]
-                $Path
+                $LocalizationFile,
+
+                [Parameter()]
+                [System.String]
+                $LocalizationFolder,
+
+                [Parameter()]
+                [System.IO.FileInfo]
+                $File
             )
 
-            $localizationResourceFilePath = Join-Path -Path (Join-Path -Path $Path -ChildPath 'en-US') -ChildPath "$Folder.strings.psd1"
-
-            Test-Path -Path $localizationResourceFilePath | Should -BeTrue -Because 'there must exist a string resource file in the localization folder en-US'
+                Test-Path -Path $LocalizationFile | Should -BeTrue -Because "the string resource file $LocalizationFile must exist in the localization folder en-US"
         }
 
-        foreach ($testCase in $foldersToTest)
+        foreach ($testCase in $filesToTest)
         {
             $skipTest_LocalizedKeys = $false
             $skipTest_UsedLocalizedKeys = $false
@@ -92,13 +107,13 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
             $testCases_LocalizedKeys = @()
             $testCases_UsedLocalizedKeys = @()
 
-            $sourceLocalizationFolderPath = Join-Path -Path $testCase.Path -ChildPath 'en-US'
-            $localizationResourceFile = '{0}.strings.psd1' -f $testCase.Folder
+            $sourceLocalizationFolderPath = $testCase.LocalizationFolder
+            $localizationResourceFile = '{0}.strings.psd1' -f $testCase.File.BaseName
 
             # Skip files that do not exist yet (they were caught in a previous test above)
-            if (-not (Test-Path -Path (Join-Path -Path $sourceLocalizationFolderPath -ChildPath $localizationResourceFile)))
+            if (-not (Test-Path -Path $testCase.LocalizationFile))
             {
-                Write-Warning -Message ('Missing the localized string resource file ''{0}''' -f $testCase.Path)
+                Write-Warning -Message ('Missing the localized string resource file ''{0}''' -f $testCase.LocalizationFile)
 
                 continue
             }
@@ -106,7 +121,8 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
             Import-LocalizedData `
                 -BindingVariable 'englishLocalizedStrings' `
                 -FileName $localizationResourceFile `
-                -BaseDirectory $sourceLocalizationFolderPath
+                -BaseDirectory $sourceLocalizationFolderPath `
+                -UICulture 'en-US'
 
             foreach ($localizedKey in $englishLocalizedStrings.Keys)
             {
@@ -115,7 +131,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 }
             }
 
-            $modulePath = Join-Path -Path $testCase.Path -ChildPath "$($testCase.Folder).psm1"
+            $modulePath = $testCase.File.FullName
 
             $parseErrors = $null
             $definitionAst = [System.Management.Automation.Language.Parser]::ParseFile($modulePath, [ref] $null, [ref] $parseErrors)
@@ -146,7 +162,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 }
             }
 
-            Context ('When validating resource/module {0}' -f $testCase.Folder) {
+            Context ('When validating module file {0}' -f $testCase.File.FullName) {
                 # If there are no test cases built, skip this test.
                 $skipTest_LocalizedKeys = -not $testCases_LocalizedKeys
 
@@ -182,13 +198,13 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
         BeforeAll {
             $otherLanguagesToTest = @()
 
-            foreach ($folder in $allFolders)
+            foreach ($file in $moduleFiles)
             {
                 <#
                     Get all localization folders except the en-US.
                     We want all regardless of casing.
                 #>
-                $localizationFolders = Get-ChildItem -Path $folder.FullName -Directory -Filter '*-*' |
+                $localizationFolders = Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*' |
                     Where-Object -FilterScript {
                         $_.Name -ne 'en-US'
                     }
@@ -196,9 +212,10 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 foreach ($localizationFolder in $localizationFolders)
                 {
                     $otherLanguagesToTest += @{
-                        Folder             = $folder.Name
-                        Path               = $folder.FullName
-                        LocalizationFolder = $localizationFolder.Name
+                        Folder             = $file.Directory.Name
+                        Path               = $file.Directory.FullName
+                        LocalizationFolder = $localizationFolder.FullName
+                        File               = $file
                     }
                 }
             }
@@ -207,7 +224,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
         # Only run these tests if there are test cases to be tested.
         $skipTests = -not $otherLanguagesToTest
 
-        It 'Should have a localization string resource file for the resource/module <Folder> and localization folder <LocalizationFolder>' -TestCases $otherLanguagesToTest -Skip:$skipTests {
+        It 'Should have a localization string file in the localization folder <LocalizationFolder>' -TestCases $otherLanguagesToTest -Skip:$skipTests {
             param
             (
                 [Parameter()]
@@ -220,15 +237,19 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
 
                 [Parameter()]
                 [System.String]
-                $LocalizationFolder
+                $LocalizationFolder,
+
+                [Parameter()]
+                [System.IO.FileInfo]
+                $File
             )
 
-            $localizationResourceFilePath = Join-Path -Path (Join-Path -Path $Path -ChildPath $LocalizationFolder) -ChildPath "$Folder.strings.psd1"
+            $localizationResourceFilePath = Join-Path -Path $LocalizationFolder -ChildPath "$($File.BaseName).strings.psd1"
 
             Test-Path -Path $localizationResourceFilePath | Should -BeTrue -Because ('there must exist a string resource file in the localization folder {0}' -f $LocalizationFolder)
         }
 
-        It 'Should have a localization folder with the correct casing for the resource/module <Folder> and localization folder <LocalizationFolder>' -TestCases $otherLanguagesToTest -Skip:$skipTests {
+        It 'Should have a localization folder with the correct casing <LocalizationFolder>' -TestCases $otherLanguagesToTest -Skip:$skipTests {
             param
             (
                 [Parameter()]
@@ -241,31 +262,35 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
 
                 [Parameter()]
                 [System.String]
-                $LocalizationFolder
+                $LocalizationFolder,
+
+                [Parameter()]
+                [System.IO.FileInfo]
+                $File
             )
 
-            $localizationFolderOnDisk = Get-ChildItem -Path $Path -Directory -Filter $LocalizationFolder
-            $localizationFolderOnDisk.Name | Should -MatchExactly '[a-z]{2}-[A-Z]{2}' -Because 'the localization folder must have the correct casing'
+            $localizationFolderOnDisk = Get-Item $LocalizationFolder -ErrorAction SilentlyContinue
+            $localizationFolderOnDisk.Name -cin ([System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::AllCultures)).Name | Should -BeTrue
         }
 
         foreach ($testCase in $otherLanguagesToTest)
         {
             $testCases_CompareAgainstEnglishLocalizedKeys = @()
             $testCases_MissingEnglishLocalizedKeys = @()
-
-            $sourceLocalizationFolderPath = Join-Path -Path $testCase.Path -ChildPath 'en-US'
-
+            $UICultureUnderTest = Split-Path -leaf -Path $testCase.LocalizationFolder
             Import-LocalizedData `
                 -BindingVariable 'englishLocalizedStrings' `
-                -FileName "$($testCase.Folder).strings.psd1" `
-                -BaseDirectory $sourceLocalizationFolderPath
+                -FileName "$($testCase.File.BaseName).strings.psd1" `
+                -BaseDirectory $testCase.Path `
+                -UICulture 'en-US'
 
-            $localizationFolderPath = Join-Path -Path $testCase.Path -ChildPath $testCase.LocalizationFolder
+            $localizationFolderPath = $testCase.LocalizationFolder
 
             Import-LocalizedData `
                 -BindingVariable 'localizedStrings' `
-                -FileName "$($testCase.Folder).strings.psd1" `
-                -BaseDirectory $localizationFolderPath
+                -FileName "$($testCase.File.BaseName).strings.psd1" `
+                -BaseDirectory $localizationFolderPath `
+                -UICulture $UICultureUnderTest
 
             foreach ($localizedKey in $englishLocalizedStrings.Keys)
             {
@@ -285,8 +310,8 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 }
             }
 
-            Context ('When validating resource/module {0}' -f $testCase.Folder) {
-                It "Should have the english localization string key <LocalizedKey> in the localization resource file '<LocalizationFolder>\<Folder>.strings.psd1' for the resource/module <Folder>" -TestCases $testCases_CompareAgainstEnglishLocalizedKeys {
+            Context ('When validating module file {0}' -f $testCase.Folder) {
+                It "Should have the string key <LocalizedKey> in the localization resource file '<LocalizationFolder>\<Folder>.strings.psd1' as per the en-US reference" -TestCases $testCases_CompareAgainstEnglishLocalizedKeys {
                     param
                     (
                         [Parameter()]
