@@ -13,8 +13,8 @@ param (
 )
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
-    $allFolders = Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'DscResources') -Directory
-    $allFolders += Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'Modules') -Directory
+    $allFolders = Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'DSCResources') -Directory -ErrorAction SilentlyContinue
+    $allFolders += Get-ChildItem -Path (Join-Path -Path $ModuleBase -ChildPath 'Modules') -Directory -ErrorAction SilentlyContinue
     $allFolders = $allFolders | Sort-Object -Property Name
 
     Context 'When a resource or module should have localization files' {
