@@ -19,6 +19,9 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
         $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
     }
 
+    # Exclude empty PSM1
+    $moduleFiles = $moduleFiles | Where-Object { $_.Length -gt 0 }
+
     Context 'When a resource or module should have localization files' {
         BeforeAll {
             $filesToTest = @()
