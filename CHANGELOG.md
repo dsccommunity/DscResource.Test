@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added new QA Localization test
+- Added new QA Localization test, supporting excludes.
 
 ### Fixed
 
 - Invoking the tests by ProjectPath (as well as per module)
+- Fixed the Get-ChildItem -Depth 3 on Windows PS (needed -Name or it does not work).
 
 ### Changed
 
