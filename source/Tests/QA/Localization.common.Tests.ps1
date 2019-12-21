@@ -20,7 +20,26 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
     }
 
     # Exclude empty PSM1
-    $moduleFiles = $moduleFiles | Where-Object { $_.Length -gt 0 }
+    $moduleFiles = $moduleFiles | Where-Object {
+        $_.Length -gt 0 -and $(
+            # Only expect localization for Module files with some functions defined
+            $tokens, $errors = $null
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+                $_.FullName,
+                [ref]$tokens,
+                [ref]$errors
+            )
+
+            # Get only function definition ASTs
+            $ast.FindAll({
+                param ([System.Management.Automation.Language.Ast] $Ast)
+
+                $Ast -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true)
+        )
+    }
+
+
+
 
     Context 'When a resource or module should have localization files' {
         BeforeAll {
