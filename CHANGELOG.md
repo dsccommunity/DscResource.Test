@@ -9,16 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added new QA Localization test, supporting excludes.
 - Added new QA MarkdownLinks test.
-- Added new QA Localization test
 
 ### Fixed
 
 - Invoking the tests by ProjectPath (as well as per module).
+- Fixed the Get-ChildItem -Depth 3 on Windows PS (needed -Name or it does not work).
 
 ### Changed
 
 - Re-added the check for Initialize-TestEnvironment to check if session elevated & OS.
+
+## [0.7.0] - 2019-12-19
+
+### Added
+
+- Added new QA Localization test.
 
 ## [0.5.3] - 2019-12-16
 
