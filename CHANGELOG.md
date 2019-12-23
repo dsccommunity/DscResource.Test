@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Invoking the tests by ProjectPath (as well as per module).
 - Fixing the Relative path to make sure it calculates from it's ModuleBase.
 - Fixed the Get-ChildItem -Depth 3 on Windows PS (needed -Name or it does not work).
+- Used the right code of conduct for DSC Community.
 
 ### Changed
 
