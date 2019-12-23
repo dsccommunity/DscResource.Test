@@ -20,20 +20,23 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
             able to compile configurations in Azure Automation.
         #>
         $fullPathHardLimit = 129
-        $allModuleFiles = Get-ChildItem -Path $ModuleBase -Recurse | WhereModuleFileNotExcluded
+        $allModuleFiles = (Get-ChildItem -Path $ModuleBase -Recurse | WhereModuleFileNotExcluded).Foreach{
+            $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $ModuleBase -PassThru
+        }
 
         if ($SourcePath)
         {
-            $allModuleFiles += Get-ChildItem -Path $SourcePath -Recurse | WhereSourceFileNotExcluded
+            $allModuleFiles += @(Get-ChildItem -Path $SourcePath -Recurse | WhereSourceFileNotExcluded).Foreach{
+                $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $SourcePath -PassThru
+            }
         }
-
 
         $testCaseModuleFile = @()
 
         $allModuleFiles | ForEach-Object -Process {
             $testCaseModuleFile += @(
                 @{
-                    FullRelativePath = Get-RelativePathFromModuleRoot -FilePath $_.FullName -ModuleRootFilePath $ModuleBase
+                    FullRelativePath = Get-RelativePathFromModuleRoot -FilePath $_.FullName -ModuleRootFilePath $_.ModuleBase
                 }
             )
         }
