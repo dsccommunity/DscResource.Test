@@ -34,8 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and changed AliasesToExport to empty (fixes [Issue #42](https://github.com/dsccommunity/DscResource.Test/issues/42)).
 - Changed Clear-DscLcmConfiguration to a public function so it can be called
   directly by resource modules (fixes [Issue #40](https://github.com/dsccommunity/DscResource.Test/issues/40)).
-- Updated CI triggers to run on PRs against master branch and also run
-  against all branches.
 
 ### Removed
 
