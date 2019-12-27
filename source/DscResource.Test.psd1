@@ -1,7 +1,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule        = 'DscResource.Test.psm1'
+    # RootModule        = ''
 
     # Version number of this module.
     ModuleVersion     = '0.0.1'
