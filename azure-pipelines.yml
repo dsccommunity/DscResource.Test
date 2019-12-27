@@ -7,7 +7,6 @@ trigger:
     - "v*"
     exclude:
     - "*-*"
-#variables:
 
 stages:
   - stage: Build_artefact
@@ -69,7 +68,6 @@ stages:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
 
-
           # Publish code coverage results
           - task: PublishCodeCoverageResults@1
             condition: succeededOrFailed()
@@ -108,7 +106,6 @@ stages:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
 
-
           # Publish code coverage results
           - task: PublishCodeCoverageResults@1
             condition: succeededOrFailed()
@@ -146,7 +143,6 @@ stages:
             inputs:
               testResultsFormat: 'NUnit'
               testResultsFiles: 'output/testResults/NUnit*.xml'
-
 
           # Publish code coverage results
           - task: PublishCodeCoverageResults@1
