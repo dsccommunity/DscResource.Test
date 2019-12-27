@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2019-12-27
+## [Unreleased]
+
 ### Added
 
 - Added an integration test to regression test integration tests failing
