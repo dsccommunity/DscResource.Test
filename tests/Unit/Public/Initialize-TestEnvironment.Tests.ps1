@@ -123,10 +123,11 @@ InModuleScope $ProjectName {
                     {
                         Assert-MockCalled -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
+
                     }
                 }
 
-                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName 'Get-ExecutionPolicy'
                 Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 0 -Scope It
             }
 
@@ -156,8 +157,19 @@ InModuleScope $ProjectName {
 
                     { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
 
-                    Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                    if (($IsWindows -or $PSEdition -eq 'Desktop') -and
+                    ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
+                    $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+                    )
+                    {
+                        Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 2 -Scope It
+                    }
+                    else
+                    {
+                        Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                    }
+
+                    Assert-MockCalled -CommandName 'Get-ExecutionPolicy'
                 }
             }
         }
