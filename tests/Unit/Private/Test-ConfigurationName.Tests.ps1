@@ -14,9 +14,10 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
 
 Import-Module $ProjectName -Force
 
-# DSC configuration parsing is not currently supported on PowerShell 6.1 on Linux or MacOS
+
 if ($isLinux -or $isMacOS)
 {
+    Write-Warning -Message 'DSC configuration parsing is not currently supported on Linux or MacOS. Skipping test.'
     return
 }
 
