@@ -80,7 +80,7 @@ InModuleScope $ProjectName {
                 )
             }
 
-            It 'Should initializing without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
+            It 'Should initialize without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
                 param
                 (
                     # String containing the test type; Unit or Integration.
@@ -123,7 +123,6 @@ InModuleScope $ProjectName {
                     {
                         Assert-MockCalled -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
                         Assert-MockCalled -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
-
                     }
                 }
 
@@ -132,7 +131,7 @@ InModuleScope $ProjectName {
             }
 
             Context 'When setting specific execution policy' {
-                It 'Should initializing without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
+                It 'Should initialize without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
                     param
                     (
                         # String containing the test type; Unit or Integration.
