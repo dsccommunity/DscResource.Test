@@ -16,8 +16,8 @@ $script:testEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:dscModuleName `
     -DSCResourceName $script:dscResourceName `
     -ResourceType 'Mof' `
-    -TestType 'Integration'
-    -Verbose $true
+    -TestType 'Integration' `
+    -Verbose
 
 Write-Verbose -Message ('Execution Polity Machine: {0}' -f (Get-ExecutionPolicy -Scope LocalMachine)) -Verbose
 
@@ -172,7 +172,7 @@ finally
 
     Write-Verbose -Message ('Execution Polity Machine: {0}' -f (Get-ExecutionPolicy -Scope LocalMachine)) -Verbose
 
-    Restore-TestEnvironment -TestEnvironment $script:testEnvironment -Verbose $true
+    Restore-TestEnvironment -TestEnvironment $script:testEnvironment -Verbose
 
     Write-Verbose -Message ('Execution Polity Machine: {0}' -f (Get-ExecutionPolicy -Scope LocalMachine)) -Verbose
 }
