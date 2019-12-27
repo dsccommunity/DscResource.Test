@@ -126,10 +126,42 @@ InModuleScope $ProjectName {
                     }
                 }
 
-                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Scope It
-                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Scope It
+                Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 0 -Scope It
+            }
+
+            Context 'When setting specific execution policy' {
+                It 'Should initializing without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
+                    param
+                    (
+                        # String containing the test type; Unit or Integration.
+                        [Parameter()]
+                        [System.String]
+                        $TestType,
+
+                        # String containing a resource type; Mof or Class.
+                        [Parameter()]
+                        [System.String]
+                        $ResourceType
+                    )
+
+                    $initializeTestEnvironmentParameters = @{
+                        Module                 = $mockDscModuleName
+                        DSCResourceName        = $mockDscResourceName
+                        TestType               = $TestType
+                        ResourceType           = $ResourceType
+                        ProcessExecutionPolicy = 'Unrestricted'
+                        MachineExecutionPolicy = 'Unrestricted'
+                    }
+
+                    { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
+
+                    Assert-MockCalled -CommandName 'Get-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                    Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
+                }
             }
         }
+
 
         Context 'When there is no module manifest file' {
             BeforeAll {
