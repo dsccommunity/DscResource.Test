@@ -14,8 +14,14 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
 
 Import-Module $ProjectName -Force
 
+# DSC configuration parsing is not currently supported on PowerShell 6.1 on Linux or MacOS
+if ($isLinux -or $isMacOS)
+{
+    return
+}
+
 InModuleScope $ProjectName {
-    Describe 'DscResource.GalleryDeploy\Test-ConfigurationName' {
+    Describe 'DscResource.GalleryDeploy\Test-ConfigurationName' -Tag 'WindowsOnly' {
         BeforeAll {
             $mockScriptPath = Join-Path -Path $TestDrive -ChildPath '99-TestConfig'
         }
