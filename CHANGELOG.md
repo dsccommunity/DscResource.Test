@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixing the Relative path to make sure it calculates from it's ModuleBase.
+- Used the right code of conduct for DSC Community.
+
+## [0.8.0] - 2019-12-21
+
 ### Added
 
 - Added new QA Localization test, supporting excludes.
