@@ -40,7 +40,7 @@
 
     .PARAMETER ProcessExecutionPolicy
         Specifies the process execution policy to set before running tests.
-        The default will be the one that is set on the machine where the tests
+        The default will be the one that is set in the process where the tests
         are running.
 
     .PARAMETER MachineExecutionPolicy
