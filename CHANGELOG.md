@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `Initialize-TestEnvironment` now takes two new parameters that sets
   the execution policy for machine and process. If these are not set then
   the execution policy will not be changed.
+- Updated `build.ps1` to the latest in the template.
 
 ### Fixed
 
