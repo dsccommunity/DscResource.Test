@@ -18,6 +18,4 @@
     # 'DscResource.Test'          = 'latest'
     # PSPKI                       = 'latest'
     xDscResourceDesigner        = 'latest'
-
-
 }

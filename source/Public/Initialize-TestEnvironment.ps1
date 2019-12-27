@@ -38,6 +38,15 @@
         Mof: The test initialization assumes a Mof-based DscResource folder structure.
         Class: The test initialization assumes a Class-based DscResource folder structure.
 
+    .PARAMETER ProcessExecutionPolicy
+        Specifies the process' execution policy to set before running tests.
+        If not specified, the command will not alter the current process' execution
+        policy.
+
+    .PARAMETER MachineExecutionPolicy
+        Specifies the machine's execution policy to set before running tests.
+        If not specified, the command will not alter the machine's execution policy.
+
     .EXAMPLE
         $TestEnvironment = Initialize-TestEnvironment `
             -DSCModuleName 'xNetworking' `
@@ -91,7 +100,17 @@ function Initialize-TestEnvironment
         [Parameter()]
         [ValidateSet('Mof', 'Class')]
         [String]
-        $ResourceType = 'Mof'
+        $ResourceType = 'Mof',
+
+        [Parameter()]
+        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [String]
+        $ProcessExecutionPolicy,
+
+        [Parameter()]
+        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [String]
+        $MachineExecutionPolicy
     )
 
     Write-Verbose -Message "Initializing test environment for $TestType testing of $DscResourceName in module $Module"
@@ -200,14 +219,34 @@ function Initialize-TestEnvironment
             }
 
             # Preserve and set the execution policy so that the DSC MOF can be created
-            if (!$script:MachineOldExecutionPolicy)
+            $currentMachineExecutionPolicy = Get-ExecutionPolicy -Scope 'LocalMachine'
+            if ($PSBoundParameters.ContainsKey('MachineExecutionPolicy'))
             {
-                $script:MachineOldExecutionPolicy = Get-ExecutionPolicy -Scope LocalMachine
-                if ($script:MachineOldExecutionPolicy -ine 'Unrestricted')
+                if ($currentMachineExecutionPolicy -ne $MachineExecutionPolicy)
                 {
-                    Set-ExecutionPolicy -ExecutionPolicy 'Unrestricted' -Scope LocalMachine -Force -ErrorAction Stop
+                    Set-ExecutionPolicy -ExecutionPolicy $MachineExecutionPolicy -Scope 'LocalMachine' -Force -ErrorAction Stop
+
+                    <#
+                        The variable $script:MachineOldExecutionPolicy should
+                        only be set if it has not been set before. If it has been
+                        set before then it means that we have already a value that
+                        has not yet been reverted using Restore-TestEnvironment.
+
+                        Should only be set after we actually changed the execution
+                        policy because if $script:MachineOldExecutionPolicy is set
+                        to a value `Restore-TestEnvironment` will try to revert
+                        the value.
+                    #>
+                    if ($null -eq $script:MachineOldExecutionPolicy)
+                    {
+                        $script:MachineOldExecutionPolicy = $currentMachineExecutionPolicy
+                    }
+
+                    $currentMachineExecutionPolicy = $MachineExecutionPolicy
                 }
             }
+
+            Write-Verbose -Message ('The machine execution policy is set to ''{0}''' -f $currentMachineExecutionPolicy)
 
             <#
                 For integration tests we have to set the machine's PSModulePath because otherwise the
@@ -227,12 +266,25 @@ function Initialize-TestEnvironment
         }
     }
 
-    # Preserve and set the execution policy so that the DSC MOF can be created
-    $oldExecutionPolicy = Get-ExecutionPolicy
-    if ($oldExecutionPolicy -ine 'Unrestricted')
+    <#
+        Preserve and set the execution policy so that the DSC MOF can be created.
+
+        `Restore-TestEnvironment` will only revert the value if $oldExecutionPolicy
+        differ from current execution policy. So we make to always set it to the
+        current execution policy so that if we don't need to change it then
+        `Restore-TestEnvironment` will not try to revert the value.
+    #>
+    $oldExecutionPolicy = Get-ExecutionPolicy -Scope 'Process'
+    if ($PSBoundParameters.ContainsKey('ProcessExecutionPolicy'))
     {
-        Set-ExecutionPolicy -ExecutionPolicy 'Unrestricted' -Scope 'Process' -Force
+        if ($oldExecutionPolicy -ne $ProcessExecutionPolicy)
+        {
+            Set-ExecutionPolicy -ExecutionPolicy $ProcessExecutionPolicy -Scope 'Process' -Force -ErrorAction Stop
+        }
     }
+
+    Write-Verbose -Message ('The process execution policy is set to ''{0}''' -f $oldExecutionPolicy)
+
 
     # Return the test environment
     return @{
