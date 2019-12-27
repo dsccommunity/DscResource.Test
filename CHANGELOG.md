@@ -7,10 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added an integration test to regression test integration tests failing
+  with `Security Error` ([issue #38](https://github.com/dsccommunity/DscResource.Test/issues/38)).
+
+### Changed
+
+- The `Initialize-TestEnvironment` now takes two new parameters that sets
+  the execution policy for machine and process. If these are not set then
+  the execution policy will not be changed.
+
 ### Fixed
 
 - Fixing the Relative path to make sure it calculates from it's ModuleBase.
 - Used the right code of conduct for DSC Community.
+- Fixed integration tests failing with the error `Security Error` 
+  ([issue #38](https://github.com/dsccommunity/DscResource.Test/issues/38)).
 
 ## [0.8.0] - 2019-12-21
 
