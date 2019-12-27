@@ -211,10 +211,6 @@ stages:
               targetType: 'inline'
               script: 'winrm quickconfig -quiet'
               pwsh: false
-          - powershell: |
-              Write-Verbose -Message 'Installing feature Web-Server with all sub-features, plus management tools'
-              Install-WindowsFeature -IncludeAllSubFeature -IncludeManagementTools -Name 'Web-Server'
-            name: InstallWebServerFeature
           - task: PowerShell@2
             name: Test
             inputs:
