@@ -40,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Removed Deploy.PSDeploy.ps1 because it is not used (fixes [Issue #44](https://github.com/dsccommunity/DscResource.Test/issues/44)).
-- Removed DscResource.Test.psm1 file because it is empty (fixes [Issue #45](https://github.com/dsccommunity/DscResource.Test/issues/45)).
+- Removed commented out code from DscResource.Test.psm1
+  file (fixes [Issue #45](https://github.com/dsccommunity/DscResource.Test/issues/45)).
 
 ## [0.8.0] - 2019-12-21
 
