@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+<<<<<<< HEAD
 - Added an integration test to regression test integration tests failing
   with `Security Error` ([issue #38](https://github.com/dsccommunity/DscResource.Test/issues/38)).
 
@@ -18,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the execution policy for machine and process. If these are not set then
   the execution policy will not be changed.
 - Updated `build.ps1` to the latest in the template.
+=======
+- Added LICENSE - fixes [Issue #41](https://github.com/dsccommunity/DscResource.Test/issues/41).
+- Added standard badges to README.MD - fixes [Issue #43](https://github.com/dsccommunity/DscResource.Test/issues/43).
+>>>>>>> Changed Clear-DscLcmConfiguration to public
 
 ### Fixed
 
@@ -25,6 +30,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Used the right code of conduct for DSC Community.
 - Fixed integration tests failing with the error `Security Error` 
   ([issue #38](https://github.com/dsccommunity/DscResource.Test/issues/38)).
+
+### Changed
+
+- Changed module manifest to include Tags, ProjectUri, LicenseUri, Logo
+  and changed AliasesToExport to empty - fixes [Issue #42](https://github.com/dsccommunity/DscResource.Test/issues/42).
+- Changed Clear-DscLcmConfiguration to a public function so it can be called
+  directly by resource modules - fixes [Issue #40](https://github.com/dsccommunity/DscResource.Test/issues/40).
+
+### Removed
+
+- Removed Deploy.PSDeploy.ps1 because it is not used - fixes [Issue #44](https://github.com/dsccommunity/DscResource.Test/issues/44).
 
 ## [0.8.0] - 2019-12-21
 
