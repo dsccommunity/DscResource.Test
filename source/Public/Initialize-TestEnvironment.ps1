@@ -39,14 +39,13 @@
         Class: The test initialization assumes a Class-based DscResource folder structure.
 
     .PARAMETER ProcessExecutionPolicy
-        Specifies the process execution policy to set before running tests.
-        The default will be the one that is set in the process where the tests
-        are running.
+        Specifies the process' execution policy to set before running tests.
+        If not specified, the command will not alter the current process' execution
+        policy.
 
     .PARAMETER MachineExecutionPolicy
-        Specifies the machine execution policy to set before running tests.
-        The default will be the one that is set on the machine where the tests
-        are running.
+        Specifies the machine's execution policy to set before running tests.
+        If not specified, the command will not alter the machine's execution policy.
 
     .EXAMPLE
         $TestEnvironment = Initialize-TestEnvironment `
@@ -228,12 +227,20 @@ function Initialize-TestEnvironment
                     Set-ExecutionPolicy -ExecutionPolicy $MachineExecutionPolicy -Scope 'LocalMachine' -Force -ErrorAction Stop
 
                     <#
+                        The variable $script:MachineOldExecutionPolicy should
+                        only be set if it has not been set before. If it has been
+                        set before then it means that we have already a value that
+                        has not yet been reverted using Restore-TestEnvironment.
+
                         Should only be set after we actually changed the execution
                         policy because if $script:MachineOldExecutionPolicy is set
                         to a value `Restore-TestEnvironment` will try to revert
                         the value.
                     #>
-                    $script:MachineOldExecutionPolicy = $currentMachineExecutionPolicy
+                    if ($null -eq $script:MachineOldExecutionPolicy)
+                    {
+                        $script:MachineOldExecutionPolicy = $currentMachineExecutionPolicy
+                    }
 
                     $currentMachineExecutionPolicy = $MachineExecutionPolicy
                 }

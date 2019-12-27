@@ -60,5 +60,7 @@ function Restore-TestEnvironment
     if ($script:MachineOldExecutionPolicy)
     {
         Set-ExecutionPolicy -ExecutionPolicy $script:MachineOldExecutionPolicy -Scope LocalMachine -Force -ErrorAction Stop
+
+        $script:MachineOldExecutionPolicy = $null
     }
 }
