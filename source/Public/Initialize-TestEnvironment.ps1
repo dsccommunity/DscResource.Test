@@ -220,7 +220,7 @@ function Initialize-TestEnvironment
             }
 
             # Preserve and set the execution policy so that the DSC MOF can be created
-            $currentMachineExecutionPolicy = Get-ExecutionPolicy -Scope LocalMachine
+            $currentMachineExecutionPolicy = Get-ExecutionPolicy -Scope 'LocalMachine'
             if ($PSBoundParameters.ContainsKey('MachineExecutionPolicy'))
             {
                 if ($currentMachineExecutionPolicy -ne $MachineExecutionPolicy)
@@ -276,7 +276,7 @@ function Initialize-TestEnvironment
         }
     }
 
-    Write-Verbose -Message ('The process execution policy is set to ''{0}''' -f $currentProcesoldExecutionPolicysExecutionPolicy)
+    Write-Verbose -Message ('The process execution policy is set to ''{0}''' -f $oldExecutionPolicy)
 
 
     # Return the test environment
