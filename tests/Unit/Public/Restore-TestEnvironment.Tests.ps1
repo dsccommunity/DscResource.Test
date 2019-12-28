@@ -81,7 +81,6 @@ InModuleScope $ProjectName {
                 { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
 
                 Assert-MockCalled -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
-                #Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
 
                 Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
                     $Path -eq $testEnvironmentParameter.OldPSModulePath `

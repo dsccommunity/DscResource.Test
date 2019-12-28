@@ -1,4 +1,3 @@
-
 <#
     .SYNOPSIS
         Initializes an environment for running unit or integration tests
@@ -27,8 +26,11 @@
 
     .PARAMETER TestType
         Specifies the type of tests that are being initialized. It can be:
-        Unit: Initialize for running Unit tests on a DSC resource. Default.
+        Unit: Initialize for running Unit tests on a DSC resource.
         Integration: Initialize for running Integration tests on a DSC resource.
+        All: Initialize for running end-to-end tests on a DSC resource. These
+        tests will include both unit and integration type tests and so will
+        initialize the DSC LCM as well as import the module.
 
     .PARAMETER ResourceType
         Specifies if the DscResource under test is mof-based or class-based.
@@ -37,6 +39,15 @@
         It can be:
         Mof: The test initialization assumes a Mof-based DscResource folder structure.
         Class: The test initialization assumes a Class-based DscResource folder structure.
+
+    .PARAMETER ProcessExecutionPolicy
+        Specifies the process' execution policy to set before running tests.
+        If not specified, the command will not alter the current process' execution
+        policy.
+
+    .PARAMETER MachineExecutionPolicy
+        Specifies the machine's execution policy to set before running tests.
+        If not specified, the command will not alter the machine's execution policy.
 
     .EXAMPLE
         $TestEnvironment = Initialize-TestEnvironment `
@@ -84,14 +95,24 @@ function Initialize-TestEnvironment
         $DscResourceName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Unit', 'Integration')]
+        [ValidateSet('Unit', 'Integration', 'All')]
         [String]
         $TestType,
 
         [Parameter()]
         [ValidateSet('Mof', 'Class')]
         [String]
-        $ResourceType = 'Mof'
+        $ResourceType = 'Mof',
+
+        [Parameter()]
+        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [String]
+        $ProcessExecutionPolicy,
+
+        [Parameter()]
+        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [String]
+        $MachineExecutionPolicy
     )
 
     Write-Verbose -Message "Initializing test environment for $TestType testing of $DscResourceName in module $Module"
@@ -109,7 +130,7 @@ function Initialize-TestEnvironment
     }
 
     # Import the module to test
-    if ($TestType -ieq 'Unit')
+    if ($TestType -in ('Unit','All'))
     {
         switch ($ResourceType)
         {
@@ -185,9 +206,9 @@ function Initialize-TestEnvironment
 
     Set-PSModulePath -Path $newPSModulePath
 
-    if ($TestType -ieq 'Integration')
+    if ($TestType -in ('Integration','All'))
     {
-        # # Making sure setting up the LCM & Machine Path makes sense...
+        # Making sure setting up the LCM & Machine Path makes sense...
         if (($IsWindows -or $PSEdition -eq 'Desktop') -and
             ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -200,14 +221,34 @@ function Initialize-TestEnvironment
             }
 
             # Preserve and set the execution policy so that the DSC MOF can be created
-            if (!$script:MachineOldExecutionPolicy)
+            $currentMachineExecutionPolicy = Get-ExecutionPolicy -Scope 'LocalMachine'
+            if ($PSBoundParameters.ContainsKey('MachineExecutionPolicy'))
             {
-                $script:MachineOldExecutionPolicy = Get-ExecutionPolicy -Scope LocalMachine
-                if ($script:MachineOldExecutionPolicy -ine 'Unrestricted')
+                if ($currentMachineExecutionPolicy -ne $MachineExecutionPolicy)
                 {
-                    Set-ExecutionPolicy -ExecutionPolicy 'Unrestricted' -Scope LocalMachine -Force -ErrorAction Stop
+                    Set-ExecutionPolicy -ExecutionPolicy $MachineExecutionPolicy -Scope 'LocalMachine' -Force -ErrorAction Stop
+
+                    <#
+                        The variable $script:MachineOldExecutionPolicy should
+                        only be set if it has not been set before. If it has been
+                        set before then it means that we have already a value that
+                        has not yet been reverted using Restore-TestEnvironment.
+
+                        Should only be set after we actually changed the execution
+                        policy because if $script:MachineOldExecutionPolicy is set
+                        to a value `Restore-TestEnvironment` will try to revert
+                        the value.
+                    #>
+                    if ($null -eq $script:MachineOldExecutionPolicy)
+                    {
+                        $script:MachineOldExecutionPolicy = $currentMachineExecutionPolicy
+                    }
+
+                    $currentMachineExecutionPolicy = $MachineExecutionPolicy
                 }
             }
+
+            Write-Verbose -Message ('The machine execution policy is set to ''{0}''' -f $currentMachineExecutionPolicy)
 
             <#
                 For integration tests we have to set the machine's PSModulePath because otherwise the
@@ -227,12 +268,25 @@ function Initialize-TestEnvironment
         }
     }
 
-    # Preserve and set the execution policy so that the DSC MOF can be created
-    $oldExecutionPolicy = Get-ExecutionPolicy
-    if ($oldExecutionPolicy -ine 'Unrestricted')
+    <#
+        Preserve and set the execution policy so that the DSC MOF can be created.
+
+        `Restore-TestEnvironment` will only revert the value if $oldExecutionPolicy
+        differ from current execution policy. So we make to always set it to the
+        current execution policy so that if we don't need to change it then
+        `Restore-TestEnvironment` will not try to revert the value.
+    #>
+    $oldExecutionPolicy = Get-ExecutionPolicy -Scope 'Process'
+
+    if ($PSBoundParameters.ContainsKey('ProcessExecutionPolicy'))
     {
-        Set-ExecutionPolicy -ExecutionPolicy 'Unrestricted' -Scope 'Process' -Force
+        if ($oldExecutionPolicy -ne $ProcessExecutionPolicy)
+        {
+            Set-ExecutionPolicy -ExecutionPolicy $ProcessExecutionPolicy -Scope 'Process' -Force -ErrorAction Stop
+        }
     }
+
+    Write-Verbose -Message ('The process execution policy is set to ''{0}''' -f $oldExecutionPolicy)
 
     # Return the test environment
     return @{
