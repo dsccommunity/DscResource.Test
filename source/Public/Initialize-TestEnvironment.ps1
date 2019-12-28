@@ -1,4 +1,3 @@
-
 <#
     .SYNOPSIS
         Initializes an environment for running unit or integration tests
@@ -27,8 +26,11 @@
 
     .PARAMETER TestType
         Specifies the type of tests that are being initialized. It can be:
-        Unit: Initialize for running Unit tests on a DSC resource. Default.
+        Unit: Initialize for running Unit tests on a DSC resource.
         Integration: Initialize for running Integration tests on a DSC resource.
+        All: Initialize for running end-to-end tests on a DSC resource. These
+        tests will include both unit and integration type tests and so will
+        initialize the DSC LCM as well as import the module.
 
     .PARAMETER ResourceType
         Specifies if the DscResource under test is mof-based or class-based.
@@ -93,7 +95,7 @@ function Initialize-TestEnvironment
         $DscResourceName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Unit', 'Integration')]
+        [ValidateSet('Unit', 'Integration', 'All')]
         [String]
         $TestType,
 
@@ -128,7 +130,7 @@ function Initialize-TestEnvironment
     }
 
     # Import the module to test
-    if ($TestType -ieq 'Unit')
+    if ($TestType -in ('Unit','All'))
     {
         switch ($ResourceType)
         {
@@ -204,9 +206,9 @@ function Initialize-TestEnvironment
 
     Set-PSModulePath -Path $newPSModulePath
 
-    if ($TestType -ieq 'Integration')
+    if ($TestType -in ('Integration','All'))
     {
-        # # Making sure setting up the LCM & Machine Path makes sense...
+        # Making sure setting up the LCM & Machine Path makes sense...
         if (($IsWindows -or $PSEdition -eq 'Desktop') -and
             ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -275,6 +277,7 @@ function Initialize-TestEnvironment
         `Restore-TestEnvironment` will not try to revert the value.
     #>
     $oldExecutionPolicy = Get-ExecutionPolicy -Scope 'Process'
+
     if ($PSBoundParameters.ContainsKey('ProcessExecutionPolicy'))
     {
         if ($oldExecutionPolicy -ne $ProcessExecutionPolicy)
@@ -284,7 +287,6 @@ function Initialize-TestEnvironment
     }
 
     Write-Verbose -Message ('The process execution policy is set to ''{0}''' -f $oldExecutionPolicy)
-
 
     # Return the test environment
     return @{
