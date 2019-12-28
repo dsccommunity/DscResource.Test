@@ -11,9 +11,7 @@ $ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
             } )
     }).BaseName
 
-
 Import-Module $ProjectName -Force
-
 
 if ($isLinux -or $isMacOS)
 {
