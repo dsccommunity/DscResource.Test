@@ -13,32 +13,29 @@ param (
 )
 
 Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate Markdown Links' {
+    $markdownFileFilter = '*.md'
 
-    $dependencyModuleName = 'MarkdownLinkCheck'
-    $uninstallMarkdownLinkCheck = $false
+    $markdownFiles = Get-ChildItem -Path $ProjectPath -File -Filter $markdownFileFilter
 
-    $markdownFileExtensions = @('.md')
-
-    $markdownFiles = Get-TextFilesList $ModuleBase | `
-        Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension } | `
+    $markdownFiles += Get-ChildItem -Path $ModuleBase -File -Recurse -Filter $markdownFileFilter | `
         WhereModuleFileNotExcluded
 
     if ($SourcePath)
     {
-        $markdownFiles += Get-TextFilesList $SourcePath | `
-            Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension } | `
+        $markdownFiles += Get-ChildItem -Path $SourcePath -File -Recurse -Filter $markdownFileFilter | `
             WhereSourceFileNotExcluded
     }
 
-    foreach ($markdownFileToValidate in $markdownFiles)
+    foreach ($markdownFile in $markdownFiles)
     {
-        $contextDescriptiveName = Join-Path -Path (Split-Path $markdownFileToValidate.Directory -Leaf) -ChildPath (Split-Path $markdownFileToValidate -Leaf)
+        $contextDescriptiveName = Join-Path -Path (Split-Path $markdownFile.Directory -Leaf) `
+            -ChildPath (Split-Path $markdownFile -Leaf)
 
         Context -Name $contextDescriptiveName {
             It 'Should not contain any broken links' {
                 $getMarkdownLinkParameters = @{
                     BrokenOnly = $true
-                    Path       = $markdownFileToValidate.FullName
+                    Path       = $markdownFile.FullName
                 }
 
                 # Make sure it always returns an array even if Get-MarkdownLink returns $null.
@@ -47,7 +44,8 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
                 if ($brokenLinks.Count -gt 0)
                 {
                     # Write out all the errors so the contributor can resolve.
-                    $report = $brokenLinks | Select-Object Line, Text, Url | Format-Table -AutoSize -Wrap | Out-String -Width 110
+                    $report = $brokenLinks | Select-Object Line, Text, Url | Format-Table -AutoSize -Wrap | `
+                        Out-String -Width 110
                     $brokenLinks.Count | Should -Be 0 -Because "broken markdown links:`r`n`r`n $report`r`n `r`n ,"
                 }
             }
