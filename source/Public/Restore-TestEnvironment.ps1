@@ -28,7 +28,7 @@ function Restore-TestEnvironment
 
     Write-Verbose -Message "Cleaning up Test Environment after $($TestEnvironment.TestType) testing of $($TestEnvironment.DSCResourceName) in module $($TestEnvironment.DSCModuleName)."
 
-    if ($TestEnvironment.TestType -ieq 'Integration')
+    if ($TestEnvironment.TestType -in ('Integration','E2E'))
     {
         # Clear the DSC LCM & Configurations
         Clear-DscLcmConfiguration
@@ -39,7 +39,7 @@ function Restore-TestEnvironment
     {
         Set-PSModulePath -Path $TestEnvironment.OldPSModulePath
 
-        if ($TestEnvironment.TestType -eq 'Integration')
+        if ($TestEnvironment.TestType -eq 'Integration','E2E')
         {
             # Restore the machine PSModulePath for integration tests.
             Set-PSModulePath -Path $TestEnvironment.OldPSModulePath -Machine
