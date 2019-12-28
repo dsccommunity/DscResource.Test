@@ -13,7 +13,7 @@
     GUID              = '036f67a1-21a3-43b6-95a0-73d5549e854e'
 
     # Author of this module
-    Author            = 'Gael Colas'
+    Author            = 'DSC Community'
 
     # Company or vendor of this module
     CompanyName       = 'DSC Community'
@@ -61,16 +61,16 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = ''
+    FunctionsToExport = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = ''
+    CmdletsToExport   = @()
 
     # Variables to export from this module
-    VariablesToExport = ''
+    VariablesToExport = @()
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = '*'
+    AliasesToExport   = @()
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -87,22 +87,23 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @()
+            Tags                       = @('DesiredStateConfiguration', 'DSC', 'DSCResourceKit', 'DSCResource')
 
             # A URL to the license for this module.
-            LicenseUri   = ''
+            LicenseUri                 = 'https://github.com/dsccommunity/DscResource.Test/blob/master/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri   = ''
+            ProjectUri                 = 'https://github.com/dsccommunity/DscResource.Test'
 
-            ExternalModuleDependencies = @('DscResource.AnalyzerRules','Pester','xDSCResourceDesigner', 'PSPKI')
+            ExternalModuleDependencies = @('DscResource.AnalyzerRules', 'Pester', 'xDSCResourceDesigner', 'PSPKI')
+
             # A URL to an icon representing this module.
-            # IconUri = ''
+            IconUri                    = 'https://dsccommunity.org/images/DSC_Logo_300p.png'
 
-            Prerelease = ''
+            Prerelease                 = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = ''
+            ReleaseNotes               = ''
 
         } # End of PSData hashtable
 
@@ -113,5 +114,4 @@
 
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
-
 }
