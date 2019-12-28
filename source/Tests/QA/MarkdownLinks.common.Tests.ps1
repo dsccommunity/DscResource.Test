@@ -12,6 +12,12 @@ param (
     $ExcludeSourceFile
 )
 
+if (!(Get-Module -Name 'MarkdownLinkCheck' -ListAvailable))
+{
+    Write-Warning -Message 'Required module MarkdownLinkCheck not found. Please add to RequiredModules.psd1'
+    return
+}
+
 Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate Markdown Links' {
     $markdownFileFilter = '*.md'
 
@@ -51,4 +57,5 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
             }
         }
     }
+}
 }
