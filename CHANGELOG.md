@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a new test type, `All`, to the `Initialize-TestEnvironment` function
   that initializes the DSC LCM and imports the module for testing ([issue #48](https://github.com/dsccommunity/DscResource.Test/issues/48)).
+- Added check on changelog when invoking by project path.
 
 ## [0.9.0] - 2019-12-27
 

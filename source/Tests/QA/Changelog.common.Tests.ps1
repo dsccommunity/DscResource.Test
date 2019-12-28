@@ -41,7 +41,7 @@ try
             {
                  # if we're not testing same commit (i.e. master..master)
                 $filesChanged.Where{
-                    (Split-Path $_ -Leaf) -match '^changelog'
+                    (Split-Path $_ -Leaf) -match '^changelog.md'
                 } | Should -Not -BeNullOrEmpty
             }
         }
