@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a new test type, E2E, to the `Initialize-TestEnvironment` function
+- Added a new test type, `All`, to the `Initialize-TestEnvironment` function
   that initializes the DSC LCM and imports the module for testing ([issue #48](https://github.com/dsccommunity/DscResource.Test/issues/48)).
 
 ## [0.9.0] - 2019-12-27
