@@ -28,7 +28,7 @@
         Specifies the type of tests that are being initialized. It can be:
         Unit: Initialize for running Unit tests on a DSC resource.
         Integration: Initialize for running Integration tests on a DSC resource.
-        E2E: Initialize for running end-to-end tests on a DSC resource. These
+        All: Initialize for running end-to-end tests on a DSC resource. These
         tests will include both unit and integration type tests and so will
         initialize the DSC LCM as well as import the module.
 
@@ -95,7 +95,7 @@ function Initialize-TestEnvironment
         $DscResourceName,
 
         [Parameter(Mandatory = $true)]
-        [ValidateSet('Unit', 'Integration', 'E2E')]
+        [ValidateSet('Unit', 'Integration', 'All')]
         [String]
         $TestType,
 
@@ -130,7 +130,7 @@ function Initialize-TestEnvironment
     }
 
     # Import the module to test
-    if ($TestType -in ('Unit','E2E'))
+    if ($TestType -in ('Unit','All'))
     {
         switch ($ResourceType)
         {
@@ -206,7 +206,7 @@ function Initialize-TestEnvironment
 
     Set-PSModulePath -Path $newPSModulePath
 
-    if ($TestType -in ('Integration','E2E'))
+    if ($TestType -in ('Integration','All'))
     {
         # Making sure setting up the LCM & Machine Path makes sense...
         if (($IsWindows -or $PSEdition -eq 'Desktop') -and
