@@ -39,7 +39,7 @@ function Restore-TestEnvironment
     {
         Set-PSModulePath -Path $TestEnvironment.OldPSModulePath
 
-        if ($TestEnvironment.TestType -eq 'Integration','All')
+        if ($TestEnvironment.TestType -in ('Integration','All'))
         {
             # Restore the machine PSModulePath for integration tests.
             Set-PSModulePath -Path $TestEnvironment.OldPSModulePath -Machine
