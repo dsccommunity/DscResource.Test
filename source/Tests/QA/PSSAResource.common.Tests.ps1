@@ -67,11 +67,11 @@ $DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassT
 
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Common Tests - PS Script Analyzer on Resource Files' {
 
-    $dscResourcesPsm1Files = Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse | WhereModuleFileNotExcluded
+    $dscResourcesPsm1Files = @(Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse | WhereModuleFileNotExcluded)
 
     if ($SourcePath)
     {
-        $dscResourcesPsm1Files += Get-ChildItem -Path $SourcePath -Include *.psm1 -Recurse | WhereSourceFileNotExcluded
+        $dscResourcesPsm1Files += @(Get-ChildItem -Path $SourcePath -Include *.psm1 -Recurse | WhereSourceFileNotExcluded)
     }
 
     foreach ($dscResourcesPsm1File in $dscResourcesPsm1Files)

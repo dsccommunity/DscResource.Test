@@ -41,7 +41,7 @@ BuildWorkflow:
   DscTest: |
     {
       Import-Module -force DscResource.Test
-      Invoke-DscResourceTest
+      Invoke-DscResourceTest -ExcludeTag 'Common Tests - Validate Localization'
     }
   t:
     - build
