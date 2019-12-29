@@ -7,28 +7,29 @@ param (
     $SourceManifest
 )
 
-if ($isLinux -or $IsMacOS)
-{
-    $skipTests = $true
-    Write-Warning "xDscResourceDesigner module only works on Windows at the moment."
-    Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
-}
-else
-{
-    $Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    if ($isAdmin)
+Describe 'Common Tests - Script Resource Schema Validation' -Tag WindowsOnly {
+    if ($isLinux -or $IsMacOS)
     {
-        $skipTests = $false
+        $skipTests = $true
+        Write-Warning "xDscResourceDesigner module only works on Windows at the moment."
+        Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
     }
     else
     {
-        Write-Warning "xDscResourceDesigner needs your session to be running elevated."
-        Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
-        $skipTests = $true
+        $Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
+        $isAdmin = $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+        if ($isAdmin)
+        {
+            $skipTests = $false
+        }
+        else
+        {
+            Write-Warning "xDscResourceDesigner needs your session to be running elevated."
+            Write-Warning "Test-xDscResource & Test-xDscSchema will be skipped"
+            $skipTests = $true
+        }
     }
-}
-Describe 'Common Tests - Script Resource Schema Validation' -Tag WindowsOnly {
+
     if ($isAdmin -and ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop'))
     {
         Import-Module -Name xDscResourceDesigner -ErrorAction Stop
