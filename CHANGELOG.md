@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Moved init code into Describe Block for PSSAResource and ResourceSchema Tests
+
 ## [0.11.0] - 2019-12-29
 
 ### Added
