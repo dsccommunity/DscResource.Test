@@ -30,8 +30,8 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                         $mockConfigurationData = @{
                             AllNodes = @(
                                 @{
-                                    NodeName        = 'localhost'
-                                    CertificateFile = $env:DscPublicCertificatePath
+                                    NodeName                    = 'localhost'
+                                    PsDscAllowPlainTextPassword = $true
                                 }
                             )
                         }
