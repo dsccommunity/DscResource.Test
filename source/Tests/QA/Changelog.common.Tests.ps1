@@ -46,7 +46,7 @@ try
                  # if we're not testing same commit (i.e. master..master)
                 $filesChanged.Where{
                     (Split-Path -Path $_ -Leaf) -match '^changelog.md'
-                } | Should -Not -BeNullOrEmpty
+                } | Should -Not -BeNullOrEmpty -Because 'the changelog should have at least one entry for every pull request'
             }
         }
 
