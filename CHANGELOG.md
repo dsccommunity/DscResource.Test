@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added new QA ExampleFiles test.
 - Added new QA MarkdownLinks test.
 
 ## [0.10.0] - 2019-12-28
