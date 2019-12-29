@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -35,7 +36,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     $moduleManifestProperties = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
 
     It "Should contain a PowerShellVersion property of at least $minimumPSVersion based on resource types" {
-        $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -Be $true
+        $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue
     }
 
     if ($containsClassResource)
@@ -46,11 +47,11 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             foreach ($classResourceInModule in $classResourcesInModule)
             {
                 It "Should explicitly export $classResourceInModule in DscResourcesToExport" {
-                    $moduleManifestProperties.ExportedDscResources -contains $classResourceInModule | Should -Be $true
+                    $moduleManifestProperties.ExportedDscResources -contains $classResourceInModule | Should -BeTrue
                 }
 
                 It "Should include class module $classResourceInModule.psm1 in NestedModules" {
-                    $moduleManifestProperties.NestedModules.Name -contains $classResourceInModule | Should -Be $true
+                    $moduleManifestProperties.NestedModules.Name -contains $classResourceInModule | Should -BeTrue
                 }
             }
         }
