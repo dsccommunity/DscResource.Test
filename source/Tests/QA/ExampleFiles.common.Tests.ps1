@@ -83,7 +83,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                                         <#
                                             Each credential parameter in the Example function is assigned the
                                             mocked credential. 'PsDscRunAsCredential' is not assigned because
-                                            that brakes the example.
+                                            that breaks the example.
                                         #>
                                         if ($parameterName -ne 'PsDscRunAsCredential' `
                                                 -and $parameterType -eq 'System.Management.Automation.PSCredential')
@@ -115,21 +115,6 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                                     #>
                                     if (Get-Item -Path variable:ConfigurationData -ErrorAction SilentlyContinue)
                                     {
-                                        # Adding certificate to the examples configuration data.
-                                        foreach ($node in $ConfigurationData.AllNodes.GetEnumerator())
-                                        {
-                                            if ($node.ContainsKey('PSDscAllowPlainTextPassword') -eq $true -and $node.PSDscAllowPlainTextPassword -eq $true)
-                                            {
-                                                Write-Warning -Message ('The example ''{0}'' is using PSDscAllowPlainTextPassword = $true in the configuration data for node name ''{1}'', this should be removed so the example is secure. PSDscAllowPlainTextPassword was overridden in the tests so the example can be tested securely.' -f
-                                                    $exampleDescriptiveName, $node.NodeName)
-
-                                                # Override PSDscAllowPlainTextPassword.
-                                                $node.PSDscAllowPlainTextPassword = $false
-                                            }
-
-                                            $node.CertificateFile = $env:DscPublicCertificatePath
-                                        }
-
                                         $mockConfigurationData = $ConfigurationData
                                     }
 
