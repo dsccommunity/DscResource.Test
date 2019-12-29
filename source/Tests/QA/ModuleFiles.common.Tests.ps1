@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -13,8 +14,8 @@ param (
 )
 
 Describe 'Common Tests - Validate Module Files' -Tag 'Module','Common Tests - Validate Module Files' {
-
     $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+
     if ($SourcePath)
     {
         $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
@@ -35,7 +36,7 @@ Describe 'Common Tests - Validate Module Files' -Tag 'Module','Common Tests - Va
                     Write-Warning -Message "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
                 }
 
-                $moduleFileHasBom | Should -Be $false
+                $moduleFileHasBom | Should -BeFalse
             }
         }
     }
