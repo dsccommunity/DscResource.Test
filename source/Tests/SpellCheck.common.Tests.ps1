@@ -1,4 +1,5 @@
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,

@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -11,7 +12,6 @@ param (
     $ExcludeModuleFile,
     $ExcludeSourceFile
 )
-
 
 if ($PSVersionTable.PSVersion.Major -lt 5)
 {
@@ -33,40 +33,42 @@ if ($PSVersionTable.PSVersion.Major -lt 5)
     - Common Tests - New Error-Level Script Analyzer Rules
     - Common Tests - Custom Script Analyzer Rules
 #>
-$RequiredPSSA = @(
+$requiredPSSA = @(
     'Common Tests - Required Script Analyzer Rules',
     'RequiredPSSA'
 )
-$FlaggedPSSA = @(
+
+$flaggedPSSA = @(
     'Common Tests - Flagged Script Analyzer Rules',
     'FlaggedPSSA'
 )
-$NewErrorPSSA = @(
+
+$newErrorPSSA = @(
     'Common Tests - New Error-Level Script Analyzer Rules',
     'NewErrorPSSA'
 )
-$CustomPSSA = @(
+
+$customPSSA = @(
     'Common Tests - Custom Script Analyzer Rules',
     'CustomPSSA',
     'DscResource.AnalyzerRules'
 )
 
 
-$TestTestShouldBeSkippedParams = @{
+$testTestShouldBeSkippedParams = @{
     Tag = $Tag
     ExcludeTag = $ExcludeTag
 }
 
-$ShouldSkipRequiredPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $RequiredPSSA
-$ShouldSkipFlaggedPSSA  = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $FlaggedPSSA
-$ShouldSkipCustomPSSA   = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $CustomPSSA
-$ShouldSkipNewErrorPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $NewErrorPSSA
+$ShouldSkipRequiredPSSA = Test-TestShouldBeSkipped @testTestShouldBeSkippedParams -TestNames $requiredPSSA
+$ShouldSkipFlaggedPSSA  = Test-TestShouldBeSkipped @testTestShouldBeSkippedParams -TestNames $flaggedPSSA
+$ShouldSkipCustomPSSA   = Test-TestShouldBeSkipped @testTestShouldBeSkippedParams -TestNames $customPSSA
+$ShouldSkipNewErrorPSSA = Test-TestShouldBeSkipped @testTestShouldBeSkippedParams -TestNames $newErrorPSSA
 
-$PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path (Get-CurrentModuleBase) 'Config/PSSA_rules_config.json')
-$DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction Stop
+$PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path -Path (Get-CurrentModuleBase) -ChildPath 'Config/PSSA_rules_config.json')
+$dscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction Stop
 
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Common Tests - PS Script Analyzer on Resource Files' {
-
     $dscResourcesPsm1Files = @(Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse | WhereModuleFileNotExcluded)
 
     if ($SourcePath)
@@ -78,12 +80,13 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Com
     {
         $invokeScriptAnalyzerParameters = @{
             Path        = $dscResourcesPsm1File.FullName
-            CustomRulePath = (Join-Path $DscResourceAnalyzerRulesModule.ModuleBase $DscResourceAnalyzerRulesModule.RootModule)
+            CustomRulePath = (Join-Path -Path $dscResourceAnalyzerRulesModule.ModuleBase -ChildPath $dscResourceAnalyzerRulesModule.RootModule)
             IncludeRule = @($PSSA_rule_config.required_rules + $PSSA_rule_config.flagged_rules + $PSSA_rule_config.ignore_rules + 'Measure-*')
             ErrorVariable = 'MyErrors'
         }
 
         $PSSAErrors = Invoke-ScriptAnalyzer @invokeScriptAnalyzerParameters
+
         $errorPssaRulesOutput    = $PSSAErrors.Where{$_.Severity -eq 'Error'}
         $requiredPssaRulesOutput = $PSSAErrors.Where{$_.RuleName -in $PSSA_rule_config.required_rules }
         $flaggedPssaRulesOutput  = $PSSAErrors.Where{$_.RuleName -in $PSSA_rule_config.flagged_rules}
@@ -92,7 +95,6 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Com
         $NewErrorRulesOutput = @($ignoredPssaRulesOutput + $flaggedPssaRulesOutput + $requiredPssaRulesOutput)
 
         Context $dscResourcesPsm1File.Name {
-
             It 'Should not suppress any required PS Script Analyzer rules' {
                 $requiredRuleIsSuppressed = $false
 
@@ -109,7 +111,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Com
                     }
                 }
 
-                $requiredRuleIsSuppressed | Should -Be $false
+                $requiredRuleIsSuppressed | Should -BeFalse
             }
 
             It 'Should pass all error-level PS Script Analyzer rules' {
@@ -137,6 +139,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Com
                     Name       = 'RuleName'
                     Expression = {$_.RuleName -replace 'DscResource.AnalyzerRules\\'}
                 },Severity,ScriptName,Line,Message | Format-Table -AutoSize -Wrap | Out-String -Width 110
+
                 $DSCCustomRulesOutput | Should -HaveCount 0 -Because "Error-level Rule(s) triggered.`r`n`r`n $report`r`n"
             }
         }

@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -13,8 +14,8 @@ param (
 )
 
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {
-
     $psm1Files = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+
     if ($SourcePath)
     {
         $psm1Files += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded

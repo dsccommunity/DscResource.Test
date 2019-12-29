@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -13,14 +14,13 @@ param (
 )
 
 Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Validate Script Files' {
-
-    $scriptFiles = @(Get-ChildItem $ModuleBase -Recurse -Include *.ps1 | WhereModuleFileNotExcluded).Foreach{
+    $scriptFiles = @(Get-ChildItem $ModuleBase -Recurse -Include *.ps1 | WhereModuleFileNotExcluded).ForEach{
         $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $ModuleBase -PassThru
     }
 
     if ($SourcePath)
     {
-        $scriptFiles += @(Get-ChildItem $SourcePath -Recurse -Include *.ps1 | WhereSourceFileNotExcluded).Foreach{
+        $scriptFiles += @(Get-ChildItem $SourcePath -Recurse -Include *.ps1 | WhereSourceFileNotExcluded).ForEach{
             $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $SourcePath -PassThru
         }
     }
@@ -30,6 +30,7 @@ Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Va
     foreach ($scriptFile in $scriptFiles)
     {
         Write-Debug -Message "... $scriptFile"
+
         $filePathOutputName = Get-RelativePathFromModuleRoot `
             -FilePath $scriptFile.FullName `
             -ModuleRootFilePath $scriptFile.ModuleBase
@@ -43,7 +44,7 @@ Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Va
                     Write-Warning -Message "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
                 }
 
-                $scriptFileHasBom | Should -Be $false -Because "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
+                $scriptFileHasBom | Should -BeFalse -Because "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
             }
         }
     }
