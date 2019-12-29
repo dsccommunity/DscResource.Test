@@ -58,4 +58,3 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
         }
     }
 }
-}
