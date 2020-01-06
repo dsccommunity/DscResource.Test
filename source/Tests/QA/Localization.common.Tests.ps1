@@ -13,44 +13,6 @@ param
     $ExcludeSourceFile
 )
 
-<#
-    .SYNOPSIS
-        Returns the function definition ASTs for a script file.
-
-    .PARAMETER FullName
-        Full path to the script file.
-#>
-function Get-FunctionDefinitionAst
-{
-    param
-    (
-        [Parameter(Mandatory = $true)]
-        [System.String]
-        $FullName
-    )
-
-    $tokens, $errors = $null
-
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-        $FullName,
-        [ref]$tokens,
-        [ref]$errors
-    )
-
-    $astFilter = {
-        param
-        (
-            [System.Management.Automation.Language.Ast]
-            $Ast
-        )
-
-        $Ast -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }
-
-    return $ast.FindAll($astFilter, $true)
-}
-
-
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
     $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
 
