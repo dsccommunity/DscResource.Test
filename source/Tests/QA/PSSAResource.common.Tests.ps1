@@ -12,60 +12,58 @@ param (
     $ExcludeSourceFile
 )
 
-
-if ($PSVersionTable.PSVersion.Major -lt 5)
-{
-    Write-Warning -Message 'PS Script Analyzer can not run on this platform. Please run tests on a machine with WMF 5.0+.'
-    return
-}
-
-<#
-    PSSA = PS Script Analyzer
-
-    The following PSSA tests will always fail if any violations are found:
-    - Common Tests - Error-Level Script Analyzer Rules
-    - Common Tests - Custom Script Analyzer Rules
-
-    The following PSSA tests will only fail if a violation is found and
-    a matching option is found in the opt-in file.
-    - Common Tests - Required Script Analyzer Rules
-    - Common Tests - Flagged Script Analyzer Rules
-    - Common Tests - New Error-Level Script Analyzer Rules
-    - Common Tests - Custom Script Analyzer Rules
-#>
-$RequiredPSSA = @(
-    'Common Tests - Required Script Analyzer Rules',
-    'RequiredPSSA'
-)
-$FlaggedPSSA = @(
-    'Common Tests - Flagged Script Analyzer Rules',
-    'FlaggedPSSA'
-)
-$NewErrorPSSA = @(
-    'Common Tests - New Error-Level Script Analyzer Rules',
-    'NewErrorPSSA'
-)
-$CustomPSSA = @(
-    'Common Tests - Custom Script Analyzer Rules',
-    'CustomPSSA',
-    'DscResource.AnalyzerRules'
-)
-
-
-$TestTestShouldBeSkippedParams = @{
-    Tag = $Tag
-    ExcludeTag = $ExcludeTag
-}
-
-$ShouldSkipRequiredPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $RequiredPSSA
-$ShouldSkipFlaggedPSSA  = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $FlaggedPSSA
-$ShouldSkipCustomPSSA   = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $CustomPSSA
-$ShouldSkipNewErrorPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $NewErrorPSSA
-
-$PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path (Get-CurrentModuleBase) 'Config/PSSA_rules_config.json')
-$DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction Stop
-
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag DscPSSA,'Common Tests - PS Script Analyzer on Resource Files' {
+
+    if ($PSVersionTable.PSVersion.Major -lt 5)
+    {
+        Write-Warning -Message 'PS Script Analyzer can not run on this platform. Please run tests on a machine with WMF 5.0+.'
+        return
+    }
+
+    <#
+        PSSA = PS Script Analyzer
+
+        The following PSSA tests will always fail if any violations are found:
+        - Common Tests - Error-Level Script Analyzer Rules
+        - Common Tests - Custom Script Analyzer Rules
+
+        The following PSSA tests will only fail if a violation is found and
+        a matching option is found in the opt-in file.
+        - Common Tests - Required Script Analyzer Rules
+        - Common Tests - Flagged Script Analyzer Rules
+        - Common Tests - New Error-Level Script Analyzer Rules
+        - Common Tests - Custom Script Analyzer Rules
+    #>
+    $RequiredPSSA = @(
+        'Common Tests - Required Script Analyzer Rules',
+        'RequiredPSSA'
+    )
+    $FlaggedPSSA = @(
+        'Common Tests - Flagged Script Analyzer Rules',
+        'FlaggedPSSA'
+    )
+    $NewErrorPSSA = @(
+        'Common Tests - New Error-Level Script Analyzer Rules',
+        'NewErrorPSSA'
+    )
+    $CustomPSSA = @(
+        'Common Tests - Custom Script Analyzer Rules',
+        'CustomPSSA',
+        'DscResource.AnalyzerRules'
+    )
+
+    $TestTestShouldBeSkippedParams = @{
+        Tag = $Tag
+        ExcludeTag = $ExcludeTag
+    }
+
+    $ShouldSkipRequiredPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $RequiredPSSA
+    $ShouldSkipFlaggedPSSA  = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $FlaggedPSSA
+    $ShouldSkipCustomPSSA   = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $CustomPSSA
+    $ShouldSkipNewErrorPSSA = Test-TestShouldBeSkipped @TestTestShouldBeSkippedParams -TestNames $NewErrorPSSA
+
+    $PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path (Get-CurrentModuleBase) 'Config/PSSA_rules_config.json')
+    $DscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction Stop
 
     $dscResourcesPsm1Files = @(Get-ChildItem -Path $ModuleBase -Include *.psm1 -Recurse | WhereModuleFileNotExcluded)
 
