@@ -27,14 +27,14 @@ InModuleScope $ProjectName {
 
             It 'Should return $true' {
                 $result = Test-ModuleContainsScriptResource -ModulePath $TestDrive
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
         }
 
         Context 'When a module does not contain a script resource' {
             It 'Should return $false' {
                 $result = Test-ModuleContainsScriptResource -ModulePath $TestDrive
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
         }
     }

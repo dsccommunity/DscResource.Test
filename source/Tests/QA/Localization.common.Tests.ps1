@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -14,32 +15,19 @@ param (
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
     $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
+
     if ($SourcePath)
     {
         $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded
     }
 
-    # Exclude empty PSM1
-    $moduleFiles = $moduleFiles | Where-Object {
-        $_.Length -gt 0 -and $(
-            # Only expect localization for Module files with some functions defined
-            $tokens, $errors = $null
-            $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-                $_.FullName,
-                [ref]$tokens,
-                [ref]$errors
-            )
-
-            # Get only function definition ASTs
-            $ast.FindAll({
-                param ([System.Management.Automation.Language.Ast] $Ast)
-
-                $Ast -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true)
-        )
+    <#
+        Exclude empty PSM1. Only expect localization for Module files with some
+        functions defined
+    #>
+    $moduleFiles = $moduleFiles | Where-Object -FilterScript {
+        $_.Length -gt 0 -and (Get-FunctionDefinitionAst -FullName $_.FullName)
     }
-
-
-
 
     Context 'When a resource or module should have localization files' {
         BeforeAll {
@@ -47,10 +35,11 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
 
             foreach ($file in $moduleFiles)
             {
-                Write-Verbose "$($file | ConvertTo-Json)"
+                Write-Verbose -Message "$($file | ConvertTo-Json)"
+
                 $filesToTest += @{
-                    LocalizationFile = (Join-Path $File.Directory.FullName (Join-Path 'en-US' "$($file.BaseName).strings.psd1"))
-                    LocalizationFolder = (Join-Path $File.Directory.FullName 'en-US')
+                    LocalizationFile = (Join-Path -Path $File.Directory.FullName -ChildPath (Join-Path -Path 'en-US' -ChildPath "$($file.BaseName).strings.psd1"))
+                    LocalizationFolder = (Join-Path -Path $File.Directory.FullName -ChildPath 'en-US')
                     File  = $file
                 }
             }
@@ -97,7 +86,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 This will return both 'en-us' and 'en-US' folders so we can
                 evaluate casing.
             #>
-            $localizationFolderOnDisk = Get-Item -Path $LocalizationFolder -ErrorAction SilentlyContinue
+            $localizationFolderOnDisk = Get-Item -Path $LocalizationFolder -ErrorAction 'SilentlyContinue'
             $localizationFolderOnDisk.Name | Should -MatchExactly 'en-US' -Because 'the en-US folder must have the correct casing'
         }
 
@@ -164,7 +153,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
             }
 
             $astFilter = {
-                    $args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] `
+                $args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] `
                 -and $args[0].Parent -is [System.Management.Automation.Language.MemberExpressionAst] `
                 -and $args[0].Parent.Expression -is [System.Management.Automation.Language.VariableExpressionAst] `
                 -and $args[0].Parent.Expression.VariablePath.UserPath -eq 'script:localizedData'
@@ -291,7 +280,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 $File
             )
 
-            $localizationFolderOnDisk = Get-Item $LocalizationFolder -ErrorAction SilentlyContinue
+            $localizationFolderOnDisk = Get-Item -Path $LocalizationFolder -ErrorAction 'SilentlyContinue'
             $localizationFolderOnDisk.Name -cin ([System.Globalization.CultureInfo]::GetCultures([System.Globalization.CultureTypes]::AllCultures)).Name | Should -BeTrue
         }
 

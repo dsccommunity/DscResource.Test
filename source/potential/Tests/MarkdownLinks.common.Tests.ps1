@@ -31,7 +31,7 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Markdown' {
     {
         $contextDescriptiveName = Join-Path -Path (Split-Path $markdownFileToValidate.Directory -Leaf) -ChildPath (Split-Path $markdownFileToValidate -Leaf)
 
-        Context -Name $contextDescriptiveName {
+        Context $contextDescriptiveName {
             It "Should not contain any broken links" -Skip:(!$optIn) {
                 $getMarkdownLinkParameters = @{
                     BrokenOnly = $true

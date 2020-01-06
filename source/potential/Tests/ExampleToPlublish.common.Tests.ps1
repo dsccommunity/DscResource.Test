@@ -60,7 +60,7 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Examples'
                 $exampleDescriptiveName = Join-Path -Path (Split-Path -Path $exampleToValidate.Directory -Leaf) `
                                                     -ChildPath (Split-Path -Path $exampleToValidate -Leaf)
 
-                Context -Name "When publishing example '$exampleDescriptiveName'" {
+                Context "When publishing example '$exampleDescriptiveName'" {
                     It 'Should pass testing of script file metadata' -Skip:(!$optIn) {
                         {
                             Test-ScriptFileInfo -Path $exampleToValidate.FullName
@@ -69,7 +69,7 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Examples'
 
                     It 'Should have the correct naming convention, and the same file name as the configuration name' -Skip:(!$optIn) {
                         $result = Test-ConfigurationName -Path $exampleToValidate.FullName
-                        $result | Should -Be $true
+                        $result | Should -BeTrue
                     }
                 }
             }

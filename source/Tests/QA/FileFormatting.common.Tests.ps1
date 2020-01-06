@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -13,19 +14,19 @@ param (
 )
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
-    $textFiles = @(Get-TextFilesList $ModuleBase | WhereModuleFileNotExcluded)
+    $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded)
 
     if ($SourcePath)
     {
-        $textFiles += Get-TextFilesList $SourcePath | WhereSourceFileNotExcluded
+        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded
     }
 
-    It "Should not contain any files with Unicode file encoding" {
+    It 'Should not contain any files with Unicode file encoding' {
         $containsUnicodeFile = $false
 
         foreach ($textFile in $textFiles)
         {
-            if (Test-FileInUnicode $textFile)
+            if (Test-FileInUnicode -FileInfo $textFile)
             {
                 if ($textFile.Extension -ieq '.mof')
                 {
@@ -40,7 +41,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             }
         }
 
-        $containsUnicodeFile | Should -Be $false
+        $containsUnicodeFile | Should -BeFalse
     }
 
     It 'Should not contain any files with tab characters' {
@@ -51,7 +52,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             $fileName = $textFile.FullName
             $fileContent = Get-Content -Path $fileName -Raw
 
-            $tabCharacterMatches = $fileContent | Select-String "`t"
+            $tabCharacterMatches = $fileContent | Select-String -Pattern "`t"
 
             if ($null -ne $tabCharacterMatches)
             {
@@ -60,7 +61,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             }
         }
 
-        $containsFileWithTab | Should -Be $false
+        $containsFileWithTab | Should -BeFalse
     }
 
     It 'Should not contain empty files' {
@@ -77,7 +78,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             }
         }
 
-        $containsEmptyFile | Should -Be $false
+        $containsEmptyFile | Should -BeFalse
     }
 
     It 'Should not contain files without a newline at the end' {
@@ -100,15 +101,14 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             }
         }
 
-
-        $containsFileWithoutNewLine | Should -Be $false
+        $containsFileWithoutNewLine | Should -BeFalse
     }
 
     Context 'When repository contains markdown files' {
         $markdownFileExtensions = @('.md')
 
         $markdownFiles = $textFiles |
-            Where-Object { $markdownFileExtensions -contains $_.Extension }
+            Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension }
 
         foreach ($markdownFile in $markdownFiles)
         {
@@ -124,7 +124,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
                     Write-Warning -Message "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
                 }
 
-                $markdownFileHasBom | Should -Be $false
+                $markdownFileHasBom | Should -BeFalse
             }
         }
     }

@@ -1,5 +1,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '', Scope='Function', Target='*')]
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -17,9 +19,6 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
 
     if (Test-Path -Path $examplesPath)
     {
-        # We need helper functions from this module.
-        #Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath 'DscResource.GalleryDeploy')
-
         Context 'When there are examples that should be published' {
             $exampleScriptFiles = Get-ChildItem -Path (Join-Path -Path $examplesPath -ChildPath '*Config.ps1') -Recurse
 
@@ -41,16 +40,21 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
 
                 $duplicateGuids = @($exampleScriptMetadata | `
                     Group-Object -Property Guid | `
-                    Where-Object { $_.Count -gt 1 })
+                    Where-Object -FilterScript {
+                        $_.Count -gt 1
+                    }
+                )
 
                 if ($duplicateGuids.Count -gt 0)
                 {
-                    foreach ($duplicateGuid in $duplicateGuids) {
+                    foreach ($duplicateGuid in $duplicateGuids)
+                    {
                         $duplicateGuidSummary = [PSCustomObject]@{
                             Name  = $duplicateGuid.Name
                             Files = $duplicateGuid.Group.Name -join ', '
                         }
                     }
+
                     $report = $duplicateGuidSummary | Format-Table -AutoSize -Wrap | Out-String -Width 110
                     $duplicateGuids.Count | Should -Be 0 -Because "duplicate guids:`r`n`r`n $report`r`n `r`n ,"
                 }
@@ -61,13 +65,13 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
                 $exampleDescriptiveName = Join-Path -Path (Split-Path -Path $exampleToValidate.Directory -Leaf) `
                     -ChildPath (Split-Path -Path $exampleToValidate -Leaf)
 
-                Context -Name "When publishing example '$exampleDescriptiveName'" {
+                Context "When publishing example '$exampleDescriptiveName'" {
                     It 'Should pass testing of script file metadata' {
                         { Test-ScriptFileInfo -Path $exampleToValidate.FullName } | Should -Not -Throw
                     }
 
                     It 'Should have the correct naming convention, and the same file name as the configuration name' {
-                        Test-ConfigurationName -Path $exampleToValidate.FullName | Should -Be $true
+                        Test-ConfigurationName -Path $exampleToValidate.FullName | Should -BeTrue
                     }
                 }
             }

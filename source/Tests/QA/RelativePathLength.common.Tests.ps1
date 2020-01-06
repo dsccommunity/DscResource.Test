@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -13,20 +14,20 @@ param (
 )
 
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {
-
-    Context -Name 'When the resource should be used to compile a configuration in Azure Automation' {
+    Context 'When the resource should be used to compile a configuration in Azure Automation' {
         <#
             129 characters is the current maximum for a relative path to be
             able to compile configurations in Azure Automation.
         #>
         $fullPathHardLimit = 129
-        $allModuleFiles = (Get-ChildItem -Path $ModuleBase -Recurse | WhereModuleFileNotExcluded).Foreach{
+
+        $allModuleFiles = (Get-ChildItem -Path $ModuleBase -Recurse | WhereModuleFileNotExcluded).ForEach{
             $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $ModuleBase -PassThru
         }
 
         if ($SourcePath)
         {
-            $allModuleFiles += @(Get-ChildItem -Path $SourcePath -Recurse | WhereSourceFileNotExcluded).Foreach{
+            $allModuleFiles += @(Get-ChildItem -Path $SourcePath -Recurse | WhereSourceFileNotExcluded).ForEach{
                 $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $SourcePath -PassThru
             }
         }

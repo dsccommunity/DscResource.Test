@@ -11,12 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Moved init code into Describe Block for PSSAResource and ResourceSchema Tests
 
+### Fixed
+
+- Updated QA tests to follow style guideline.
+
 ## [0.11.0] - 2019-12-29
 
 ### Added
 
 - Added new QA ExampleFiles test.
 - Added new QA MarkdownLinks test.
+- Added check on changelog when invoking by project path.
 
 ## [0.10.0] - 2019-12-28
 
@@ -24,7 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a new test type, `All`, to the `Initialize-TestEnvironment` function
   that initializes the DSC LCM and imports the module for testing ([issue #48](https://github.com/dsccommunity/DscResource.Test/issues/48)).
-- Added check on changelog when invoking by project path.
 
 ## [0.9.0] - 2019-12-27
 

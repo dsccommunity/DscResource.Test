@@ -1,5 +1,6 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
-param (
+param
+(
     $ModuleName,
     $ModuleBase,
     $ModuleManifest,
@@ -12,50 +13,54 @@ param (
     $ExcludeSourceFile
 )
 
-if (!$ProjectPath)
+if (-not $ProjectPath)
 {
     # Invoke-DscResourceTest is only looking at a built module, skipping this test file.
     Write-Verbose "No Project path set: $ProjectPath. Skipping changelog checks."
+
     return
 }
 else
 {
     Write-Verbose "Pushing location $ProjectPath on Stack ProjectTest"
+
     Push-Location -StackName ProjectTest -Path $ProjectPath
 }
 
 try
 {
     Describe 'Changelog Management' -Tag 'Changelog' {
+        $skipTest = -not (
+                [System.Boolean] (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue') `
+                -and [System.Boolean] (& (Get-Process -Id $PID).Path -NoProfile -Command 'git rev-parse --is-inside-work-tree 2>$null')
+            )
 
-        It 'Changelog has been updated' -skip:(
-            !([bool](Get-Command git -EA SilentlyContinue) -and
-              [bool](&(Get-Process -id $PID).Path -NoProfile -Command 'git rev-parse --is-inside-work-tree 2>$null'))
-            ) {
+        It 'Changelog has been updated' -Skip:$skipTest {
             # Get the list of changed files compared with master
-            $HeadCommit = &git rev-parse HEAD
-            $MasterCommit = &git rev-parse origin/master
-            $filesChanged = &git diff $MasterCommit...$HeadCommit --name-only
+            $headCommit = & git rev-parse HEAD
+            $masterCommit = & git rev-parse origin/master
+            $filesChanged = & git diff $masterCommit...$headCommit --name-only
 
-            if ($HeadCommit -ne $MasterCommit)
+            if ($headCommit -ne $masterCommit)
             {
                  # if we're not testing same commit (i.e. master..master)
                 $filesChanged.Where{
-                    (Split-Path $_ -Leaf) -match '^changelog.md'
-                } | Should -Not -BeNullOrEmpty
+                    (Split-Path -Path $_ -Leaf) -match '^changelog.md'
+                } | Should -Not -BeNullOrEmpty -Because 'the changelog should have at least one entry for every pull request'
             }
         }
 
-        It 'Changelog format compliant with keepachangelog format' -skip:(
-            ![bool](Get-Command git -EA SilentlyContinue) -or
-            !(Import-Module -Name ChangelogManagement -ErrorAction SilentlyContinue -PassThru)
-            ) {
-            { Get-ChangelogData (Join-Path $ProjectPath 'CHANGELOG.md') -ErrorAction Stop } | Should -Not -Throw
+        $skipTest = -not [System.Boolean] (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue') `
+            -or -not (Import-Module -Name ChangelogManagement -ErrorAction 'SilentlyContinue' -PassThru)
+
+        It 'Changelog format compliant with keepachangelog format' -Skip:$skipTest {
+            { Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction 'Stop' } | Should -Not -Throw
         }
     }
 }
 finally
 {
     Write-Debug "Poping location on Stack ProjectTest"
+
     Pop-Location -StackName ProjectTest
 }

@@ -22,7 +22,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
         {
             $exampleDescriptiveName = Join-Path -Path (Split-Path $example.Directory -Leaf) -ChildPath (Split-Path $example -Leaf)
 
-            Context -Name $exampleDescriptiveName {
+            Context $exampleDescriptiveName {
                 It 'Should compile MOFs for example correctly' {
                     {
                         $mockPassword = ConvertTo-SecureString '&iPm%M5q3K$Hhq=wcEK' -AsPlainText -Force
