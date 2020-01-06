@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Moved init code into Describe Block for PSSAResource and ResourceSchema Tests
 
+### Fixed
+
+- Updated QA tests to follow style guideline.
+
 ## [0.11.0] - 2019-12-29
 
 ### Added
@@ -18,10 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added new QA ExampleFiles test.
 - Added new QA MarkdownLinks test.
 - Added check on changelog when invoking by project path.
-
-### Fixed
-
-- Updated QA tests to follow style guideline.
 
 ## [0.10.0] - 2019-12-28
 
