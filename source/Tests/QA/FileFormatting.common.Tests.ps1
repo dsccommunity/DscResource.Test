@@ -21,7 +21,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
         $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded
     }
 
-    It "Should not contain any files with Unicode file encoding" {
+    It 'Should not contain any files with Unicode file encoding' {
         $containsUnicodeFile = $false
 
         foreach ($textFile in $textFiles)

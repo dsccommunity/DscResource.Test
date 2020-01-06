@@ -41,7 +41,7 @@ Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Par
                     $containsParseErrors = $true
                 }
 
-                $containsParseErrors | Should -Be $false
+                $containsParseErrors | Should -BeFalse
             }
         }
     }

@@ -24,7 +24,7 @@ InModuleScope $ProjectName {
 
             It 'Should return $true' {
                 $result = Test-ModuleContainsClassResource -ModulePath $TestDrive
-                $result | Should -Be $true
+                $result | Should -BeTrue
 
                 Assert-MockCalled -CommandName 'Test-FileContainsClassResource' -Exactly -Times 1 -Scope It
             }
@@ -39,7 +39,7 @@ InModuleScope $ProjectName {
 
             It 'Should return $false' {
                 $result = Test-ModuleContainsClassResource -ModulePath $TestDrive
-                $result | Should -Be $false
+                $result | Should -BeFalse
 
                 Assert-MockCalled -CommandName 'Test-FileContainsClassResource' -Exactly -Times 1 -Scope It
             }
@@ -53,7 +53,7 @@ InModuleScope $ProjectName {
 
             It 'Should return $false' {
                 $result = Test-ModuleContainsClassResource -ModulePath $TestDrive
-                $result | Should -Be $false
+                $result | Should -BeFalse
 
                 Assert-MockCalled -CommandName 'Get-Psm1FileList' -Exactly -Times 1 -Scope It
                 Assert-MockCalled -CommandName 'Test-FileContainsClassResource' -Exactly -Times 0 -Scope It

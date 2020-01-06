@@ -65,7 +65,7 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
                 $exampleDescriptiveName = Join-Path -Path (Split-Path -Path $exampleToValidate.Directory -Leaf) `
                     -ChildPath (Split-Path -Path $exampleToValidate -Leaf)
 
-                Context -Name "When publishing example '$exampleDescriptiveName'" {
+                Context "When publishing example '$exampleDescriptiveName'" {
                     It 'Should pass testing of script file metadata' {
                         { Test-ScriptFileInfo -Path $exampleToValidate.FullName } | Should -Not -Throw
                     }

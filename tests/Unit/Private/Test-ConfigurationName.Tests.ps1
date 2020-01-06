@@ -38,7 +38,7 @@ InModuleScope $ProjectName {
 
             It 'Should return true' {
                 $result = Test-ConfigurationName -Path $mockScriptPath
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
         }
 
@@ -55,7 +55,7 @@ InModuleScope $ProjectName {
 
             It 'Should return false' {
                 $result = Test-ConfigurationName -Path $mockScriptPath
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
         }
 
@@ -89,7 +89,7 @@ InModuleScope $ProjectName {
 
             It 'Should return false' {
                 $result = Test-ConfigurationName -Path $mockScriptPath
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
         }
 
@@ -106,7 +106,7 @@ InModuleScope $ProjectName {
 
             It 'Should return false' {
                 $result = Test-ConfigurationName -Path $mockScriptPath
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
         }
     }

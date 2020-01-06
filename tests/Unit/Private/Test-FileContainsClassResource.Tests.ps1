@@ -31,7 +31,7 @@ InModuleScope $ProjectName {
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
                 $result = Test-FileContainsClassResource -FilePath $scriptPath
-                $result | Should -Be $true
+                $result | Should -BeTrue
             }
         }
 
@@ -44,7 +44,7 @@ InModuleScope $ProjectName {
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
                 $result = Test-FileContainsClassResource -FilePath $scriptPath
-                $result | Should -Be $false
+                $result | Should -BeFalse
             }
         }
     }

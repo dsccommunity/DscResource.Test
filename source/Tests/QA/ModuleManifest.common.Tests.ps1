@@ -18,11 +18,11 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
 
     if ($containsClassResource)
     {
-        $minimumPSVersion = [Version]'5.0'
+        $minimumPSVersion = [Version] '5.0'
     }
     else
     {
-        $minimumPSVersion = [Version]'4.0'
+        $minimumPSVersion = [Version] '4.0'
     }
 
     $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$moduleName.psd1"
