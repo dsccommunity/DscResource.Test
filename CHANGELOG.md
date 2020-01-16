@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Moved init code into Describe Block for PSSAResource and ResourceSchema Tests
+- Required PowerShell version was lowered to v5.0 in the module manifest.
 
 ### Fixed
 
