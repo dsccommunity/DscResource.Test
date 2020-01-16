@@ -116,7 +116,7 @@ InModuleScope $ProjectName {
                         $PSBoundParameters.ContainsKey('Machine') -eq $true
                     } -Exactly -Times 1 -Scope It
 
-                    if (($IsWindows -or $PSEdition -eq 'Desktop') -and
+                    if (($IsWindows -or $PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [System.Version] '5.1') -and
                         ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
                         $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
                     )
