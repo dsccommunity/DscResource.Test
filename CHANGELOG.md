@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2020-01-16
+
 ### Changed
 
 - Required PowerShell version was lowered to v5.0 in the module manifest.
