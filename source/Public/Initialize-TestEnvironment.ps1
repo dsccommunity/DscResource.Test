@@ -208,8 +208,13 @@ function Initialize-TestEnvironment
 
     if ($TestType -in ('Integration','All'))
     {
-        # Making sure setting up the LCM & Machine Path makes sense...
-        if (($IsWindows -or $PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [Version] '5.1') -and
+        <#
+            Making sure setting up the LCM & Machine Path makes sense...
+
+            $PSEdition does not exist prior to PS5.1 so we need to evaluate the
+            version in $PSVersionTable too.
+        #>
+        if (($IsWindows -or $PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [System.Version] '5.1') -and
             ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         )

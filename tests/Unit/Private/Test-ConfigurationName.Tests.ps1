@@ -102,9 +102,15 @@ InModuleScope $ProjectName {
             '
 
                 $definition | Out-File -FilePath $mockScriptPath -Encoding utf8 -Force
+
+                <#
+                    It is not allowed to have a configuration name that contains
+                    a dash ('-') in PS5.0. Skipping this test if it is PS5.0.
+                #>
+                $skipTest = $PSVersionTable.PSVersion -lt [System.Version] '5.1'
             }
 
-            It 'Should return false' {
+            It 'Should return false' -Skip:$skipTest {
                 $result = Test-ConfigurationName -Path $mockScriptPath
                 $result | Should -BeFalse
             }
