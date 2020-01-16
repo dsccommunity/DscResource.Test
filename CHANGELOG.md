@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Required PowerShell version was lowered to v5.0 in the module manifest.
+- Azure Pipelines will no longer trigger on changes to just the CHANGELOG.md.
+
 ## [0.11.1] - 2020-01-06
 
 ### Changed
 
 - Moved init code into Describe Block for PSSAResource and ResourceSchema Tests
-- Required PowerShell version was lowered to v5.0 in the module manifest.
 
 ### Fixed
 
