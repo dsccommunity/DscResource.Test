@@ -7,15 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2020-01-16
+
+### Fixed
+
+- Update the cmdlet `Initialize-TestEnvironment` to allow setting up
+  the environment when run in PowerShell 5.0.
+- Update the pipeline so the module will be tested on PowerShell 5.0 
+  (Microsoft-hosted agent running Windows Server 2012 R2).
+
 ## [0.12.0] - 2020-01-16
 
 ### Changed
 
 - Required PowerShell version was lowered to v5.0 in the module manifest.
-  - Update the cmdlet `Initialize-TestEnvironment` to allow setting up
-    the environment when run in PowerShell 5.0.
-  - Update the pipeline so the module will be tested on PowerShell 5.0 
-    (Microsoft-hosted agent running Windows Server 2012 R2).
 - Azure Pipelines will no longer trigger on changes to just the CHANGELOG.md.
 
 ## [0.11.1] - 2020-01-06
