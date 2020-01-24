@@ -56,6 +56,10 @@ try
         It 'Changelog format compliant with keepachangelog format' -Skip:$skipTest {
             { Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction 'Stop' } | Should -Not -Throw
         }
+
+        It 'Changelog should have an Unreleased header' -Skip:$skipTest {
+            (Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction 'Stop').Unreleased.RawData | Should -Not -BeNullOrEmpty
+        }
     }
 }
 finally

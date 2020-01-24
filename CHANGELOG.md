@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added a test to check for the correct formatting of the Unreleased section
+  in the Changelog
+
 ## [0.12.1] - 2020-01-16
 
 ### Fixed
 
 - Update the cmdlet `Initialize-TestEnvironment` to allow setting up
   the environment when run in PowerShell 5.0.
-- Update the pipeline so the module will be tested on PowerShell 5.0 
+- Update the pipeline so the module will be tested on PowerShell 5.0
   (Microsoft-hosted agent running Windows Server 2012 R2).
 
 ## [0.12.0] - 2020-01-16
