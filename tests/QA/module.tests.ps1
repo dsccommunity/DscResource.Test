@@ -33,6 +33,10 @@ $allModuleFunctions = &$mut {Get-Command -Module $args[0] -CommandType Function 
         It 'Changelog format compliant with keepachangelog format' -skip:(![bool](Get-Command git -EA SilentlyContinue)) {
             { Get-ChangelogData (Join-Path $ProjectPath 'CHANGELOG.md') -ErrorAction Stop } | Should -Not -Throw
         }
+
+        It 'Changelog should have an Unreleased header' -Skip:$skipTest {
+            (Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction 'Stop').Unreleased.RawData | Should -Not -BeNullOrEmpty
+        }
     }
 
     Describe 'General module control' -Tags 'FunctionalQuality' {
