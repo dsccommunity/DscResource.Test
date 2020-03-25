@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a test to check for the correct formatting of the Unreleased section
   in the Changelog
 
+### Fixed
+
+- Fixed #66. Tests in 'ModuleManifest.common.Tests.ps1' in context 'Requirements for manifest of module with class-based resources' always fail.
+
 ## [0.12.1] - 2020-01-16
 
 ### Fixed
