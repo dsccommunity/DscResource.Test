@@ -41,7 +41,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
 
     if ($containsClassResource)
     {
-        $classResourcesInModule = Get-ClassResourceNameFromFile -FilePath $moduleRootFilePath
+        $classResourcesInModule = Get-ClassResourceNameFromFile -FilePath $ModuleBase
 
         Context 'Requirements for manifest of module with class-based resources' {
             foreach ($classResourceInModule in $classResourcesInModule)
