@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   because the older `win1803` and `vs2015-win2012r2` versions have been
   deprecated ([issue #68](https://github.com/dsccommunity/DscResource.Test/issues/68)).
 
+### Fixed
+
+- Fixed #66. Tests in 'ModuleManifest.common.Tests.ps1' in context 'Requirements for manifest of module with class-based resources' always fail.
+
 ## [0.12.1] - 2020-01-16
 
 ### Fixed
