@@ -81,7 +81,7 @@ stages:
 
       - job: test_windows_core
         pool:
-          vmImage: 'win1803'
+          vmImage: 'windows-2019'
         steps:
           - task: DownloadBuildArtifacts@0
             inputs:
@@ -119,7 +119,7 @@ stages:
 
       - job: test_windows_ps
         pool:
-          vmImage: 'win1803'
+          vmImage: 'windows-2019'
         steps:
           - task: DownloadBuildArtifacts@0
             inputs:
@@ -157,7 +157,7 @@ stages:
 
       - job: test_windows_ps_5
         pool:
-          vmImage: 'vs2015-win2012r2'
+          vmImage: 'vs2017-win2016'
         steps:
           - task: DownloadBuildArtifacts@0
             inputs:
