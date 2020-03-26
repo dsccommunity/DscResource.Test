@@ -41,7 +41,11 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
 
     if ($containsClassResource)
     {
-        $classResourcesInModule = Get-ClassResourceNameFromFile -FilePath $ModuleBase
+        $moduleFiles = Get-ChildItem -Path $ModuleBase -Filter *.psm1 -Recurse
+        $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
+        {
+            Get-ClassResourceNameFromFile -FilePath $moduleFile.FullName
+        }
 
         Context 'Requirements for manifest of module with class-based resources' {
             foreach ($classResourceInModule in $classResourcesInModule)
