@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added a test to check for the correct formatting of the Unreleased section
-  in the Changelog
+  in the Changelog.
+
+### Changed
+
+- Updated the Azure DevOps Pipeline build agents to the supported versions
+  because the older `win1803` and `vs2015-win2012r2` versions have been
+  deprecated ([issue #68](https://github.com/dsccommunity/DscResource.Test/issues/68)).
 
 ### Fixed
 
