@@ -175,8 +175,9 @@ function Invoke-DscResourceTest
                 )
 
                 $ModulePsd1 = Join-Path -Path $OutputPath (Get-ChildItem @GetOutputModuleParams | Select-Object -First 1)
+                $dataFileImport = Import-PowerShellDataFile -Path $ModulePsd1
                 Write-Verbose "Loading $ModulePsd1"
-                $ModuleUnderTest = Import-Module -Name $ModulePsd1 -ErrorAction Stop -PassThru
+                $ModuleUnderTest = Import-Module -Name $ModulePsd1 -ErrorAction Stop -PassThru | Where-Object -FilterScript {$PSItem.Guid -eq $dataFileImport['GUID']}
             }
         }
 
