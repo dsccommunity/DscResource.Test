@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.1] - 2020-05-15
+
 ### Fixed
 
 - Fixed #71. Updated `Invoke-DscResourceTest` to handle multiple PSModuleInfo objects
