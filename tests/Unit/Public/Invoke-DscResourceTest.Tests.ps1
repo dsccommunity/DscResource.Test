@@ -126,15 +126,25 @@ InModuleScope $ProjectName {
     }
 
     Describe 'Loading Opt Ins and Opt Outs by Tags' {
-        mock Import-Module -MockWith {
+        Mock Import-Module -MockWith {
             return @{
                 ModuleBase = 'TestDrive:\'
                 ModuleName = 'MyModule'
                 Path       = 'TestDrive:\MyModule.psd1'
+                Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
             }
         }
+
         Mock Get-ChildItem -MockWith { @{FullName = 'C:\dummy.psd1' }}
 
+        Mock Import-PowerShellDataFile -MockWith {
+            return @{
+                ModuleBase = 'TestDrive:\'
+                ModuleName = 'MyModule'
+                Path       = 'TestDrive:\MyModule.psd1'
+                Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
+            }
+        }
 
         Mock Get-StructuredObjectFromFile -ParameterFilter { $Path -like '*out.json' } -MockWith {
             param
