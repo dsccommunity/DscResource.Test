@@ -6,10 +6,11 @@
 # SourcePath: ./Sampler/Sampler.psd1
 # Output Directory where ModuleBuilder will build the Module, relative to module manifest
 # OutputDirectory: ../output/Sampler
-CopyDirectories:
+CopyPaths:
   - en-US
   - Tests
   - Config
+Encoding: UTF8
 # SemVer: '1.2.3'
 # Suffix to add to Root module PSM1 after merge (here, the Set-Alias exporting IB tasks)
 # suffix: suffix.ps1

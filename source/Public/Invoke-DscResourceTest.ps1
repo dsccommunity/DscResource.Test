@@ -15,9 +15,9 @@ function Invoke-DscResourceTest
         ${ProjectPath},
 
         [Parameter(Position = 1)]
-        [Alias('Path', 'relative_path')]
+        [Alias('Script', 'relative_path')]
         [System.Object[]]
-        ${Script},
+        ${Path},
 
         [Parameter(Position = 2)]
         [Alias('Name')]
@@ -29,13 +29,14 @@ function Invoke-DscResourceTest
         ${EnableExit},
 
         [Parameter(Position = 5)]
-        [Alias('Tags')]
+        [Alias('Tags','Tag')]
         [string[]]
-        ${Tag},
+        ${TagFilter},
 
         [Parameter()]
+        [Alias('ExcludeTag')]
         [string[]]
-        ${ExcludeTag},
+        ${ExcludeTagFilter},
 
         [Parameter()]
         [string[]]
@@ -68,6 +69,10 @@ function Invoke-DscResourceTest
 
         [Parameter()]
         [string]
+        ${Output},
+
+        [Parameter()]
+        [string]
         ${OutputFile},
 
         [Parameter()]
@@ -90,7 +95,6 @@ function Invoke-DscResourceTest
         [Parameter()]
         [Hashtable]
         $Settings
-
     )
 
     begin
@@ -104,22 +108,28 @@ function Invoke-DscResourceTest
             'ByModuleNameOrPath'
             {
                 Write-Verbose "Calling DscResource Test by Module Name (Or Path)"
-                if (!$PSBoundParameters.ContainsKey('Script'))
+
+                if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
+
                 $null = $PSBoundParameters.Remove('Module')
+
                 $ModuleUnderTest = Import-Module -Name $Module -ErrorAction Stop -Force -PassThru
             }
 
             'ByModuleSpecification'
             {
                 Write-Verbose "Calling DscResource Test by Module Specification"
-                if (!$PSBoundParameters.ContainsKey('Script'))
+
+                if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
+
                 $null = $PSBoundParameters.Remove('FullyQualifiedModule')
+
                 $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction Stop
             }
 
@@ -140,10 +150,11 @@ function Invoke-DscResourceTest
                     Write-Debug -Message "The function was called via default param set. Using `$PWD for Project Path"
                 }
 
-                if (!$PSBoundParameters.ContainsKey('Script'))
+                if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
-                    $PSBoundParameters['Script'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
+
                 # Find the Source Manifest under ProjectPath
                 $SourceManifest = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
                         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
@@ -297,48 +308,141 @@ function Invoke-DscResourceTest
 
         $ModuleUnderTestManifest = Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath "$($ModuleUnderTest.Name).psd1"
 
-        $ScriptItems = foreach ($item in $PSBoundParameters['Script'])
+        $isPester5 = (Get-Module -Name 'Pester').Version -ge '5.0.0'
+
+        if (-not $isPester5)
         {
-            if ($item -is [System.Collections.IDictionary])
+            $ScriptItems = foreach ($item in $PSBoundParameters['Path'])
             {
-                if ($item['Parameters'] -isNot [System.Collections.IDictionary])
+                if ($item -is [System.Collections.IDictionary])
                 {
-                    $item['Parameters'] = @{ }
+                    if ($item['Parameters'] -isNot [System.Collections.IDictionary])
+                    {
+                        $item['Parameters'] = @{ }
+                    }
+                    $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
+                    $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
+                    $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
+                    $item['Parameters']['ProjectPath'] = $ProjectPath
+                    $item['Parameters']['SourcePath'] = $SourcePath
+                    $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
+                    $item['Parameters']['Tag'] = $PSBoundParameters['Tag']
+                    $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTag']
+                    $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
+                    $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
                 }
-                $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
-                $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
-                $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
-                $item['Parameters']['ProjectPath'] = $ProjectPath
-                $item['Parameters']['SourcePath'] = $SourcePath
-                $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
-                $item['Parameters']['Tag'] = $PSBoundParameters['Tag']
-                $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTag']
-                $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
-                $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
-            }
-            else
-            {
-                $item = @{
-                    Path       = $item
-                    Parameters = @{
-                        ModuleBase         = $ModuleUnderTest.ModuleBase
-                        ModuleName         = $ModuleUnderTest.Name
-                        ModuleManifest     = $ModuleUnderTestManifest
-                        ProjectPath        = $ProjectPath
-                        SourcePath         = $SourcePath
-                        SourceManifest     = $SourceManifest.FullName
-                        Tag                = $PSBoundParameters['Tag']
-                        ExcludeTag         = $PSBoundParameters['ExcludeTag']
-                        ExcludeModuleFile  = $ExcludeModuleFile
-                        ExcludeSourceFile = $ExcludeSourceFile
+                else
+                {
+                    $item = @{
+                        Path       = $item
+                        Parameters = @{
+                            ModuleBase         = $ModuleUnderTest.ModuleBase
+                            ModuleName         = $ModuleUnderTest.Name
+                            ModuleManifest     = $ModuleUnderTestManifest
+                            ProjectPath        = $ProjectPath
+                            SourcePath         = $SourcePath
+                            SourceManifest     = $SourceManifest.FullName
+                            Tag                = $PSBoundParameters['Tag']
+                            ExcludeTag         = $PSBoundParameters['ExcludeTag']
+                            ExcludeModuleFile  = $ExcludeModuleFile
+                            ExcludeSourceFile = $ExcludeSourceFile
+                        }
                     }
                 }
+
+                $item
             }
 
-            $item
+            $PSBoundParameters['Path'] = $ScriptItems
         }
 
-        $PSBoundParameters['Script'] = $ScriptItems
+        $invokePesterParameters = @{
+            PassThru = $PSBoundParameters.PassThru
+        }
+
+        if ($isPester5)
+        {
+            $invokePesterParameters['Path'] = $PSBoundParameters.Path
+
+            if ($PSBoundParameters.ContainsKey('TagFilter'))
+            {
+                $invokePesterParameters['TagFilter'] = $PSBoundParameters.TagFilter
+            }
+
+            if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
+            {
+                $invokePesterParameters['ExcludeTagFilter'] = $PSBoundParameters.ExcludeTagFilter
+            }
+
+            if ($PSBoundParameters.ContainsKey('Output'))
+            {
+                $invokePesterParameters['Output'] = $PSBoundParameters.Output
+            }
+
+            if ($PSBoundParameters.ContainsKey('FullNameFilter'))
+            {
+                $invokePesterParameters['FullNameFilter'] = $PSBoundParameters.TestName
+            }
+        }
+        else
+        {
+            $invokePesterParameters['Script'] = $PSBoundParameters.Path
+
+            if ($PSBoundParameters.ContainsKey('TestName'))
+            {
+                $invokePesterParameters['TestName'] = $PSBoundParameters.TestName
+            }
+
+            if ($PSBoundParameters.ContainsKey('EnableExit'))
+            {
+                $invokePesterParameters['EnableExit'] = $PSBoundParameters.EnableExit
+            }
+
+            if ($PSBoundParameters.ContainsKey('TagFilter'))
+            {
+                $invokePesterParameters['Tag'] = $PSBoundParameters.TagFilter
+            }
+
+            if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
+            {
+                $invokePesterParameters['ExcludeTag'] = $PSBoundParameters.ExcludeTagFilter
+            }
+
+            if ($PSBoundParameters.ContainsKey('OutputFile'))
+            {
+                $invokePesterParameters['OutputFile'] = $PSBoundParameters.OutputFile
+            }
+
+            if ($PSBoundParameters.ContainsKey('OutputFormat'))
+            {
+                $invokePesterParameters['OutputFormat'] = $PSBoundParameters.OutputFormat
+            }
+
+            if ($PSBoundParameters.ContainsKey('CodeCoverage'))
+            {
+                $invokePesterParameters['CodeCoverage'] = $PSBoundParameters.CodeCoverage
+            }
+
+            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFile'))
+            {
+                $invokePesterParameters['CodeCoverageOutputFile'] = $PSBoundParameters.CodeCoverageOutputFile
+            }
+
+            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFileFormat'))
+            {
+                $invokePesterParameters['CodeCoverageOutputFileFormat'] = $PSBoundParameters.CodeCoverageOutputFileFormat
+            }
+
+            if ($PSBoundParameters.ContainsKey('PesterOption'))
+            {
+                $invokePesterParameters['PesterOption'] = $PSBoundParameters.PesterOption
+            }
+
+            if ($PSBoundParameters.ContainsKey('Show'))
+            {
+                $invokePesterParameters['Show'] = $PSBoundParameters.Show
+            }
+        }
 
         # Below is default command proxy handling
         try
@@ -349,7 +453,7 @@ function Invoke-DscResourceTest
                 $PSBoundParameters['OutBuffer'] = 1
             }
             $wrappedCmd = Get-Command -CommandType Function -Name Invoke-Pester
-            $scriptCmd = { & $wrappedCmd @PSBoundParameters }
+            $scriptCmd = { & $wrappedCmd @invokePesterParameters }
             $steppablePipeline = $scriptCmd.GetSteppablePipeline()
             $steppablePipeline.Begin($PSCmdlet)
         }
