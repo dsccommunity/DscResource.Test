@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.2] - 2020-05-30
+
 ### Fixed
 
 - Update build.yaml to support latest ModuleBuilder.
