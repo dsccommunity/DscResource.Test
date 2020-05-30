@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Update build.yaml to support latest ModuleBuilder.
+- Pinned required module Pester to 4.10.1.
+- Update CONTRIBUTING.md.
+
+### Changes
+
+- The cmdlet Invoke-DscResourceTest support running test in Pester 5.
+
 ## [0.13.1] - 2020-05-15
 
 ### Fixed
