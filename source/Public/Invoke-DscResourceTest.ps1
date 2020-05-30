@@ -1,10 +1,14 @@
+<#
+    .ForwardHelpTargetName Invoke-Pester
+    .ForwardHelpCategory Function
+#>
 function Invoke-DscResourceTest
 {
     [CmdletBinding(DefaultParameterSetName = 'ByProjectPath')]
     param (
         [Parameter(ParameterSetName = 'ByModuleNameOrPath', Position = 0)]
         [System.String]
-        ${Module},
+        $Module,
 
         [Parameter(ParameterSetName = 'ByModuleSpecification', Position = 0)]
         [Microsoft.PowerShell.Commands.ModuleSpecification]
@@ -12,102 +16,105 @@ function Invoke-DscResourceTest
 
         [Parameter(ParameterSetName = 'ByProjectPath', Position = 0)]
         [System.String]
-        ${ProjectPath},
+        $ProjectPath,
 
         [Parameter(Position = 1)]
         [Alias('Script', 'relative_path')]
         [System.Object[]]
-        ${Path},
+        $Path,
 
         [Parameter(Position = 2)]
         [Alias('Name')]
-        [string[]]
-        ${TestName},
+        [System.String[]]
+        $TestName,
 
         [Parameter(Position = 3)]
         [switch]
-        ${EnableExit},
+        $EnableExit,
 
         [Parameter(Position = 5)]
         [Alias('Tags','Tag')]
-        [string[]]
-        ${TagFilter},
+        [System.String[]]
+        $TagFilter,
 
         [Parameter()]
         [Alias('ExcludeTag')]
-        [string[]]
-        ${ExcludeTagFilter},
+        [System.String[]]
+        $ExcludeTagFilter,
 
         [Parameter()]
-        [string[]]
-        ${ExcludeModuleFile},
+        [System.String[]]
+        $ExcludeModuleFile,
 
         [Parameter()]
-        [string[]]
-        ${ExcludeSourceFile},
+        [System.String[]]
+        $ExcludeSourceFile,
 
         [Parameter()]
         [switch]
-        ${PassThru},
+        $PassThru,
 
         [Parameter()]
         [System.Object[]]
-        ${CodeCoverage},
+        $CodeCoverage,
 
         [Parameter()]
-        [string]
-        ${CodeCoverageOutputFile},
+        [System.String]
+        $CodeCoverageOutputFile,
 
         [Parameter()]
         [ValidateSet('JaCoCo')]
-        [string]
-        ${CodeCoverageOutputFileFormat},
+        [System.String]
+        $CodeCoverageOutputFileFormat,
 
         [Parameter()]
-        [switch]
-        ${Strict},
+        [System.Management.Automation.SwitchParameter]
+        $Strict,
 
         [Parameter()]
-        [string]
-        ${Output},
+        [System.String]
+        $Output,
 
         [Parameter()]
-        [string]
-        ${OutputFile},
+        [System.String]
+        $OutputFile,
 
         [Parameter()]
         [ValidateSet('NUnitXml', 'JUnitXml')]
-        [string]
-        ${OutputFormat},
+        [System.String]
+        $OutputFormat,
 
         [Parameter()]
-        [switch]
-        ${Quiet},
+        [System.Management.Automation.SwitchParameter]
+        $Quiet,
 
         [Parameter()]
         [System.Object]
-        ${PesterOption},
+        $PesterOption,
 
         [Parameter()]
         [Pester.OutputTypes]
-        ${Show},
+        $Show,
 
         [Parameter()]
-        [Hashtable]
+        [System.Collections.Hashtable]
         $Settings
     )
 
     begin
     {
-        # Make sure Invoke-DscResourceTest runs against the Built Module either:
-        #   By $Module (Name, Path, ModuleSpecification): enables to run some tests on installed modules (even without source)
-        #   By $ProjectPath (detect source from there based on .psd1): Target both the source when relevant and the expected files
+        <#
+            Make sure Invoke-DscResourceTest runs against the Built Module either:
+
+            By $Module (Name, Path, ModuleSpecification): enables to run some tests on installed modules (even without source)
+            By $ProjectPath (detect source from there based on .psd1): Target both the source when relevant and the expected files
+        #>
 
         switch ($PSCmdlet.ParameterSetName)
         {
             'ByModuleNameOrPath'
             {
-                Write-Verbose "Calling DscResource Test by Module Name (Or Path)"
+                Write-Verbose -Message 'Calling DscResource Test by Module Name (or Path).'
 
                 if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
@@ -116,12 +123,12 @@ function Invoke-DscResourceTest
 
                 $null = $PSBoundParameters.Remove('Module')
 
-                $ModuleUnderTest = Import-Module -Name $Module -ErrorAction Stop -Force -PassThru
+                $ModuleUnderTest = Import-Module -Name $Module -ErrorAction 'Stop' -Force -PassThru
             }
 
             'ByModuleSpecification'
             {
-                Write-Verbose "Calling DscResource Test by Module Specification"
+                Write-Verbose -Message 'Calling DscResource Test by Module Specification.'
 
                 if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
@@ -130,13 +137,14 @@ function Invoke-DscResourceTest
 
                 $null = $PSBoundParameters.Remove('FullyQualifiedModule')
 
-                $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction Stop
+                $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction 'Stop'
             }
 
             'ByProjectPath'
             {
-                Write-Verbose "Calling DscResource Test by Project Path"
-                if (!$ProjectPath)
+                Write-Verbose -Message 'Calling DscResource Test by Project Path.'
+
+                if (-not $ProjectPath)
                 {
                     $ProjectPath = $PWD.Path
                 }
@@ -147,7 +155,7 @@ function Invoke-DscResourceTest
                 }
                 catch
                 {
-                    Write-Debug -Message "The function was called via default param set. Using `$PWD for Project Path"
+                    Write-Debug -Message 'The function was called via default param set. Using $PWD for Project Path.'
                 }
 
                 if (-not $PSBoundParameters.ContainsKey('Path'))
@@ -156,50 +164,66 @@ function Invoke-DscResourceTest
                 }
 
                 # Find the Source Manifest under ProjectPath
-                $SourceManifest = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
+                $SourceManifest = ((Get-ChildItem -Path "$ProjectPath\*\*.psd1").Where{
                         ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-                        $(try
+                        $(
+                            try
                             {
-                                Test-ModuleManifest $_.FullName -ErrorAction Stop
+                                Test-ModuleManifest -Path $_.FullName -ErrorAction 'Stop'
                             }
                             catch
                             {
                                 $false
-                            } )
-                    })
+                            }
+                        )
+                    }
+                )
 
                 $SourcePath = $SourceManifest.Directory.FullName
-                $OutputPath = Join-Path $ProjectPath 'output'
+                $OutputPath = Join-Path -Path $ProjectPath -ChildPath 'output'
 
                 $GetOutputModuleParams = @{
                     Path        = $OutputPath
                     Include     = $SourceManifest.Name
-                    Name        = $True # Or it doesn't behave properly on PS5.1
+                    Name        = $true # Or it doesn't behave properly on PS5.1
                     Exclude     = 'RequiredModules'
                     ErrorAction = 'Stop'
                     Depth       = 3
                 }
 
-                Write-Verbose (
-                    "Finding Output Module with `r`n {0}" -f
-                    ($GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String)
+                Write-Verbose -Message (
+                    "Finding Output Module with `r`n {0}" -f (
+                        $GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String
+                    )
                 )
 
-                $ModulePsd1 = Join-Path -Path $OutputPath (Get-ChildItem @GetOutputModuleParams | Select-Object -First 1)
-                # Importing the module psd1 ensures the filtered Import-Module passthru returns only one PSModuleInfo Object: Issue #71
-                $dataFileImport = Import-PowerShellDataFile -Path $ModulePsd1
-                Write-Verbose "Loading $ModulePsd1"
-                $ModuleUnderTest = Import-Module -Name $ModulePsd1 -ErrorAction Stop -PassThru | Where-Object -FilterScript {$PSItem.Guid -eq $dataFileImport['GUID']}
+                $modulePsd1 = Join-Path -Path $OutputPath -ChildPath (
+                    Get-ChildItem @GetOutputModuleParams |
+                        Select-Object -First 1
+                )
+
+                <#
+                    Importing the module psd1 ensures the filtered Import-Module
+                    passthru returns only one PSModuleInfo Object: Issue #71
+                #>
+                $dataFileImport = Import-PowerShellDataFile -Path $modulePsd1
+
+                Write-Verbose -Message "Loading $modulePsd1."
+
+                $ModuleUnderTest = Import-Module -Name $modulePsd1 -ErrorAction 'Stop' -PassThru |
+                    Where-Object -FilterScript {
+                        $PSItem.Guid -eq $dataFileImport['GUID']
+                    }
             }
         }
 
         $ExcludeSourceFile = foreach ($projectFileOrFolder in $ExcludeSourceFile)
         {
-            if (![string]::IsNullOrEmpty($projectFileOrFolder) -and !(Split-Path -IsAbsolute $projectFileOrFolder))
+            if (-not [System.String]::IsNullOrEmpty($projectFileOrFolder) -and -not (Split-Path -IsAbsolute $projectFileOrFolder))
             {
                 Join-Path -Path $SourcePath -ChildPath $projectFileOrFolder
             }
-            elseif (![string]::IsNullOrEmpty($projectFileOrFolder))
+            elseif (-not [System.String]::IsNullOrEmpty($projectFileOrFolder))
             {
                 $projectFileOrFolder
             }
@@ -212,11 +236,11 @@ function Invoke-DscResourceTest
 
         $ExcludeModuleFile = foreach ($moduleFileOrFolder in $ExcludeModuleFile)
         {
-            if (![string]::IsNullOrEmpty($moduleFileOrFolder) -and !(Split-Path -IsAbsolute $moduleFileOrFolder))
+            if (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder) -and -not (Split-Path -IsAbsolute $moduleFileOrFolder))
             {
                 Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath $moduleFileOrFolder
             }
-            elseif (![string]::IsNullOrEmpty($moduleFileOrFolder))
+            elseif (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder))
             {
                 $moduleFileOrFolder
             }
@@ -228,36 +252,47 @@ function Invoke-DscResourceTest
         }
 
 
-        # In case of ByProjectPath Opt-ins will be done by tags:
-        #   The Describe Name will be one of the Tag for the Describe block
-        #   If a Opt-In file is found, it will default to auto-populate -Tag (cumulative from Command parameters)
-        if ($ProjectPath -and !$PSBoundParameters.ContainsKey('Tag') -and !$PSBoundParameters.ContainsKey('ExcludeTag'))
+        <#
+            In case of ByProjectPath Opt-ins will be done by tags:
+            The Describe Name will be one of the Tag for the Describe block
+            If a Opt-In file is found, it will default to auto-populate -Tag
+            (cumulative from Command parameters).
+        #>
+        if ($ProjectPath -and -not $PSBoundParameters.ContainsKey('Tag') -and -not $PSBoundParameters.ContainsKey('ExcludeTag'))
         {
-            $ExpectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
-            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path $ExpectedMetaOptInFile))
+            $expectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
+
+            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptInFile))
             {
-                Write-Verbose -Message "Loading OptIns from $ExpectedMetaOptInFile"
-                $OptIns = Get-StructuredObjectFromFile -Path $ExpectedMetaOptInFile -ErrorAction Stop
+                Write-Verbose -Message "Loading OptIns from $expectedMetaOptInFile."
+
+                $optIns = Get-StructuredObjectFromFile -Path $expectedMetaOptInFile -ErrorAction 'Stop'
             }
+
             # Opt-Outs should be preferred, and we can do similar ways with ExcludeTags
-            $ExpectedMetaOptOutFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptOut.json'
-            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path $ExpectedMetaOptOutFile))
+            $expectedMetaOptOutFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptOut.json'
+
+            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptOutFile))
             {
-                Write-Verbose -Message "Loading OptOuts from $ExpectedMetaOptOutFile"
-                $OptOuts = Get-StructuredObjectFromFile -Path $ExpectedMetaOptOutFile -ErrorAction Stop
+                Write-Verbose -Message "Loading OptOuts from $expectedMetaOptOutFile."
+
+                $optOuts = Get-StructuredObjectFromFile -Path $expectedMetaOptOutFile -ErrorAction 'Stop'
             }
         }
 
         # For each Possible parameters, use BoundParameters if exists, or use $Settings.ParameterName if exists otherwise
-        $PossibleParamName = $PSCmdlet.MyInvocation.MyCommand.Parameters.Name
-        foreach ($ParamName in $PossibleParamName)
+        $possibleParamName = $PSCmdlet.MyInvocation.MyCommand.Parameters.Name
+
+        foreach ($paramName in $possibleParamName)
         {
-            if ( !$PSBoundParameters.ContainsKey($ParamName) -and
-                ($ParamValue = $Settings.($ParamName))
+            if (
+                -not $PSBoundParameters.ContainsKey($paramName) `
+                -and ($paramValue = $Settings.($paramName))
             )
             {
-                Write-Verbose -Message "Adding setting $ParamName"
-                $PSBoundParameters.Add($ParamName, $ParamValue)
+                Write-Verbose -Message "Adding setting $paramName."
+
+                $PSBoundParameters.Add($paramName, $paramValue)
             }
         }
 
@@ -265,14 +300,15 @@ function Invoke-DscResourceTest
         $newExcludeTag = @()
 
         # foreach OptIns, add them to `-Tag`, unless in the ExcludeTags or already in Tag
-        foreach ($OptInTag in $OptIns)
+        foreach ($optInTag in $optIns)
         {
-            if ( $OptInTag -notIn $PSBoundParameters['ExcludeTag'] -and
-                $OptInTag -notIn $PSBoundParameters['Tag']
+            if (
+                $optInTag -notin $PSBoundParameters['ExcludeTag'] `
+                -and $optInTag -notin $PSBoundParameters['Tag']
             )
             {
-                Write-Debug -Message "Adding tag $OptInTag"
-                $newTag += $OptInTag
+                Write-Debug -Message "Adding tag $optInTag."
+                $newTag += $optInTag
             }
         }
 
@@ -282,14 +318,16 @@ function Invoke-DscResourceTest
         }
 
         # foreach OptOuts, add them to `-ExcludeTag`, unless in `-Tag`
-        foreach ($OptOutTag in $OptOuts)
+        foreach ($optOutTag in $optOuts)
         {
-            if ( $OptOutTag -notIn $PSBoundParameters['Tag'] -and
-                $OptOutTag -notIn $PSBoundParameters['ExcludeTag']
+            if (
+                $optOutTag -notin $PSBoundParameters['Tag'] `
+                -and $optOutTag -notin $PSBoundParameters['ExcludeTag']
             )
             {
-                Write-Debug -Message "Adding ExcludeTag $OptOutTag"
-                $newExcludeTag += $OptOutTag
+                Write-Debug -Message "Adding ExcludeTag $optOutTag."
+
+                $newExcludeTag += $optOutTag
             }
         }
 
@@ -298,13 +336,15 @@ function Invoke-DscResourceTest
             $PSBoundParameters['ExcludeTag'] = $newExcludeTag
         }
 
-        # This won't display the warning message for the skipped blocks
-        #  But should save time by not running initialization code within a Describe Block
-        #  And we can add such warning if we create a static list of the things we can opt-in
-        #  I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is preferred
+        <#
+            This won't display the warning message for the skipped blocks
+            But should save time by not running initialization code within a Describe Block
+            And we can add such warning if we create a static list of the things we can opt-in
+            I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is preferred
 
-        # Most tests should run against the built module
-        # PSSA could be run against source, or against built module & convert lines/file
+            Most tests should run against the built module
+            PSSA could be run against source, or against built module & convert lines/file
+        #>
 
         $ModuleUnderTestManifest = Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath "$($ModuleUnderTest.Name).psd1"
 
@@ -448,13 +488,20 @@ function Invoke-DscResourceTest
         try
         {
             $outBuffer = $null
-            if ($PSBoundParameters.TryGetValue('OutBuffer', [ref]$outBuffer))
+
+            if ($PSBoundParameters.TryGetValue('OutBuffer', [ref] $outBuffer))
             {
                 $PSBoundParameters['OutBuffer'] = 1
             }
-            $wrappedCmd = Get-Command -CommandType Function -Name Invoke-Pester
-            $scriptCmd = { & $wrappedCmd @invokePesterParameters }
+
+            $wrappedCmd = Get-Command -CommandType 'Function' -Name 'Invoke-Pester'
+
+            $scriptCmd = {
+                & $wrappedCmd @invokePesterParameters
+            }
+
             $steppablePipeline = $scriptCmd.GetSteppablePipeline()
+
             $steppablePipeline.Begin($PSCmdlet)
         }
         catch
@@ -486,12 +533,4 @@ function Invoke-DscResourceTest
             throw
         }
     }
-    <#
-
-.ForwardHelpTargetName Invoke-Pester
-.ForwardHelpCategory Function
-
-#>
-
-
 }
