@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update build.yaml to support latest ModuleBuilder.
 - Pinned required module Pester to 4.10.1.
 - Update CONTRIBUTING.md.
+- Added logic to support Pester 4.
 
 ### Changes
 
