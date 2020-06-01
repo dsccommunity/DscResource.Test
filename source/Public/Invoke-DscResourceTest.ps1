@@ -258,7 +258,7 @@ function Invoke-DscResourceTest
             If a Opt-In file is found, it will default to auto-populate -Tag
             (cumulative from Command parameters).
         #>
-        if ($ProjectPath -and -not $PSBoundParameters.ContainsKey('Tag') -and -not $PSBoundParameters.ContainsKey('ExcludeTag'))
+        if ($ProjectPath -and -not $PSBoundParameters.ContainsKey('TagFilter') -and -not $PSBoundParameters.ContainsKey('ExcludeTagFilter'))
         {
             $expectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
 
@@ -303,8 +303,8 @@ function Invoke-DscResourceTest
         foreach ($optInTag in $optIns)
         {
             if (
-                $optInTag -notin $PSBoundParameters['ExcludeTag'] `
-                -and $optInTag -notin $PSBoundParameters['Tag']
+                $optInTag -notin $PSBoundParameters['ExcludeTagFilter'] `
+                -and $optInTag -notin $PSBoundParameters['TagFilter']
             )
             {
                 Write-Debug -Message "Adding tag $optInTag."
@@ -314,15 +314,15 @@ function Invoke-DscResourceTest
 
         if ($newTag.Count -gt 0)
         {
-            $PSBoundParameters['Tag'] = $newTag
+            $PSBoundParameters['TagFilter'] = $newTag
         }
 
         # foreach OptOuts, add them to `-ExcludeTag`, unless in `-Tag`
         foreach ($optOutTag in $optOuts)
         {
             if (
-                $optOutTag -notin $PSBoundParameters['Tag'] `
-                -and $optOutTag -notin $PSBoundParameters['ExcludeTag']
+                $optOutTag -notin $PSBoundParameters['TagFilter'] `
+                -and $optOutTag -notin $PSBoundParameters['ExcludeTagFilter']
             )
             {
                 Write-Debug -Message "Adding ExcludeTag $optOutTag."
@@ -333,7 +333,7 @@ function Invoke-DscResourceTest
 
         if ($newExcludeTag.Count -gt 0)
         {
-            $PSBoundParameters['ExcludeTag'] = $newExcludeTag
+            $PSBoundParameters['ExcludeTagFilter'] = $newExcludeTag
         }
 
         <#
@@ -366,8 +366,8 @@ function Invoke-DscResourceTest
                     $item['Parameters']['ProjectPath'] = $ProjectPath
                     $item['Parameters']['SourcePath'] = $SourcePath
                     $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
-                    $item['Parameters']['Tag'] = $PSBoundParameters['Tag']
-                    $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTag']
+                    $item['Parameters']['Tag'] = $PSBoundParameters['TagFilter']
+                    $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTagFilter']
                     $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
                     $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
                 }
@@ -382,8 +382,8 @@ function Invoke-DscResourceTest
                             ProjectPath        = $ProjectPath
                             SourcePath         = $SourcePath
                             SourceManifest     = $SourceManifest.FullName
-                            Tag                = $PSBoundParameters['Tag']
-                            ExcludeTag         = $PSBoundParameters['ExcludeTag']
+                            Tag                = $PSBoundParameters['TagFilter']
+                            ExcludeTag         = $PSBoundParameters['ExcludeTagFilter']
                             ExcludeModuleFile  = $ExcludeModuleFile
                             ExcludeSourceFile = $ExcludeSourceFile
                         }
