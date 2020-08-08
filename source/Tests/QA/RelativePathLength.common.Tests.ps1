@@ -10,7 +10,8 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {

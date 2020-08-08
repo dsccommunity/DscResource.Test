@@ -10,7 +10,8 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch = 'master'
 )
 
 if (-not $ProjectPath)
@@ -36,14 +37,14 @@ try
             )
 
         It 'Changelog has been updated' -Skip:$skipTest {
-            # Get the list of changed files compared with master
+            # Get the list of changed files compared with main
             $headCommit = & git rev-parse HEAD
-            $masterCommit = & git rev-parse origin/master
-            $filesChanged = & git diff $masterCommit...$headCommit --name-only
+            $mainCommit = & git @('rev-parse', "origin/$MainGitBranch")
+            $filesChanged = & git @('diff', "$mainCommit...$headCommit",'--name-only')
 
-            if ($headCommit -ne $masterCommit)
+            if ($headCommit -ne $mainCommit)
             {
-                 # if we're not testing same commit (i.e. master..master)
+                 # if we're not testing same commit (i.e. main..main)
                 $filesChanged.Where{
                     (Split-Path -Path $_ -Leaf) -match '^changelog.md'
                 } | Should -Not -BeNullOrEmpty -Because 'the changelog should have at least one entry for every pull request'

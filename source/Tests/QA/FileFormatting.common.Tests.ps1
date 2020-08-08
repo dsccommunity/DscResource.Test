@@ -10,7 +10,8 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {

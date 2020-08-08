@@ -11,7 +11,8 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Tests - Validate Example Files To Be Published' {

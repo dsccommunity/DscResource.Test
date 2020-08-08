@@ -10,7 +10,8 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Validate Script Files' {
