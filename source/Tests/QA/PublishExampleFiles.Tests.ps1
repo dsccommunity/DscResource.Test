@@ -11,7 +11,10 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Tests - Validate Example Files To Be Published' {

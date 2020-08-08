@@ -9,7 +9,8 @@ param (
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 if (!(Get-Module -Name 'MarkdownLinkCheck' -ListAvailable))

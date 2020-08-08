@@ -5,7 +5,13 @@ param
     $ModuleBase,
     $ModuleManifest,
     $ProjectPath,
-    $SourceManifest
+    $SourcePath,
+    $SourceManifest,
+    $Tag,
+    $ExcludeTag,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile,
+    $MainGitBranch
 )
 
 Describe 'Common Tests - Script Resource Schema Validation' -Tag 'WindowsOnly' {

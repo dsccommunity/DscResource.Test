@@ -10,7 +10,10 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {

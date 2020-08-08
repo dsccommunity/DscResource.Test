@@ -98,7 +98,11 @@ function Invoke-DscResourceTest
 
         [Parameter()]
         [System.Collections.Hashtable]
-        $Settings
+        $Settings,
+
+        [Parameter()]
+        [System.String]
+        $MainGitBranch = 'master'
     )
 
     begin
@@ -370,6 +374,7 @@ function Invoke-DscResourceTest
                     $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTagFilter']
                     $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
                     $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
+                    $item['Parameters']['MainGitBranch'] = $MainGitBranch
                 }
                 else
                 {
@@ -385,7 +390,8 @@ function Invoke-DscResourceTest
                             Tag                = $PSBoundParameters['TagFilter']
                             ExcludeTag         = $PSBoundParameters['ExcludeTagFilter']
                             ExcludeModuleFile  = $ExcludeModuleFile
-                            ExcludeSourceFile = $ExcludeSourceFile
+                            ExcludeSourceFile  = $ExcludeSourceFile
+                            MainGitBranch      = $MainGitBranch
                         }
                     }
                 }

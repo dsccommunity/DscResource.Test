@@ -10,7 +10,10 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {

@@ -10,7 +10,10 @@ param
     $Tag,
     $ExcludeTag,
     $ExcludeModuleFile,
-    $ExcludeSourceFile
+    $ExcludeSourceFile,
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
