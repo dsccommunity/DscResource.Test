@@ -11,7 +11,9 @@ param
     $ExcludeTag,
     $ExcludeModuleFile,
     $ExcludeSourceFile,
-    $MainGitBranch
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA','Common Tests - PS Script Analyzer on Resource Files') {

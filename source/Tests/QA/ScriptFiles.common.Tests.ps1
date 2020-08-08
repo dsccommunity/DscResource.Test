@@ -11,7 +11,9 @@ param
     $ExcludeTag,
     $ExcludeModuleFile,
     $ExcludeSourceFile,
-    $MainGitBranch
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Validate Script Files' {

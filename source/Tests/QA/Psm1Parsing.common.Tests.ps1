@@ -11,7 +11,9 @@ param
     $ExcludeTag,
     $ExcludeModuleFile,
     $ExcludeSourceFile,
-    $MainGitBranch
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {

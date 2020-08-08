@@ -11,7 +11,9 @@ param
     $ExcludeTag,
     $ExcludeModuleFile,
     $ExcludeSourceFile,
-    $MainGitBranch
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' {

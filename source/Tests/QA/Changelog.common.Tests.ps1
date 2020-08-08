@@ -40,7 +40,7 @@ try
             # Get the list of changed files compared with main
             $headCommit = & git rev-parse HEAD
             $mainCommit = & git @('rev-parse', "origin/$MainGitBranch")
-            $filesChanged = & git @('diff', "$mainCommit...$headCommit",'--name-only')
+            $filesChanged = & git @('diff', "$mainCommit...$headCommit", '--name-only')
 
             if ($headCommit -ne $mainCommit)
             {
