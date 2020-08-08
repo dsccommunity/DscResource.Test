@@ -11,7 +11,7 @@ param
     $ExcludeTag,
     $ExcludeModuleFile,
     $ExcludeSourceFile,
-    $MainGitBranch = 'master'
+    $MainGitBranch
 )
 
 if (-not $ProjectPath)

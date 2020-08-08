@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed error in `Tests/QA/Changelog.common.Tests.ps1` when Describing Changelog
   Management ([issue #81](https://github.com/dsccommunity/DscResource.Test/issues/81)).
 
+### Added
+
+- Added support for passing alternate trunk branch name through to
+  `Invoke-DscResourceTest.Tests.ps1` function ([issue #82](https://github.com/dsccommunity/DscResource.Test/issues/82)).
+
 ## [0.13.3] - 2020-06-01
 
 ### Fixed
