@@ -262,14 +262,14 @@ stages:
 
   - stage: Deploy
     dependsOn: test_module
-    # Only execute deploy stage if we're on master and previous stage succeeded
     condition: |
       and(
         succeeded(),
         or(
           eq(variables['Build.SourceBranch'], 'refs/heads/master'),
           startsWith(variables['Build.SourceBranch'], 'refs/tags/')
-        )
+        ),
+        contains(variables['System.TeamFoundationCollectionUri'], 'dsccommunity')
       )
     jobs:
       - job: Deploy_Artefact
