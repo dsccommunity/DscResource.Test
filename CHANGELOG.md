@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Fix deploy condition in `azure-pipelines.yml` so that it does not execute
+  unless run from the `dsccommunity` Azure DevOps org ([issue #86](https://github.com/dsccommunity/DscResource.Test/issues/86)).
+
 ## [0.14.0] - 2020-08-08
 
 ### Fixed
