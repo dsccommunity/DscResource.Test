@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Remove Test Manifest has Class based resource in nested modules - Fixes #85
+
 ### Changed
 
 - Fix deploy condition in `azure-pipelines.yml` so that it does not execute
