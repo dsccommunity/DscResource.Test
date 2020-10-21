@@ -56,10 +56,6 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
                 It "Should explicitly export $classResourceInModule in DscResourcesToExport" {
                     $moduleManifestProperties.ExportedDscResources -contains $classResourceInModule | Should -BeTrue
                 }
-
-                It "Should include class module $classResourceInModule.psm1 in NestedModules" {
-                    $moduleManifestProperties.NestedModules.Name -contains $classResourceInModule | Should -BeTrue
-                }
             }
         }
     }
