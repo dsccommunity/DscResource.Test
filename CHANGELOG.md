@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2020-11-12
+
 ### Fixed
 
 - Fix Remove Test Manifest has Class based resource in nested modules - Fixes #85
