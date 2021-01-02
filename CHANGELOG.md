@@ -11,7 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added test helper functions `Get-InvalidResultRecord` and `Get-InvalidOperationRecord`.
 - Added alias `Get-ObjectNotFoundRecord` that points to `Get-InvalidResultRecord`.
+- Added build task `Invoke_HQRM_Tests` and `Fail_Build_If_HQRM_Tests_Failed`.
+- Added meta build task `Invoke_HQRM_Tests_Stop_On_Fail` that runs both
+  build tasks `Invoke_HQRM_Tests` and `Fail_Build_If_HQRM_Tests_Failed`
+  in correct order.
+- New QA (HQRM) tests for Pester 5 was added that will only run if Pester 5.1
+  is used by the test pipeline.
 
+### Changed
+
+- Exported function `Get-PublishFileName` so it can be used in the QA 
+  (HQRM) tests when used through the build task `Invoke_HQRM_Tests`.
+- Renamed all existing QA (HQRM) tests to `*.v4.Tests.ps1*` and made
+  them not run if test pipeline is using Pester 5.
+  
 ## [0.14.3] - 2021-01-13
 
 ### Fixed

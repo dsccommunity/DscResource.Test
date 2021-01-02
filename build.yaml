@@ -10,6 +10,7 @@ CopyPaths:
   - en-US
   - Tests
   - Config
+  - tasks
 Encoding: UTF8
 # SemVer: '1.2.3'
 # Suffix to add to Root module PSM1 after merge (here, the Set-Alias exporting IB tasks)
@@ -44,9 +45,11 @@ BuildWorkflow:
       Import-Module -force DscResource.Test
       Invoke-DscResourceTest -ExcludeTag 'Common Tests - Validate Localization'
     }
+
   t:
     - build
     - DscTest
+
   build:
     - Clean
     - Build_Module_ModuleBuilder
