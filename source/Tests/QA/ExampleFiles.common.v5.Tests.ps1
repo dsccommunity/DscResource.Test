@@ -1,3 +1,15 @@
+<#
+    .NOTES
+        To run manually:
+
+        $pathToHQRMTests = '\source\DscResource.Test\source\Tests\QA'
+
+        $container = New-PesterContainer -Path "$pathToHQRMTests/ExampleFiles.common.*.Tests.ps1" -Data @{
+            SourcePath = './source'
+        }
+
+        Invoke-Pester -Container $container -Output Detailed
+#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '')]
 param
 (

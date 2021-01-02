@@ -1,3 +1,17 @@
+<#
+    .NOTES
+        To run manually:
+
+        $defaultBranch = 'main'
+        $pathToHQRMTests = '/source/DscResource.Test/source/Tests/QA'
+
+        $container = New-PesterContainer -Path "$pathToHQRMTests/Changelog.common.*.Tests.ps1" -Data @{
+            ProjectPath = '.'
+            MainGitBranch = $defaultBranch
+        }
+
+        Invoke-Pester -Container $container -Output Detailed
+#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '')]
 param
 (
