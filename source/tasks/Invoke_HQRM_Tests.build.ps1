@@ -288,44 +288,6 @@ task Invoke_HQRM_Tests {
         "`t$($paddedVariableName) = $($variable.Value -join ', ')"
     }
 
-    # # Test folders is specified, override invoke-DscResourceTest internal default
-    # if ($DscTestPesterScript.Count -gt 0)
-    # {
-    #     $pesterParameters.Add('Path', @())
-
-    #     Write-Build -Color 'DarkGray' -Text " Adding DscTestScript to params"
-
-    #     foreach ($testFolder in $DscTestPesterScript)
-    #     {
-    #         if (-not (Split-Path -IsAbsolute $testFolder))
-    #         {
-    #             $testFolder = Join-Path -Path $ProjectPath -ChildPath $testFolder
-    #         }
-
-    #         Write-Build -Color 'DarkGray' -Text "      ... $testFolder"
-
-    #         <#
-    #             The Absolute path to this folder exists, adding to the list of
-    #             DscTest scripts to run.
-    #         #>
-    #         if (Test-Path -Path $testFolder)
-    #         {
-    #             $pesterParameters.Path += $testFolder
-    #         }
-    #     }
-    # }
-
-    # # Add all DscTest* variables in current scope into the $pesterParameters hashtable.
-    # foreach ($paramName in $DscTestCmd.Parameters.keys)
-    # {
-    #     $paramValueFromScope = (Get-Variable -Name "DscTest$paramName" -ValueOnly -ErrorAction 'SilentlyContinue')
-
-    #     if (-not $pesterParameters.ContainsKey($paramName) -and $paramValueFromScope)
-    #     {
-    #         $pesterParameters.Add($paramName, $paramValueFromScope)
-    #     }
-    # }
-
     $pesterData = @{
         ProjectPath        = $ProjectPath
         SourcePath         = $SourcePath
