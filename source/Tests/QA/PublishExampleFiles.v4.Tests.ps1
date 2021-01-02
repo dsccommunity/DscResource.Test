@@ -17,6 +17,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Tests - Validate Example Files To Be Published' {
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
 

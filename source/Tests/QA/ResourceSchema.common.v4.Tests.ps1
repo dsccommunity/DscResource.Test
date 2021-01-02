@@ -14,6 +14,14 @@ param
     $MainGitBranch
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - Script Resource Schema Validation' -Tag 'WindowsOnly' {
     if ($IsLinux -or $IsMacOS)
     {

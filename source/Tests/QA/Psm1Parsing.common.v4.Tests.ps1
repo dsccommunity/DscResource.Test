@@ -16,6 +16,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {
     $psm1Files = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)
 

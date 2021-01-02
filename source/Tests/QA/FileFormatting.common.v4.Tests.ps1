@@ -16,6 +16,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded)
 

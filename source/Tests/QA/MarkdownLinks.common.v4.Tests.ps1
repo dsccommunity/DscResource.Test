@@ -13,6 +13,14 @@ param (
     $MainGitBranch
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 if (!(Get-Module -Name 'MarkdownLinkCheck' -ListAvailable))
 {
     Write-Warning -Message 'Required module MarkdownLinkCheck not found. Please add to RequiredModules.psd1'

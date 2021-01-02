@@ -1,3 +1,20 @@
+<#
+    .NOTES
+        *** To run manually in Pester 4:
+
+        $defaultBranch = 'master'
+        $pathToHQRMTests = '/source/DscResource.Test/source/Tests/QA'
+
+        $container =  @{
+            Path = "$pathToHQRMTests/Changelog.common.*.Tests.ps1"
+            Parameters = @{
+                ProjectPath = '.'
+                MainGitBranch = $defaultBranch
+            }
+        }
+
+        Invoke-Pester -Path $container
+#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
 param
 (
@@ -13,6 +30,14 @@ param
     $ExcludeSourceFile,
     $MainGitBranch
 )
+
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
 
 if (-not $ProjectPath)
 {

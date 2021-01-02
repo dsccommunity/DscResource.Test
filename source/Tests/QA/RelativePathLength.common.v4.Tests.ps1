@@ -16,6 +16,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {
     Context 'When the resource should be used to compile a configuration in Azure Automation' {
         <#
