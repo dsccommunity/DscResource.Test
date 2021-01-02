@@ -1,20 +1,3 @@
-<#
-    .NOTES
-        *** To run manually in Pester 4:
-
-        $defaultBranch = 'master'
-        $pathToHQRMTests = '/source/DscResource.Test/source/Tests/QA'
-
-        $container =  @{
-            Path = "$pathToHQRMTests/Changelog.common.*.Tests.ps1"
-            Parameters = @{
-                ProjectPath = '.'
-                MainGitBranch = $defaultBranch
-            }
-        }
-
-        Invoke-Pester -Path $container
-#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
 param
 (
