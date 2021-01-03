@@ -3,7 +3,7 @@
         To run manually:
 
         $defaultBranch = 'main'
-        $pathToHQRMTests = '/source/DscResource.Test/source/Tests/QA'
+        $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/Changelog.common.*.Tests.ps1" -Data @{
             ProjectPath = '.'
@@ -12,20 +12,18 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '')]
 param
 (
-    $ModuleName,
-    $ModuleBase,
-    $ModuleManifest,
+    [Parameter(Mandatory = $true)]
+    [System.String]
     $ProjectPath,
-    $SourcePath,
-    $SourceManifest,
-    $Tag,
-    $ExcludeTag,
-    $ExcludeModuleFile,
-    $ExcludeSourceFile,
-    $MainGitBranch
+
+    [Parameter(Mandatory = $true)]
+    [System.String]
+    $MainGitBranch,
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+    $Args
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.

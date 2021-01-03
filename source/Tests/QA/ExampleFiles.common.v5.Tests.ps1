@@ -2,7 +2,7 @@
     .NOTES
         To run manually:
 
-        $pathToHQRMTests = '\source\DscResource.Test\source\Tests\QA'
+        $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/ExampleFiles.common.*.Tests.ps1" -Data @{
             SourcePath = './source'
@@ -10,19 +10,11 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '')]
 param
 (
-    $ModuleName,
-    $ModuleBase,
-    $ModuleManifest,
-    $ProjectPath,
+    [Parameter()]
+    [System.String]
     $SourcePath,
-    $SourceManifest,
-    $Tag,
-    $ExcludeTag,
-    $ExcludeModuleFile,
-    $ExcludeSourceFile,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
@@ -60,6 +52,22 @@ BeforeDiscovery {
 
         $testCase += $newTestCase
     }
+}
+
+BeforeAll {
+    $moduleName = 'DscResource.Test'
+
+    # Removes the imported module so we can import the private functions.
+    Remove-Module -Name $moduleName
+
+    # Import the private (and public) functions.
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1')
+}
+
+AfterAll {
+    # Re-import just the public functions.
+    Remove-Module $moduleName
+    Import-Module $moduleName
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
