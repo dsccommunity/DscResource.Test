@@ -20,8 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Exported function `Get-PublishFileName` so it can be used in the QA 
-  (HQRM) tests when used through the build task `Invoke_HQRM_Tests`.
 - Renamed all existing QA (HQRM) tests to `*.v4.Tests.ps1*` and made
   them not run if test pipeline is using Pester 5.
   
