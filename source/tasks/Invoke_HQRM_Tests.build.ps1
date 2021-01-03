@@ -68,8 +68,6 @@ param
     $BuildInfo = (property BuildInfo @{ })
 )
 
-#Import-Module -Name "$PSScriptRoot/Common.Functions.psm1"
-
 # Synopsis: Making sure the Module meets some quality standard (help, tests)
 task Invoke_HQRM_Tests {
     if ([System.String]::IsNullOrEmpty($ProjectName))
@@ -347,65 +345,3 @@ task Invoke_HQRM_Tests {
 
     $null = $script:testResults | Export-CliXml -Path $DscTestResultObjectCliXml -Force
 }
-
-# Synopsis: This task ensures the build job fails if the test aren't successful.
-task Fail_Build_If_HQRM_Tests_Failed {
-    "Asserting that no test failed"
-
-    if ([System.String]::IsNullOrEmpty($ProjectName))
-    {
-        $ProjectName = Get-ProjectName -BuildRoot $BuildRoot
-    }
-
-    if (-not (Split-Path -IsAbsolute $OutputDirectory))
-    {
-        $OutputDirectory = Join-Path -Path $ProjectPath -ChildPath $OutputDirectory
-
-        Write-Build -Color 'Yellow' -Text "Absolute path to Output Directory is $OutputDirectory"
-    }
-
-    if (-not (Split-Path -IsAbsolute $DscTestOutputFolder))
-    {
-        $DscTestOutputFolder = Join-Path -Path $OutputDirectory -ChildPath $DscTestOutputFolder
-    }
-
-    $os = if ($isWindows -or $PSVersionTable.PSVersion.Major -le 5)
-    {
-        'Windows'
-    }
-    elseif ($isMacOS)
-    {
-        'MacOS'
-    }
-    else
-    {
-        'Linux'
-    }
-
-    $getModuleVersionParameters = @{
-        OutputDirectory = $OutputDirectory
-        ProjectName     = $ProjectName
-    }
-
-    $ModuleVersion = Get-BuiltModuleVersion @getModuleVersionParameters
-
-    $psVersion = 'PSv.{0}' -f $PSVersionTable.PSVersion
-    $DscTestOutputFileFileName = "DscTest_{0}_v{1}.{2}.{3}.xml" -f $ProjectName, $ModuleVersion, $os, $psVersion
-    $DscTestResultObjectClixml = Join-Path -Path $DscTestOutputFolder -ChildPath "DscTestObject_$DscTestOutputFileFileName"
-
-    Write-Build -Color 'White' -Text "`tDscTest Output Object = $DscTestResultObjectClixml"
-
-    if (-not (Test-Path -Path $DscTestResultObjectClixml))
-    {
-        throw "No command were tested. $DscTestResultObjectClixml not found"
-    }
-    else
-    {
-        $DscTestObject = Import-Clixml -Path $DscTestResultObjectClixml -ErrorAction 'Stop'
-
-        Assert-Build -Condition ($DscTestObject.FailedCount -eq 0) -Message ('Failed {0} tests. Aborting Build' -f $DscTestObject.FailedCount)
-    }
-}
-
-# Synopsis: Meta task that runs High Quality Resource Module (HQRM) Tests, and fails if they're not successful
-task Invoke_HQRM_Tests_Stop_On_Fail Invoke_HQRM_Tests, Fail_Build_If_HQRM_Tests_Failed

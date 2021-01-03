@@ -1,10 +1,10 @@
 <#
     .SYNOPSIS
-        This is the alias to the build task Fail_Build_If_HQRM_Tests_Failed's
+        This is the alias to the build task Invoke_HQRM_Tests_Stop_On_Fail's
         script file.
 
     .DESCRIPTION
-        This makes available the alias 'Task.Fail_Build_If_HQRM_Tests_Failed' that
+        This makes available the alias 'Task.Invoke_HQRM_Tests_Stop_On_Fail' that
         is exported in the module manifest so that the build task can be correctly
         imported using for example Invoke-Build.
 
@@ -13,4 +13,4 @@
         https://github.com/nightroman/Invoke-Build/tree/master/Tasks/Import.
 #>
 
-Set-Alias -Name 'Task.Fail_Build_If_HQRM_Tests_Failed' -Value "$PSScriptRoot/tasks/Fail_Build_If_HQRM_Tests_Failed.build.ps1"
+Set-Alias -Name 'Task.Invoke_HQRM_Tests_Stop_On_Fail' -Value "$PSScriptRoot/tasks/Invoke_HQRM_Tests_Stop_On_Fail.build.ps1"
