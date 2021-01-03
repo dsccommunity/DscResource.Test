@@ -292,14 +292,13 @@ task Invoke_HQRM_Tests {
         ProjectPath        = $ProjectPath
         SourcePath         = $SourcePath
         MainGitBranch      = $scriptParameters['MainGitBranch']
-        ModuleBase         = $ModuleUnderTest.ModuleBase
-        ModuleName         = $ModuleUnderTest.Name
-        ExcludeModuleFile  = $ExcludeModuleFile
-        ExcludeSourceFile  = $ExcludeSourceFile
+        # ModuleBase         = $ModuleUnderTest.ModuleBase
+        # ModuleName         = $ModuleUnderTest.Name
+        # ExcludeModuleFile  = $ExcludeModuleFile
+        # ExcludeSourceFile  = $ExcludeSourceFile
     }
 
-    #$pathToHqrmTests = Join-Path -Path $PSScriptRoot -ChildPath '../Tests/QA'
-    $pathToHqrmTests = Join-Path -Path $PSScriptRoot -ChildPath '../Tests/QA/*.v5.Tests.ps1'
+    $pathToHqrmTests = Join-Path -Path $PSScriptRoot -ChildPath '../Tests/QA'
 
     Write-Verbose -Message ('Path to HQRM tests: {0}' -f $pathToHqrmTests)
 
