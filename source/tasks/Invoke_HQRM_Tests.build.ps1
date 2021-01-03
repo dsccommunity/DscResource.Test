@@ -233,10 +233,13 @@ task Invoke_HQRM_Tests {
         }
     }
 
-    "`tProject Path      = $ProjectPath"
-    "`tProject Name      = $ProjectName"
-    "`tBuildModuleOutput = $BuildModuleOutput"
-    "`tModuleVersion     = $ModuleVersion"
+    "`tProject Path        = $ProjectPath"
+    "`tProject Name        = $ProjectName"
+    "`tSource Path         = $SourcePath"
+    "`tOutput Directory    = $OutputDirectory"
+    "`tBuild Module Output = $BuildModuleOutput"
+    "`tModule Version      = $ModuleVersion"
+    "`tTest Output Folder  = $DscTestOutputFolder"
     "`t"
 
     $pesterParameters = @{}

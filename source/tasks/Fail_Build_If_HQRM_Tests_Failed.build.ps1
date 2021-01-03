@@ -47,7 +47,7 @@ param
 
 # Synopsis: This task ensures the build job fails if the test aren't successful.
 task Fail_Build_If_HQRM_Tests_Failed {
-    "Asserting that no test failed"
+    "Asserting that no test failed."
 
     if ([System.String]::IsNullOrEmpty($ProjectName))
     {
@@ -90,16 +90,22 @@ task Fail_Build_If_HQRM_Tests_Failed {
     $DscTestOutputFileFileName = "DscTest_{0}_v{1}.{2}.{3}.xml" -f $ProjectName, $ModuleVersion, $os, $psVersion
     $DscTestResultObjectClixml = Join-Path -Path $DscTestOutputFolder -ChildPath "DscTestObject_$DscTestOutputFileFileName"
 
-    Write-Build -Color 'White' -Text "`tDscTest Output Object = $DscTestResultObjectClixml"
+    "`t"
+    "`tProject Path        = $ProjectPath"
+    "`tProject Name        = $ProjectName"
+    "`tOutput Directory    = $OutputDirectory"
+    "`tTest Output Folder  = $DscTestOutputFolder"
+    "`tTest Output Object  = $DscTestResultObjectClixml"
+    "`t"
 
     if (-not (Test-Path -Path $DscTestResultObjectClixml))
     {
-        throw "No command were tested. $DscTestResultObjectClixml not found"
+        throw "No command were tested. $DscTestResultObjectClixml not found."
     }
     else
     {
         $DscTestObject = Import-Clixml -Path $DscTestResultObjectClixml -ErrorAction 'Stop'
 
-        Assert-Build -Condition ($DscTestObject.FailedCount -eq 0) -Message ('Failed {0} tests. Aborting Build' -f $DscTestObject.FailedCount)
+        Assert-Build -Condition ($DscTestObject.FailedCount -eq 0) -Message ('Failed {0} tests. Aborting Build.' -f $DscTestObject.FailedCount)
     }
 }
