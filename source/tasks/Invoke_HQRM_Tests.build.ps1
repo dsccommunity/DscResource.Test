@@ -265,15 +265,40 @@ task Invoke_HQRM_Tests {
                         }
                         else
                         {
-                            $taskParameterValue = $BuildInfo.DscTest.Pester.Configuration.$sectionName.$propertyName
-
-                            if ($taskParameterValue)
+                            if ($BuildInfo.DscTest.Pester.Configuration.$sectionName.$propertyName)
                             {
-                                # Use the value from build.yaml.
-                                Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Build Config"
+                                $taskParameterValue = $BuildInfo.DscTest.Pester.Configuration.$sectionName.$propertyName
 
-                                Set-Variable -Name $taskParameterName -Value $taskParameterValue
+                                if ($taskParameterValue)
+                                {
+                                    # Use the value from build.yaml.
+                                    Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Build Config"
+
+                                    Set-Variable -Name $taskParameterName -Value $taskParameterValue
+                                }
                             }
+                        }
+
+                        if ($taskParameterValue)
+                        {
+                            if ($taskParameterValue -is [array])
+                            {
+                                <#
+                                    Convert the value to an string array that can converted to
+                                    [Pester.StringArrayOption] in cases where it is needed.
+                                #>
+                                $pesterConfigurationValue = [System.String[]] @($taskParameterValue)
+                            }
+                            else
+                            {
+                                <#
+                                    Convert the value to an string that can converted to [Pester.StringOption]
+                                    in cases where it is needed.
+                                #>
+                                $pesterConfigurationValue = [System.String] $taskParameterValue
+                            }
+
+                            $pesterConfiguration.$sectionName.$propertyName = $pesterConfigurationValue
                         }
                     }
                 }
