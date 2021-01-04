@@ -57,17 +57,13 @@ BeforeDiscovery {
 BeforeAll {
     $moduleName = 'DscResource.Test'
 
-    # Removes the imported module so we can import the private functions.
-    Remove-Module -Name $moduleName
-
-    # Import the private (and public) functions.
-    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1')
+    # Re-imports the private (and public) functions.
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 }
 
 AfterAll {
     # Re-import just the public functions.
-    Remove-Module $moduleName
-    Import-Module $moduleName
+    Import-Module $moduleName -Force
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
