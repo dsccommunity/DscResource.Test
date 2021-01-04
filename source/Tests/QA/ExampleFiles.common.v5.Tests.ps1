@@ -16,6 +16,10 @@ param
     [System.String]
     $SourcePath,
 
+    [Parameter()]
+    [System.String[]]
+    $ExcludeSourceFile,
+
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
 )
@@ -31,6 +35,9 @@ if (-not $isPester5)
 }
 
 BeforeDiscovery {
+    # Re-imports the private (and public) functions.
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
+
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
 
     # If there are no Examples folder, exit.
@@ -39,7 +46,7 @@ BeforeDiscovery {
         return
     }
 
-    $exampleFiles = Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse
+    $exampleFiles = @(Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
     $testCase = @()
 
