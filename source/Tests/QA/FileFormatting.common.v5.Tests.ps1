@@ -8,6 +8,8 @@
         $container = New-PesterContainer -Path "$pathToHQRMTests/FileFormatting.common.*.Tests.ps1" -Data @{
             SourcePath = './source'
             ModuleBase = "./output/$dscResourceModuleName/*"
+            # ExcludeModuleFile = @('Modules/DscResource.Common')
+            # ExcludeSourceFile = @('Examples')
         }
 
         Invoke-Pester -Container $container -Output Detailed
@@ -38,11 +40,11 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded)
+    $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
     if ($SourcePath)
     {
-        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded
+        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
     }
 
     # Get the root of the source folder.
@@ -122,7 +124,7 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             Test-FileInUnicode -FileInfo $File | Should -BeFalse -Because $becauseMessage
         }
 
-        It 'Should not contain any files with tab characters' {
+        It 'Should not contain any tab characters' {
             $tabCharacterMatches = $script:fileContent | Select-String -Pattern "`t"
 
             $containsFileWithTab = $null -ne $tabCharacterMatches
@@ -130,13 +132,13 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             $containsFileWithTab | Should -BeFalse -Because 'no file should have tab character(s) in them'
         }
 
-        It 'Should not contain empty files' {
+        It 'Should not be an empty file' {
             $containsEmptyFile = [String]::IsNullOrWhiteSpace($script:fileContent)
 
             $containsEmptyFile | Should -BeFalse -Because 'no file should be empty'
         }
 
-        It 'Should not contain files without a newline at the end' {
+        It 'Should not contain a newline at the end' {
             if (-not [String]::IsNullOrWhiteSpace($script:fileContent) -and $script:fileContent[-1] -ne "`n")
             {
                 $containsFileWithoutNewLine = $true

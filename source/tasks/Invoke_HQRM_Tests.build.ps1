@@ -416,14 +416,15 @@ task Invoke_HQRM_Tests {
         "`t$($paddedVariableName) = $($variable.Value -join ', ')"
     }
 
+    # Values passed to parameters in all test scripts.
     $pesterData = @{
         ProjectPath        = $ProjectPath
         SourcePath         = $SourcePath
         MainGitBranch      = $scriptParameters['MainGitBranch']
         ModuleBase         = Join-Path -Path $BuildModuleOutput -ChildPath "$ProjectName/*"
         # ModuleName         = $ModuleUnderTest.Name
-        # ExcludeModuleFile  = $ExcludeModuleFile
-        # ExcludeSourceFile  = $ExcludeSourceFile
+        ExcludeModuleFile  = $DscTestScriptExcludeModuleFile
+        ExcludeSourceFile  = $DscTestScriptExcludeSourceFile
     }
 
     $pathToHqrmTests = Join-Path -Path $PSScriptRoot -ChildPath '../Tests/QA'

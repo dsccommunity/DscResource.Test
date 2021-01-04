@@ -1,5 +1,11 @@
 filter WhereSourceFileNotExcluded
 {
+    param
+    (
+        # This will set the $ExcludeSourceFile from the parent scope if it exist
+        $ExcludeSourceFile = $ExcludeSourceFile
+    )
+
     foreach ($excludePath in $ExcludeSourceFile)
     {
         # Replace any path separator to the one used in the current operating system.
