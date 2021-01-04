@@ -16,11 +16,11 @@
 #>
 param
 (
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [System.String]
     $ModuleBase,
 
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [System.String]
     $SourcePath,
 

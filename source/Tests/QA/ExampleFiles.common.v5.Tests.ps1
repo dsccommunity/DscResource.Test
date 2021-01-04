@@ -12,7 +12,7 @@
 #>
 param
 (
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [System.String]
     $SourcePath,
 
