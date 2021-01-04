@@ -281,7 +281,7 @@ task Invoke_HQRM_Tests {
 
                         if ($taskParameterValue)
                         {
-                            if ($taskParameterValue -is [array])
+                            if ($taskParameterValue -is [System.Array])
                             {
                                 <#
                                     Convert the value to an string array that can converted to
