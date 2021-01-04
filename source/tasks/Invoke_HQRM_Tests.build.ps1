@@ -224,13 +224,13 @@ task Invoke_HQRM_Tests {
             #>
             $pesterConfiguration = [PesterConfiguration]::Default
 
-            $pesterConfigurationSectionNames = ($pesterConfiguration | Get-Member -Type Properties).Name
+            $pesterConfigurationSectionNames = ($pesterConfiguration | Get-Member -Type 'Properties').Name
 
-            foreach ($sectionName in $pesterConfigurationSectionNames )
+            foreach ($sectionName in $pesterConfigurationSectionNames)
             {
                 if ($BuildInfo.DscTest.Pester.Configuration.$sectionName)
                 {
-                    $propertyNames = ($pesterConfiguration.$sectionName | Get-Member -Type Properties).Name
+                    $propertyNames = ($pesterConfiguration.$sectionName | Get-Member -Type 'Properties').Name
 
                     <#
                         This will build the DscTestPester<parameterName> variables (e.g.
@@ -269,25 +269,48 @@ task Invoke_HQRM_Tests {
                             }
                         }
 
+                        # Set the value in the pester configuration object if it was available.
                         if ($taskParameterValue)
                         {
-                            if ($taskParameterValue -is [System.Array])
+                            <#
+                                Force conversion from build configuration types to
+                                correct Pester type to avoid exceptions like:
+
+                                ERROR: Exception setting "ExcludeTag": "Cannot convert
+                                the "System.Collections.Generic.List`1[System.Object]"
+                                value of type "System.Collections.Generic.List`1[[System.Object,
+                                System.Private.CoreLib, Version=5.0.0.0, Culture=neutral,
+                                PublicKeyToken=7cec85d7bea7798e]]" to type
+                                "Pester.StringArrayOption"."
+                            #>
+                            $pesterConfigurationValue = switch ($pesterConfiguration.$sectionName.$propertyName)
                             {
-                                <#
-                                    Convert the value to an string array that can converted to
-                                    [Pester.StringArrayOption] in cases where it is needed.
-                                #>
-                                $pesterConfigurationValue = [System.String[]] @($taskParameterValue)
-                            }
-                            else
-                            {
-                                <#
-                                    Convert the value to an string that can converted to [Pester.StringOption]
-                                    in cases where it is needed.
-                                #>
-                                $pesterConfigurationValue = [System.String] $taskParameterValue
+                                {$_ -is [Pester.StringArrayOption]}
+                                {
+                                    [Pester.StringArrayOption] @($taskParameterValue)
+                                }
+
+                                {$_ -is [Pester.StringOption]}
+                                {
+                                    [Pester.StringOption] $taskParameterValue
+                                }
+
+                                {$_ -is [Pester.BoolOption]}
+                                {
+                                    [Pester.BoolOption] $taskParameterValue
+                                }
+
+                                Default
+                                {
+                                    <#
+                                        Set the value without conversion so that new types that
+                                        are not supported can be catched.
+                                    #>
+                                    $pesterConfigurationValue = $taskParameterValue
+                                }
                             }
 
+                            # If the conversion above is not made this will fail.
                             $pesterConfiguration.$sectionName.$propertyName = $pesterConfigurationValue
                         }
                     }
