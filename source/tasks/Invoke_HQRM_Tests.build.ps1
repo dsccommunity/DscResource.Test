@@ -32,7 +32,7 @@ param
     [Parameter()]
     # Base directory of all output (default to 'output')
     [System.String]
-    $OutputDirectory = (property OutputDirectory (Join-Path $BuildRoot 'output')),
+    $OutputDirectory = (property OutputDirectory (Join-Path -Path $BuildRoot -ChildPath 'output')),
 
     [Parameter()]
     [System.String]
@@ -45,6 +45,10 @@ param
     [Parameter()]
     [System.String]
     $DscTestOutputFolder = (property DscTestOutputFolder 'testResults'),
+
+    [Parameter()]
+    [System.String]
+    $BuildModuleOutput = (property BuildModuleOutput (Join-Path -Path $BuildRoot -ChildPath 'output')),
 
     # [Parameter()]
     # [System.String]
@@ -379,7 +383,7 @@ task Invoke_HQRM_Tests {
         ProjectPath        = $ProjectPath
         SourcePath         = $SourcePath
         MainGitBranch      = $scriptParameters['MainGitBranch']
-        # ModuleBase         = $ModuleUnderTest.ModuleBase
+        ModuleBase         = Join-Path -Path $BuildModuleOutput -ChildPath "$ProjectName/*"
         # ModuleName         = $ModuleUnderTest.Name
         # ExcludeModuleFile  = $ExcludeModuleFile
         # ExcludeSourceFile  = $ExcludeSourceFile
