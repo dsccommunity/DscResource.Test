@@ -7,7 +7,7 @@
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/FileFormatting.common.*.Tests.ps1" -Data @{
             SourcePath = './source'
-            ModuleBase = "./output/$dscResourceModuleName/**/"
+            ModuleBase = "./output/$dscResourceModuleName/*"
         }
 
         Invoke-Pester -Container $container -Output Detailed
@@ -17,6 +17,8 @@ param
 (
     $ModuleBase,
     $SourcePath,
+    $ExcludeModuleFile,
+    $ExcludeSourceFile,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
@@ -32,10 +34,10 @@ if (-not $isPester5)
     return
 }
 
-# TODO: REMOVE THIS TO RUN THIS TEST
-return
-
 BeforeDiscovery {
+    # Re-imports the private (and public) functions.
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
+
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded)
 
     if ($SourcePath)
@@ -43,115 +45,109 @@ BeforeDiscovery {
         $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded
     }
 
-    #TODO: BUILD THE TEST CASES HERE FOR THE IT-BLOCKS
+    # Get the root of the source folder.
+    $resolvedSourcePath = (Resolve-Path -Path $SourcePath).Path
+    $resolvedSourcePath = Split-Path -Path $resolvedSourcePath -Parent
+
+    #region Setup text file test cases.
+    $textFileToTest = @()
+
+    foreach ($file in $textFiles)
+    {
+        # Use the root of the source folder to extrapolate relative path.
+        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedSourcePath
+
+        $textFileToTest += @(
+            @{
+                File = $file
+                DescriptiveName = $descriptiveName
+            }
+        )
+    }
+    #endregion
+
+    #region Setup markdown file test cases.
+    $markdownFileExtensions = @('.md')
+
+    $markdownFiles = $textFiles |
+        Where-Object -FilterScript { $_.Extension -contains $markdownFileExtensions }
+
+    $markdownFileToTest = @()
+
+    foreach ($file in $markdownFiles)
+    {
+        # Use the root of the source folder to extrapolate relative path.
+        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedSourcePath
+
+        $markdownFileToTest += @(
+            @{
+                File = $file
+                DescriptiveName = $descriptiveName
+            }
+        )
+    }
+    #endregion
+}
+
+BeforeAll {
+    # Re-imports the private (and public) functions.
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
+}
+
+AfterAll {
+    # Re-import just the public functions.
+    Import-Module 'DscResource.Test' -Force
 }
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
-    It 'Should not contain any files with Unicode file encoding' {
-        $containsUnicodeFile = $false
-
-        foreach ($textFile in $textFiles)
-        {
-            if (Test-FileInUnicode -FileInfo $textFile)
+    Context 'When code file ''<DescriptiveName>'' exist' -ForEach $textFileToTest {
+        BeforeEach {
+            # We should make a a new helper function that correctly
+            if ($File.Extension -ieq '.mof')
             {
-                if ($textFile.Extension -ieq '.mof')
-                {
-                    Write-Warning -Message "File $($textFile.FullName) should be converted to ASCII. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-ASCII'."
-                }
-                else
-                {
-                    Write-Warning -Message "File $($textFile.FullName) should be converted to UTF-8. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8'."
-                }
-
-                $containsUnicodeFile = $true
+                $becauseMessage = "File $($File.FullName) should be converted to ASCII. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-ASCII'."
             }
+            else
+            {
+                $becauseMessage = "File $($textFile.FullName) should be converted to UTF-8. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8'."
+            }
+
+            $script:fileContent = Get-Content -Path $File.FullName -Raw
         }
 
-        $containsUnicodeFile | Should -BeFalse
-    }
-
-    It 'Should not contain any files with tab characters' {
-        $containsFileWithTab = $false
-
-        foreach ($textFile in $textFiles)
-        {
-            $fileName = $textFile.FullName
-            $fileContent = Get-Content -Path $fileName -Raw
-
-            $tabCharacterMatches = $fileContent | Select-String -Pattern "`t"
-
-            if ($null -ne $tabCharacterMatches)
-            {
-                Write-Warning -Message "Found tab character(s) in $fileName."
-                $containsFileWithTab = $true
-            }
+        It 'Should not contain a unicode file encoding' {
+            Test-FileInUnicode -FileInfo $File | Should -BeFalse -Because $becauseMessage
         }
 
-        $containsFileWithTab | Should -BeFalse
-    }
+        It 'Should not contain any files with tab characters' {
+            $tabCharacterMatches = $script:fileContent | Select-String -Pattern "`t"
 
-    It 'Should not contain empty files' {
-        $containsEmptyFile = $false
+            $containsFileWithTab = $null -ne $tabCharacterMatches
 
-        foreach ($textFile in $textFiles)
-        {
-            $fileContent = Get-Content -Path $textFile.FullName -Raw
-
-            if ([String]::IsNullOrWhiteSpace($fileContent))
-            {
-                Write-Warning -Message "File $($textFile.FullName) is empty. Please remove this file."
-                $containsEmptyFile = $true
-            }
+            $containsFileWithTab | Should -BeFalse -Because 'no file should have tab character(s) in them'
         }
 
-        $containsEmptyFile | Should -BeFalse
-    }
+        It 'Should not contain empty files' {
+            $containsEmptyFile = [String]::IsNullOrWhiteSpace($script:fileContent)
 
-    It 'Should not contain files without a newline at the end' {
-        $containsFileWithoutNewLine = $false
+            $containsEmptyFile | Should -BeFalse -Because 'no file should be empty'
+        }
 
-        foreach ($textFile in $textFiles)
-        {
-            $fileContent = Get-Content -Path $textFile.FullName -Raw
-
-            if (-not [String]::IsNullOrWhiteSpace($fileContent) -and $fileContent[-1] -ne "`n")
+        It 'Should not contain files without a newline at the end' {
+            if (-not [String]::IsNullOrWhiteSpace($script:fileContent) -and $script:fileContent[-1] -ne "`n")
             {
-                if (-not $containsFileWithoutNewLine)
-                {
-                    Write-Warning -Message 'Each file must end with a new line.'
-                }
-
-                Write-Warning -Message "$($textFile.FullName) does not end with a new line. Use fixer function 'Add-NewLine'"
-
                 $containsFileWithoutNewLine = $true
             }
-        }
 
-        $containsFileWithoutNewLine | Should -BeFalse
+            $containsFileWithoutNewLine | Should -BeFalse -Because 'every file should end with a new line (blank row) at the end'
+        }
     }
 
-    Context 'When repository contains markdown files' {
-        $markdownFileExtensions = @('.md')
+    Context 'When markdown file ''<DescriptiveName>'' exist' -ForEach $markdownFileToTest {
+        It 'Should not not have Byte Order Mark (BOM)' {
+            $markdownFileHasBom = Test-FileHasByteOrderMark -FilePath $File.FullName
 
-        $markdownFiles = $textFiles |
-            Where-Object -FilterScript { $markdownFileExtensions -contains $_.Extension }
-
-        foreach ($markdownFile in $markdownFiles)
-        {
-            $filePathOutputName = Get-RelativePathFromModuleRoot `
-                -FilePath $markdownFile.FullName `
-                -ModuleRootFilePath $ModuleBase
-
-            It ('Markdown file ''{0}'' should not have Byte Order Mark (BOM)' -f $filePathOutputName) {
-                $markdownFileHasBom = Test-FileHasByteOrderMark -FilePath $markdownFile.FullName
-
-                if ($markdownFileHasBom)
-                {
-                    Write-Warning -Message "$filePathOutputName contain Byte Order Mark (BOM). Use fixer function 'ConvertTo-ASCII'."
-                }
-
-                $markdownFileHasBom | Should -BeFalse
-            }
+            $markdownFileHasBom | Should -BeFalse -Because 'no markdown file should contain Byte Order Mark (BOM). Use fixer function ''ConvertTo-ASCII''.'
         }
     }
 }
