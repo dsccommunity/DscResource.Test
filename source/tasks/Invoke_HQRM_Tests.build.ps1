@@ -110,31 +110,24 @@ task Invoke_HQRM_Tests {
     # $DscTestPesterTag = $DscTestPesterTag.Where{ -not [System.String]::IsNullOrEmpty($_) }
     # $DscTestPesterExcludeTag = $DscTestPesterExcludeTag.Where{ -not [System.String]::IsNullOrEmpty($_) }
 
-    <#
-        Default values for parameters for Pester 5.
-        The parameter PassThru will be overridden further down
-    #>
-    $defaultPesterParameters = @{
-        Output = 'Detailed'
-    }
+    Import-Module -Name 'Pester' -MinimumVersion 5.1 -ErrorAction 'Stop'
 
-    # Default parameters for Pester 5.
+    # Default parameters for test scripts.
     $defaultScriptParameters = @{
         # None for now.
     }
 
-    Import-Module -Name 'Pester' -MinimumVersion 5.1 -ErrorAction 'Stop'
-
     if ($BuildInfo.DscTest -and $BuildInfo.DscTest.Script)
     {
         <#
-            This will build the DscTestScript* variables (e.g. DscTestScriptExcludeSourceFile)
-            in this scope that are used in the rest of the code.
+            This will build the DscTestScript<parameterName> variables
+            (e.g. DscTestScriptExcludeSourceFile) in this scope that are used in
+            the rest of the code.
 
             It will use values for the variables in the following order:
 
             1. Skip creating the variable if a variable is already available because
-               it was already set in a passed parameter (DscTestScript*).
+               it was already set in a passed parameter (DscTestScript<parameterName>).
             2. Use the value from a property in the build.yaml under the key 'DscTest:'.
         #>
         foreach ($propertyName in $BuildInfo.DscTest.Script.Keys)
@@ -165,19 +158,49 @@ task Invoke_HQRM_Tests {
     #     throw 'Missing the key ''DscTest:'' or the child key ''Script:'' in the build configuration file build.yaml.'
     # }
 
+    <#
+        Default values for the Pester 5 parameters that are valid
+        for all parameter sets.
+    #>
+    $defaultPesterParameters = @{
+        # None.
+    }
+
+    <#
+        Default values for the Pester 5 (default) parameter set Simple.
+        Only set if build configuration has not configured the advanced
+        parameter set.
+    #>
+    if ('Configuration' -notin $BuildInfo.DscTest.Pester.Keys)
+    {
+        $defaultPesterParameters['Output'] = 'Detailed'
+    }
+
     if ($BuildInfo.DscTest -and $BuildInfo.DscTest.Pester)
     {
         <#
-            This will build the DscTestPester* variables (e.g. DscTestPesterExcludeTag)
-            in this scope that are used in the rest of the code.
+            This is the parameters that will be passed to Invoke-Pester for
+            either all Pester parameter sets of for the Pester default (Simple)
+            parameter set.
+        #>
+
+        $pesterParameterConfigurationKeys = $BuildInfo.DscTest.Pester.Keys |
+            Where-Object -FilterScript {
+                $_ -notin 'Configuration'
+            }
+
+        <#
+            This will build the DscTestPester<parameterName> variables (e.g.
+            DscTestPesterExcludeTagFilter) in this scope that are used in the
+            rest of the code.
 
             It will use values for the variables in the following order:
 
             1. Skip creating the variable if a variable is already available because
-               it was already set in a passed parameter (DscTestPester*).
+               it was already set in a passed parameter (DscTestPester<parameterName>).
             2. Use the value from a property in the build.yaml under the key 'DscTest:'.
         #>
-        foreach ($propertyName in $BuildInfo.DscTest.Pester.Keys)
+        foreach ($propertyName in $pesterParameterConfigurationKeys)
         {
             $taskParameterName = "DscTestPester$propertyName"
             $taskParameterValue = Get-Variable -Name $taskParameterName -ValueOnly -ErrorAction 'SilentlyContinue'
@@ -196,6 +219,60 @@ task Invoke_HQRM_Tests {
                     Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Build Config"
 
                     Set-Variable -Name $taskParameterName -Value $taskParameterValue
+                }
+            }
+        }
+
+        if ($BuildInfo.DscTest.Pester.Configuration)
+        {
+            <#
+                Default values for the Pester 5 configuration.
+            #>
+            $pesterConfiguration = [PesterConfiguration]::Default
+            $pesterConfiguration.Output.Verbosity = 'Detailed'
+
+            $pesterConfigurationSectionNames = ($pesterConfiguration | Get-Member -Type Properties).Name
+
+            foreach ($sectionName in $pesterConfigurationSectionNames )
+            {
+                if ($BuildInfo.DscTest.Pester.Configuration.$sectionName)
+                {
+                    $propertyNames = ($pesterConfiguration.$sectionName | Get-Member -Type Properties).Name
+
+                    <#
+                        This will build the DscTestPester<parameterName> variables (e.g.
+                        DscTestPesterExcludeTagFilter) in this scope that are used in the
+                        rest of the code.
+
+                        It will use values for the variables in the following order:
+
+                        1. Skip creating the variable if a variable is already available because
+                            it was already set in a passed parameter (DscTestPester<parameterName>).
+                        2. Use the value from a property in the build.yaml under the key 'DscTest:'.
+                    #>
+                    foreach ($propertyName in $propertyNames)
+                    {
+                        $taskParameterName = 'DscTestPesterConfiguration{0}{1}' -f $sectionName, $propertyName
+
+                        $taskParameterValue = Get-Variable -Name $taskParameterName -ValueOnly -ErrorAction 'SilentlyContinue'
+
+                        if ($taskParameterValue)
+                        {
+                            Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Build Invocation Parameters"
+                        }
+                        else
+                        {
+                            $taskParameterValue = $BuildInfo.DscTest.Pester.Configuration.$sectionName.$propertyName
+
+                            if ($taskParameterValue)
+                            {
+                                # Use the value from build.yaml.
+                                Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Build Config"
+
+                                Set-Variable -Name $taskParameterName -Value $taskParameterValue
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -229,7 +306,7 @@ task Invoke_HQRM_Tests {
         {
             Write-Build -Color 'DarkGray' -Text "Using $taskParameterName from Defaults"
 
-            Set-Variable -Name $taskParameterName -Value $defaultPesterParameters.($propertyName)
+            Set-Variable -Name $taskParameterName -Value $defaultPesterParameters.$propertyName
         }
     }
 
@@ -244,8 +321,12 @@ task Invoke_HQRM_Tests {
 
     $pesterParameters = @{}
 
+    <#
+        Get all pester variables (DscTestPester*).
+    #>
     $dscTestPesterVariables = Get-Variable -Name 'DscTestPester*' -Scope 'Local'
 
+    # Find the longest name so we can pad the output nicely.
     $longestPropertyNameLength = (
         ($dscTestPesterVariables).Name |
             ForEach-Object -Process { $_.Length } |
@@ -254,17 +335,21 @@ task Invoke_HQRM_Tests {
 
     foreach ($variable in $dscTestPesterVariables)
     {
-        $pesterParameterName = $variable.Name -replace 'DscTestPester'
-
-        $pesterParameters[$pesterParameterName] = $variable.Value
-
         $paddedVariableName = $variable.Name.PadRight($longestPropertyNameLength)
 
         "`t$($paddedVariableName) = $($variable.Value -join ', ')"
-    }
 
-    # Override the PassThru property if it was wrongly set through build configuration.
-    $pesterParameters['PassThru'] = $true
+        <#
+            Only set the pester parameter if it does not belong to the
+            Pester Configuration object.
+        #>
+        if ($variable.Name -notmatch 'DscTestPesterConfiguration')
+        {
+            $pesterParameterName = $variable.Name -replace 'DscTestPester'
+
+            $pesterParameters[$pesterParameterName] = $variable.Value
+        }
+    }
 
     "`t"
 
@@ -272,6 +357,7 @@ task Invoke_HQRM_Tests {
 
     $dscTestScriptVariables = Get-Variable -Name 'DscTestScript*' -Scope 'Local'
 
+    # Find the longest name so we can pad the output nicely.
     $longestPropertyNameLength = (
         ($dscTestScriptVariables).Name |
             ForEach-Object -Process { $_.Length } |
@@ -312,7 +398,20 @@ task Invoke_HQRM_Tests {
         $pesterContainers += New-PesterContainer -Path $testScript.FullName -Data $pesterData
     }
 
-    $pesterParameters['Container'] = $pesterContainers
+    if ($BuildInfo.DscTest.Pester.Configuration -and $pesterConfiguration)
+    {
+        $pesterConfiguration.Run.Container = $pesterContainers
+
+        # Override the PassThru property if it was wrongly set through the build configuration.
+        $pesterConfiguration.Run.PassThru = $true
+    }
+    else
+    {
+        $pesterParameters['Container'] = $pesterContainers
+
+        # Override the PassThru property if it was wrongly set through the build configuration.
+        $pesterParameters['PassThru'] = $true
+    }
 
     <#
         Avoiding processing the verbose statements unless it is necessary since
@@ -325,7 +424,15 @@ task Invoke_HQRM_Tests {
         Write-Verbose -Message ($scriptParameters | ConvertTo-Json)
     }
 
-    $script:testResults = Invoke-Pester @pesterParameters
+    if ($BuildInfo.DscTest.Pester.Configuration -and $pesterConfiguration)
+    {
+        $script:testResults = Invoke-Pester @pesterParameters -Configuration $pesterConfiguration
+    }
+    else
+    {
+        $script:testResults = Invoke-Pester @pesterParameters
+    }
+
 
     $os = if ($isWindows -or $PSVersionTable.PSVersion.Major -le 5)
     {
