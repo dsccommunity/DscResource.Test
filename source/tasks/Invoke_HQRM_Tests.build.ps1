@@ -233,7 +233,6 @@ task Invoke_HQRM_Tests {
                 Default values for the Pester 5 configuration.
             #>
             $pesterConfiguration = [PesterConfiguration]::Default
-            $pesterConfiguration.Output.Verbosity = 'Detailed'
 
             $pesterConfigurationSectionNames = ($pesterConfiguration | Get-Member -Type Properties).Name
 
@@ -278,6 +277,12 @@ task Invoke_HQRM_Tests {
                         }
                     }
                 }
+            }
+
+            # Set the verbosity to 'Detailed' if it was not set through the build configuration.
+            if (-not $BuildInfo.DscTest.Pester.Configuration.Output.Verbosity)
+            {
+                $pesterConfiguration.Output.Verbosity = 'Detailed'
             }
         }
     }
