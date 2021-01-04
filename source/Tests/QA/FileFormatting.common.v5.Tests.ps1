@@ -102,7 +102,10 @@ AfterAll {
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
     Context 'When code file ''<DescriptiveName>'' exist' -ForEach $textFileToTest {
         BeforeEach {
-            # We should make a a new helper function that correctly
+            <#
+                TODO: This should be updated when issue https://github.com/dsccommunity/DscResource.Test/issues/92
+                is resolved.
+            #>
             if ($File.Extension -ieq '.mof')
             {
                 $becauseMessage = "File $($File.FullName) should be converted to ASCII. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-ASCII'."
