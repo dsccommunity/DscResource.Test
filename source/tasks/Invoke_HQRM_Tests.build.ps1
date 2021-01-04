@@ -170,16 +170,6 @@ task Invoke_HQRM_Tests {
         # None.
     }
 
-    <#
-        Default values for the Pester 5 (default) parameter set Simple.
-        Only set if build configuration has not configured the advanced
-        parameter set.
-    #>
-    if ('Configuration' -notin $BuildInfo.DscTest.Pester.Keys)
-    {
-        $defaultPesterParameters['Output'] = 'Detailed'
-    }
-
     if ($BuildInfo.DscTest -and $BuildInfo.DscTest.Pester)
     {
         <#
@@ -230,7 +220,7 @@ task Invoke_HQRM_Tests {
         if ($BuildInfo.DscTest.Pester.Configuration)
         {
             <#
-                Default values for the Pester 5 configuration.
+                Pester default values for the Pester 5 configuration.
             #>
             $pesterConfiguration = [PesterConfiguration]::Default
 
@@ -302,12 +292,6 @@ task Invoke_HQRM_Tests {
                         }
                     }
                 }
-            }
-
-            # Set the verbosity to 'Detailed' if it was not set through the build configuration.
-            if (-not $BuildInfo.DscTest.Pester.Configuration.Output.Verbosity)
-            {
-                $pesterConfiguration.Output.Verbosity = 'Detailed'
             }
         }
     }
