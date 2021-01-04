@@ -14,12 +14,22 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '')]
 param
 (
+    [Parameter()]
+    [System.String]
     $ModuleBase,
+
+    [Parameter()]
+    [System.String]
     $SourcePath,
+
+    [Parameter()]
+    [System.String[]]
     $ExcludeModuleFile,
+
+    [Parameter()]
+    [System.String[]]
     $ExcludeSourceFile,
 
     [Parameter(ValueFromRemainingArguments = $true)]
