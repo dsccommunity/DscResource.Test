@@ -72,7 +72,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
-    Context '<ExampleDescriptiveName>' -ForEach $testCase {
+    Context 'When the example ''<ExampleDescriptiveName>'' exist' -ForEach $testCase {
         It 'Should compile the MOF schema for the example correctly' {
             {
                 $mockPassword = ConvertTo-SecureString '&iPm%M5q3K$Hhq=wcEK' -AsPlainText -Force
