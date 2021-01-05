@@ -1,12 +1,17 @@
 filter WhereModuleFileNotExcluded
 {
-    foreach ($ExclPath in $ExcludeModuleFile)
+    foreach ($excludePath in $ExcludeModuleFile)
     {
-        if ((($filename = $_.FullName) -or ($fileName = $_)) -and $filename -Match ([regex]::Escape($ExclPath)))
+        # Replace any path separator to the one used in the current operating system.
+        $excludePath = $excludePath -replace '\/', [IO.Path]::DirectorySeparatorChar
+        $excludePath = $excludePath -replace '\\', [IO.Path]::DirectorySeparatorChar
+
+        if ((($filename = $_.FullName) -or ($fileName = $_)) -and $filename -match ([regex]::Escape($excludePath)))
         {
-            Write-Debug "Skipping $($_.FullName) because it matches $ExclPath"
+            Write-Debug "Skipping $($_.FullName) because it matches $excludePath"
             return
         }
     }
+
     $_
 }
