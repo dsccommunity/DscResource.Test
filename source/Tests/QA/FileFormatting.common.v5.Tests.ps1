@@ -52,10 +52,7 @@ BeforeDiscovery {
 
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    if ($SourcePath)
-    {
-        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
-    }
+    $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
 
     # Get the root of the source folder.
     $resolvedSourcePath = (Resolve-Path -Path $SourcePath).Path

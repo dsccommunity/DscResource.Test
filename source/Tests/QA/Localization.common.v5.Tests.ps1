@@ -52,10 +52,7 @@ BeforeDiscovery {
 
     $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    if ($SourcePath)
-    {
-        $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
-    }
+    $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
 
     <#
         Exclude empty PSM1. Only expect localization for Module files with some
