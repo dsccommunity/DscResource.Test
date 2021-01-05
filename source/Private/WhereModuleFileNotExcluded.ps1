@@ -9,6 +9,7 @@ filter WhereModuleFileNotExcluded
         if ((($filename = $_.FullName) -or ($fileName = $_)) -and $filename -match ([regex]::Escape($excludePath)))
         {
             Write-Debug "Skipping $($_.FullName) because it matches $excludePath"
+
             return
         }
     }
