@@ -7,14 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Updated cmdlet documentation in README.md.
 
 ### Added
 
 - Added test helper functions `Get-InvalidResultRecord` and `Get-InvalidOperationRecord`.
 - Added alias `Get-ObjectNotFoundRecord` that points to `Get-InvalidResultRecord`.
+
+### Fixed
+
+- Now the path separators are handled correctly in the filter functions
+  `WhereModuleFileNotExcluded` and `WhereSourceFileNotExcluded`.
+- Updated cmdlet documentation in README.md.
 
 ## [0.14.1] - 2020-11-12
 
