@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       `ModuleFiles.common.v4.Tests.ps1` that only checked BOM on `.psm1`
       files. No changes to Pester 4 tests, just the Pester 5 tests.
   - Added `MarkdownLinks.common.v5.Tests.ps1`
+  - Added `ModuleManifest.common.v5.Tests.ps1`
 
 ### Changed
 
