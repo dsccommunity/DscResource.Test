@@ -196,7 +196,7 @@ BeforeAll {
 
 AfterAll {
     # Re-import just the public functions.
-    Import-Module 'DscResource.Test' -Force
+    Import-Module -Name 'DscResource.Test' -Force
 }
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {

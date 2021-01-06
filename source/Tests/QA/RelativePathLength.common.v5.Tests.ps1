@@ -59,7 +59,7 @@ BeforeDiscovery {
 
 AfterAll {
     # Re-import just the public functions.
-    Import-Module 'DscResource.Test' -Force
+    Import-Module -Name 'DscResource.Test' -Force
 }
 
 Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Path Length' {

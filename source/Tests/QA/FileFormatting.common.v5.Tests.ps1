@@ -90,7 +90,7 @@ BeforeAll {
 
 AfterAll {
     # Re-import just the public functions.
-    Import-Module 'DscResource.Test' -Force
+    Import-Module -Name 'DscResource.Test' -Force
 }
 
 Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {

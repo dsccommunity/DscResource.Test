@@ -68,7 +68,7 @@ BeforeAll {
 
 AfterAll {
     # Re-import just the public functions.
-    Import-Module 'DscResource.Test' -Force
+    Import-Module -Name 'DscResource.Test' -Force
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
