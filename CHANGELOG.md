@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Renamed all existing QA (HQRM) tests to `*.v4.Tests.ps1*` and made
   them not run if test pipeline is using Pester 5.
+- The function `Get-TextFilesList` can now take an optional parameter
+  `FileExtension` to only return those files, e.g. `@('.psm1')`. This
+  makes the function `Get-Psm1FileList` obsolete.
   
 ## [0.14.3] - 2021-01-13
 

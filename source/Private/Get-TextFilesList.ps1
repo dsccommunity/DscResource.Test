@@ -18,10 +18,12 @@ function Get-TextFilesList
     (
         [Parameter(Mandatory = $true)]
         [String]
-        $Root
+        $Root,
+
+        [Parameter()]
+        [String[]]
+        $FileExtension = @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.json', '.xml', '.cmd', '.mof', '.md', '.js', '.yml')
     )
 
-    $textFileExtensions = @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.json', '.xml', '.cmd', '.mof', '.md', '.js', '.yml')
-
-    return Get-ChildItem -Path $Root -File -Recurse | Where-Object { $textFileExtensions -contains $_.Extension }
+    return Get-ChildItem -Path $Root -File -Recurse | Where-Object -FilterScript { $FileExtension -contains $_.Extension }
 }

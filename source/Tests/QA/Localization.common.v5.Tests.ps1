@@ -50,9 +50,9 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
+    $moduleFiles = @(Get-TextFilesList -Root $ModuleBase -FileExtension @('.psm1') | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    $moduleFiles += Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+    $moduleFiles += Get-TextFilesList -Root $SourcePath -FileExtension @('.psm1') | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
 
     <#
         Exclude empty PSM1. Only expect localization for Module files with some
