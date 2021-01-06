@@ -74,28 +74,6 @@ BeforeDiscovery {
         )
     }
     #endregion
-
-    #region Setup markdown file test cases.
-    $markdownFileExtensions = @('.md')
-
-    $markdownFiles = $textFiles |
-        Where-Object -FilterScript { $_.Extension -contains $markdownFileExtensions }
-
-    $markdownFileToTest = @()
-
-    foreach ($file in $markdownFiles)
-    {
-        # Use the root of the source folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedSourcePath
-
-        $markdownFileToTest += @(
-            @{
-                File = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
-    }
-    #endregion
 }
 
 BeforeAll {
@@ -117,11 +95,11 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
             #>
             if ($File.Extension -ieq '.mof')
             {
-                $becauseMessage = "File $($File.FullName) should be converted to ASCII. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-ASCII'."
+                $becauseMessage = "File $($File.FullName) should be converted to ASCII (use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-ASCII' or any other method to convert to ASCII)"
             }
             else
             {
-                $becauseMessage = "File $($textFile.FullName) should be converted to UTF-8. Use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8'."
+                $becauseMessage = "File $($File.FullName) should be converted to UTF-8 (use fixer function 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8' or any other method to convert to UTF8)"
             }
 
             $script:fileContent = Get-Content -Path $File.FullName -Raw
@@ -153,13 +131,11 @@ Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' 
 
             $containsFileWithoutNewLine | Should -BeFalse -Because 'every file should end with a new line (blank row) at the end'
         }
-    }
 
-    Context 'When markdown file ''<DescriptiveName>'' exist' -ForEach $markdownFileToTest {
         It 'Should not not have Byte Order Mark (BOM)' {
             $markdownFileHasBom = Test-FileHasByteOrderMark -FilePath $File.FullName
 
-            $markdownFileHasBom | Should -BeFalse -Because 'no markdown file should contain Byte Order Mark (BOM). Use fixer function ''ConvertTo-ASCII''.'
+            $markdownFileHasBom | Should -BeFalse -Because 'no text file (code or configuration) should contain Byte Order Mark (BOM) (use fixer function ''ConvertTo-ASCII'' or any other method to convert to ASCII)'
         }
     }
 }

@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in correct order.
 - New QA (HQRM) tests for Pester 5 was added that will only run if Pester 5.1
   is used by the test pipeline.
+- Added (converted) HQRM test for Pester 5
+  - Added `Changelog.common.v5.Tests.ps1`
+  - Added `ExampleFiles.common.v5.Tests.ps1`
+  - Added `FileFormatting.common.v5.Tests.ps1`
+    - The individual test for checking BOM on markdown files was remove
+      and replaced by a test that checks for BOM on all text files (code,
+      configuration, and markdown). That also replaced the Pester 4 test
+      `ModuleFiles.common.v4.Tests.ps1` that only checked BOM on `.psm1`
+      files. No changes to Pester 4 tests, just the Pester 5 tests.
 
 ### Changed
 

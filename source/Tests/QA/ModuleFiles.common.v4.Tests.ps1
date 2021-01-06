@@ -1,3 +1,7 @@
+<#
+    .NOTES
+        For Pester 5 this test has been added to FileFormatting.common.v5.Tests.ps1.
+#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
 param
 (
