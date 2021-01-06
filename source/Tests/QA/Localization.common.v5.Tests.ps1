@@ -62,7 +62,27 @@ BeforeDiscovery {
         functions defined
     #>
     $moduleFiles = $moduleFiles | Where-Object -FilterScript {
-        $_.Length -gt 0 -and (Get-FunctionDefinitionAst -FullName $_.FullName)
+        <#
+            Ignore parse errors in the script files. Parse error will be caught
+            in the tests in ModuleScriptFiles.common.
+        #>
+        $currentPath = $_.FullName
+
+        try
+        {
+            Get-FunctionDefinitionAst -FullName $currentPath
+
+            $valid = $true
+        }
+        catch
+        {
+            # Outputting the error just in case there is another error than parse error.
+            Write-Warning -Message ('File ''{0}'' is skipped because it could not be parsed. Error message: {1}' -f $currentPath, $_.Exception.Message)
+
+            $valid = $false
+        }
+
+        $_.Length -gt 0 -and $valid
     }
 
     $fileToTest = @()
