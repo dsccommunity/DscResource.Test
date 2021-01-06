@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       Pester 4 tests, just the Pester 5 tests.
   - Added `MarkdownLinks.common.v5.Tests.ps1`
   - Added `ModuleManifest.common.v5.Tests.ps1`
+  - Added `ModuleScriptFiles.common.v5.Tests.ps1`
+    - Contain the converted Pester 4 tests from `Psm1Parsing.common.v4.Tests.ps1`.
 
 ### Changed
 
