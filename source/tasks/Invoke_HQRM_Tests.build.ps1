@@ -422,7 +422,7 @@ task Invoke_HQRM_Tests {
         SourcePath         = $SourcePath
         MainGitBranch      = $scriptParameters['MainGitBranch']
         ModuleBase         = Join-Path -Path $BuildModuleOutput -ChildPath "$ProjectName/*"
-        # ModuleName         = $ModuleUnderTest.Name
+        ModuleName         = $ProjectName
         ExcludeModuleFile  = $DscTestScriptExcludeModuleFile
         ExcludeSourceFile  = $DscTestScriptExcludeSourceFile
     }
