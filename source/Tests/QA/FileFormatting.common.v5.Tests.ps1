@@ -70,7 +70,7 @@ BeforeDiscovery {
 
     foreach ($file in $textFiles)
     {
-        # Use the root of the source folder to extrapolate relative path.
+        # Use the project folder to extrapolate relative path.
         $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
 
         $textFileToTest += @(
