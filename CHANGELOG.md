@@ -23,9 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `FileFormatting.common.v5.Tests.ps1`
     - The individual test for checking BOM on markdown files was remove
       and replaced by a test that checks for BOM on all text files (code,
-      configuration, and markdown). That also replaced the Pester 4 test
-      `ModuleFiles.common.v4.Tests.ps1` that only checked BOM on `.psm1`
-      files. No changes to Pester 4 tests, just the Pester 5 tests.
+      configuration, and markdown). That also replaced the Pester 4 tests
+      `ModuleFiles.common.v4.Tests.ps1` (that only checked for BOM on
+      `.psm1`files), and `ScriptFiles.common.v4.Tests.ps1` (that only
+      checked for BOM on `.ps1` files). No changes were made to the
+      Pester 4 tests, just the Pester 5 tests.
   - Added `MarkdownLinks.common.v5.Tests.ps1`
   - Added `ModuleManifest.common.v5.Tests.ps1`
 
