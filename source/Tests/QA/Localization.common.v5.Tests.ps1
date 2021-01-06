@@ -6,8 +6,8 @@
         $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/Localization.common.*.Tests.ps1" -Data @{
-            SourcePath = './source'
             ModuleBase = "./output/$dscResourceModuleName/*"
+            # SourcePath = './source'
             # ExcludeModuleFile = @('Modules/DscResource.Common')
             # ExcludeSourceFile = @('Examples')
         }
@@ -20,7 +20,7 @@ param
     [System.String]
     $ModuleBase,
 
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $SourcePath,
 
@@ -52,7 +52,10 @@ BeforeDiscovery {
 
     $moduleFiles = @(Get-TextFilesList -Root $ModuleBase -FileExtension @('.psm1') | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    $moduleFiles += Get-TextFilesList -Root $SourcePath -FileExtension @('.psm1') | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+    if ($SourcePath)
+    {
+        $moduleFiles += Get-TextFilesList -Root $SourcePath -FileExtension @('.psm1') | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+    }
 
     <#
         Exclude empty PSM1. Only expect localization for Module files with some

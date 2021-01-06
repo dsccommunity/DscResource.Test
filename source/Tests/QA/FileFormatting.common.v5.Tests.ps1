@@ -6,8 +6,9 @@
         $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/FileFormatting.common.*.Tests.ps1" -Data @{
-            SourcePath = './source'
+            $ProjectPath = '.'
             ModuleBase = "./output/$dscResourceModuleName/*"
+            # SourcePath = './source'
             # ExcludeModuleFile = @('Modules/DscResource.Common')
             # ExcludeSourceFile = @('Examples')
         }
@@ -18,9 +19,13 @@ param
 (
     [Parameter(Mandatory = $true)]
     [System.String]
-    $ModuleBase,
+    $ProjectPath,
 
     [Parameter(Mandatory = $true)]
+    [System.String]
+    $ModuleBase,
+
+    [Parameter()]
     [System.String]
     $SourcePath,
 
@@ -52,11 +57,13 @@ BeforeDiscovery {
 
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+    if ($SourcePath)
+    {
+        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+    }
 
-    # Get the root of the source folder.
-    $resolvedSourcePath = (Resolve-Path -Path $SourcePath).Path
-    $resolvedSourcePath = Split-Path -Path $resolvedSourcePath -Parent
+    # Expand the project folder if it is a relative path.
+    $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
 
     #region Setup text file test cases.
     $textFileToTest = @()
@@ -64,7 +71,7 @@ BeforeDiscovery {
     foreach ($file in $textFiles)
     {
         # Use the root of the source folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedSourcePath
+        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
 
         $textFileToTest += @(
             @{
