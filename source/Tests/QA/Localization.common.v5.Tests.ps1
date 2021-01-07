@@ -50,11 +50,11 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = @(Get-TextFilesList -Root $ModuleBase -FileExtension @('.psm1') | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
+    $moduleFiles = @(Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
     if ($SourcePath)
     {
-        $moduleFiles += Get-TextFilesList -Root $SourcePath -FileExtension @('.psm1') | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+        $moduleFiles += @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
     }
 
     <#
