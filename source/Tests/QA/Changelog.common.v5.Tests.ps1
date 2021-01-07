@@ -60,10 +60,10 @@ AfterAll {
 
 Describe 'Changelog Management' -Tag 'Changelog' {
     Context 'When there is a git diff' {
-        BeforeAll{
+        BeforeAll {
             $skipTest = -not (
                 [System.Boolean] (Get-Command -Name 'git' -ErrorAction 'SilentlyContinue') `
-                -and [System.Boolean] (& (Get-Process -Id $PID).Path -NoProfile -Command 'git rev-parse --is-inside-work-tree 2>$null')
+                    -and [System.Boolean] (& (Get-Process -Id $PID).Path -NoProfile -Command 'git rev-parse --is-inside-work-tree 2>$null')
             )
         }
 

@@ -74,7 +74,7 @@ BeforeDiscovery {
 
         $moduleFileToTest += @(
             @{
-                File = $file
+                File            = $file
                 DescriptiveName = $descriptiveName
             }
         )

@@ -98,7 +98,7 @@ BeforeDiscovery {
 
         $markdownFileToTest += @(
             @{
-                File = $file
+                File            = $file
                 DescriptiveName = $descriptiveName
             }
         )

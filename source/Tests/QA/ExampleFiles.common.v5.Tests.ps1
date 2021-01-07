@@ -54,7 +54,7 @@ BeforeDiscovery {
     foreach ($exampleFile in $exampleFiles)
     {
         $exampleToTest += @{
-            ExampleFile = $exampleFile
+            ExampleFile            = $exampleFile
             ExampleDescriptiveName = Join-Path -Path (Split-Path $exampleFile.Directory -Leaf) -ChildPath (Split-Path $exampleFile -Leaf)
         }
     }

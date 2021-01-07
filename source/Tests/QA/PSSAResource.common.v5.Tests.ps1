@@ -90,7 +90,7 @@ BeforeDiscovery {
 
         $moduleFileToTest += @(
             @{
-                File = $file
+                File            = $file
                 DescriptiveName = $descriptiveName
             }
         )
@@ -112,7 +112,7 @@ AfterAll {
     Import-Module -Name 'DscResource.Test' -Force
 }
 
-Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA','Common Tests - PS Script Analyzer on Resource Files') {
+Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA', 'Common Tests - PS Script Analyzer on Resource Files') {
     BeforeAll {
         $PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path -Path (Get-CurrentModuleBase) -ChildPath 'Config/PSSA_rules_config.json')
 
@@ -139,11 +139,11 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
 
             $PSSAErrors = Invoke-ScriptAnalyzer @invokeScriptAnalyzerParameters
 
-            $errorPssaRulesOutput    = $PSSAErrors.Where{$_.Severity -eq 'Error'}
-            $requiredPssaRulesOutput = $PSSAErrors.Where{$_.RuleName -in $PSSA_rule_config.required_rules }
-            $flaggedPssaRulesOutput  = $PSSAErrors.Where{$_.RuleName -in $PSSA_rule_config.flagged_rules}
-            $DSCCustomRulesOutput    = $PSSAErrors.Where{$_.RuleName -like "DscResource.AnalyzerRules*"}
-            $ignoredPssaRulesOutput  = $PSSAErrors.Where{$_.RuleName -in $PSSA_rule_config.ignore_rules}
+            $errorPssaRulesOutput = $PSSAErrors.Where{ $_.Severity -eq 'Error' }
+            $requiredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.required_rules }
+            $flaggedPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.flagged_rules }
+            $DSCCustomRulesOutput = $PSSAErrors.Where{ $_.RuleName -like "DscResource.AnalyzerRules*" }
+            $ignoredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.ignore_rules }
             $NewErrorRulesOutput = @($ignoredPssaRulesOutput + $flaggedPssaRulesOutput + $requiredPssaRulesOutput)
 
             $suppressedRuleNames = @(
@@ -201,7 +201,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
             $report = $DSCCustomRulesOutput |
                 Select-Object @{
                     Name       = 'RuleName'
-                    Expression = {$_.RuleName -replace 'DscResource.AnalyzerRules\\'}
+                    Expression = { $_.RuleName -replace 'DscResource.AnalyzerRules\\' }
                 }, Severity, ScriptName, Line, Message |
                 Format-Table -AutoSize -Wrap |
                 Out-String -Width 110

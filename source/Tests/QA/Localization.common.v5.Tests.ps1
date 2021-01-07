@@ -95,10 +95,10 @@ BeforeDiscovery {
         }
 
         $testProperties = @{
-            File  = $file
-            ParentFolderName = Split-Path -Path $file.Directory.FullName -Leaf
+            File                   = $file
+            ParentFolderName       = Split-Path -Path $file.Directory.FullName -Leaf
             LocalizationFolderPath = (Join-Path -Path $file.Directory.FullName -ChildPath 'en-US')
-            LocalizationFile = (Join-Path -Path $file.Directory.FullName -ChildPath (Join-Path -Path 'en-US' -ChildPath "$($file.BaseName).strings.psd1"))
+            LocalizationFile       = (Join-Path -Path $file.Directory.FullName -ChildPath (Join-Path -Path 'en-US' -ChildPath "$($file.BaseName).strings.psd1"))
         }
 
         $localizedKeyToTest = @()
@@ -136,9 +136,9 @@ BeforeDiscovery {
 
             $astFilter = {
                 $args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] `
-                -and $args[0].Parent -is [System.Management.Automation.Language.MemberExpressionAst] `
-                -and $args[0].Parent.Expression -is [System.Management.Automation.Language.VariableExpressionAst] `
-                -and $args[0].Parent.Expression.VariablePath.UserPath -eq 'script:localizedData'
+                    -and $args[0].Parent -is [System.Management.Automation.Language.MemberExpressionAst] `
+                    -and $args[0].Parent.Expression -is [System.Management.Automation.Language.VariableExpressionAst] `
+                    -and $args[0].Parent.Expression.VariablePath.UserPath -eq 'script:localizedData'
             }
 
             $localizationStringConstantsAst = $definitionAst.FindAll($astFilter, $true)

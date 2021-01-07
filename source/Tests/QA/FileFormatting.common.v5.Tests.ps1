@@ -75,7 +75,7 @@ BeforeDiscovery {
 
         $textFileToTest += @(
             @{
-                File = $file
+                File            = $file
                 DescriptiveName = $descriptiveName
             }
         )
@@ -93,7 +93,7 @@ AfterAll {
     Import-Module -Name 'DscResource.Test' -Force
 }
 
-Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting'  {
+Describe 'Common Tests - File Formatting' -Tag 'Common Tests - File Formatting' {
     Context 'When code file ''<DescriptiveName>'' exist' -ForEach $textFileToTest {
         BeforeEach {
             <#
