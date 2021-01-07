@@ -177,7 +177,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                     }
                     else
                     {
-                        throw "The example '$exampleDescriptiveName' does not contain a configuration named 'Example' or '$azureCommandName'."
+                        throw ('The example ''{0}'' does not contain a configuration named ''{1}''.' -f $exampleDescriptiveName, ($commandName -join "', or '"))
                     }
 
                 }
