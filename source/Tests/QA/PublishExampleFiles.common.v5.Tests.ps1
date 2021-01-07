@@ -103,7 +103,7 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
             Test-ConfigurationName -Path $ExampleFile.FullName | Should -BeTrue -Because 'the configuration name and the file name must be equal except for the ordinal number, and the name must start with a letter, it must end with a letter or a number, and only contain letters, numbers, and underscores (e.g ''ResourceName_ExampleName_Config.ps1'')'
         }
 
-        It 'Should not have the script metadata GUID duplicated in another script file' {
+        It 'Should not have the script file information metadata GUID duplicated in another example file' {
             try
             {
                 $metadataGuid = Test-ScriptFileInfo -Path $ExampleFile.FullName |
@@ -115,10 +115,10 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
                     Ignore if the metatdata could not be read, files with missing
                     metadata was caught in the previous test.
                 #>
-                Set-ItResult -Inconclusive -Because 'the example script information metadata could not be read'
+                Set-ItResult -Inconclusive -Because 'the example script file information metadata could not be read'
             }
 
-            $exampleFilesWithSameGuid = $exampleScriptMetadata | Where-Object -FilterScript { $_.Guid -eq $metadataGuid.Guid }
+            $exampleFilesWithSameGuid = @($exampleScriptMetadata | Where-Object -FilterScript { $_.Guid -eq $metadataGuid.Guid })
 
             $report = $exampleFilesWithSameGuid | Format-Table -AutoSize -Wrap | Out-String -Width 110
 
