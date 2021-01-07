@@ -25,5 +25,5 @@ function Get-TextFilesList
         $FileExtension = @('.gitignore', '.gitattributes', '.ps1', '.psm1', '.psd1', '.json', '.xml', '.cmd', '.mof', '.md', '.js', '.yml')
     )
 
-    return Get-ChildItem -Path $Root -File -Recurse | Where-Object -FilterScript { $FileExtension -contains $_.Extension }
+    return Get-ChildItem -Path $Root -Recurse | Where-Object -FilterScript { $FileExtension -contains $_.Extension }
 }
