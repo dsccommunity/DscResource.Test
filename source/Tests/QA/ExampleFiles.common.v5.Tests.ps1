@@ -6,6 +6,7 @@
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/ExampleFiles.common.*.Tests.ps1" -Data @{
             SourcePath = './source'
+            # ExcludeSourceFile = @('MyExample.ps1')
         }
 
         Invoke-Pester -Container $container -Output Detailed
