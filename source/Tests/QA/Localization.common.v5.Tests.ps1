@@ -187,7 +187,7 @@ BeforeDiscovery {
                 Import-LocalizedData `
                     -BindingVariable 'cultureLocalizedStrings' `
                     -FileName "$($testProperties.File.BaseName).strings.psd1" `
-                    -BaseDirectory $localizationFolder `
+                    -BaseDirectory $cultureToTest.LocalizationFolderPath `
                     -UICulture $otherLanguageToTest.LocalizationFolderName
 
                 foreach ($localizedKey in $cultureLocalizedStrings.Keys)
