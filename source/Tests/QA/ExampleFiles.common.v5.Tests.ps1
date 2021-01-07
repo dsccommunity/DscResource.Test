@@ -48,16 +48,14 @@ BeforeDiscovery {
 
     $exampleFiles = @(Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
-    $testCase = @()
+    $exampleToTest = @()
 
     foreach ($exampleFile in $exampleFiles)
     {
-        $newTestCase = @{
+        $exampleToTest += @{
             ExampleFile = $exampleFile
             ExampleDescriptiveName = Join-Path -Path (Split-Path $exampleFile.Directory -Leaf) -ChildPath (Split-Path $exampleFile -Leaf)
         }
-
-        $testCase += $newTestCase
     }
 }
 
@@ -72,7 +70,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
-    Context 'When the example ''<ExampleDescriptiveName>'' exist' -ForEach $testCase {
+    Context 'When the example ''<ExampleDescriptiveName>'' exist' -ForEach $exampleToTest {
         It 'Should compile the MOF schema for the example correctly' {
             {
                 $mockPassword = ConvertTo-SecureString '&iPm%M5q3K$Hhq=wcEK' -AsPlainText -Force
