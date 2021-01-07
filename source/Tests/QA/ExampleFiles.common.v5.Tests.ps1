@@ -94,7 +94,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
 
                 try
                 {
-                    . $ExampleFile
+                    . $ExampleFile.FullName
 
                     <#
                         Test for either a configuration named 'Example',
@@ -104,7 +104,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                     #>
                     $commandName = @(
                         'Example',
-                        (Get-PublishFileName -Path $ExampleFile)
+                        (Get-PublishFileName -Path $ExampleFile.FullName)
                     )
 
                     # Get the first one that matches.
