@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `PSSAResource.common.v5.Tests.ps1`
     - Any test that is excluded by using Pester `ExcludeTag` under the key
       `DscTest:` will now be silently excluded due to how Pester does _Discovery_.
+  - Added `PublishExampleFiles.v5.Tests.ps1`
 
 ### Changed
 
