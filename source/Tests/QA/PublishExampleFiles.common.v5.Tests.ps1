@@ -4,7 +4,7 @@
 
         $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
-        $container = New-PesterContainer -Path "$pathToHQRMTests/ExampleFiles.common.*.Tests.ps1" -Data @{
+        $container = New-PesterContainer -Path "$pathToHQRMTests/PublishExampleFiles.common.*.Tests.ps1" -Data @{
             SourcePath = './source'
             # ExcludeSourceFile = @('MyExample.ps1')
         }
