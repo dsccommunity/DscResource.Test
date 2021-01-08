@@ -561,7 +561,7 @@ DscTest:
 
 This build task evaluates that there was no failed tests when the task
 `Invoke_HQRM_Tests` ran. This build task is normally not used on its own.
-It is meant to run through the meta task [`Invoke_HQRM_Tests_Stop_On_Fail`](#invoke-hqrm-tests-stop-on-fail).
+It is meant to run through the meta task [`Invoke_HQRM_Tests_Stop_On_Fail`](#invoke_hqrm_tests_stop_on_fail).
 
 Below is an example how the build task can be used when a repository is
 based on the [Sampler](https://github.com/gaelcolas/Sampler) project.
