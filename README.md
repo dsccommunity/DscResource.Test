@@ -412,3 +412,651 @@ Wait-ForIdleLcm -Clear
 ```
 
 This will wait for the LCM to become idle and then clear the LCM.
+
+## Tasks
+
+These are `Invoke-Build` tasks. The build tasks are primarily meant to be
+run by the project [Sampler's](https://github.com/gaelcolas/Sampler)
+`build.ps1` which wraps `Invoke-Build` and has the configuration file
+(`build.yaml`) to control its behavior.
+
+To make the tasks available for the cmdlet `Invoke-Build` in a repository
+that is based on the [Sampler](https://github.com/gaelcolas/Sampler) project,
+add this module to the file `RequiredModules.psd1` and then in the file
+`build.yaml` add the following:
+
+```yaml
+ModuleBuildTasks:
+  DscResource.Test:
+    - 'Task.*'
+```
+
+### `Invoke_HQRM_Tests`
+
+This build task runs the High Quality Resource Module (HQRM) tests located
+in the folder `Tests/QA` in the module _DscResource.Test_'s root. This build
+task is normally not used on its own. It is meant to run through the meta task
+[`Invoke_HQRM_Tests_Stop_On_Fail`](#invoke-hqrm-tests-stop-on-fail).
+
+Below is an example how the build task can be used when a repository is
+based on the [Sampler](https://github.com/gaelcolas/Sampler) project.
+
+```yaml
+BuildWorkflow:
+  '.':
+    - build
+
+  hqrmtest:
+    - Invoke_HQRM_Tests
+```
+
+The build configuration (build.yaml) can be used to control the behavior
+of the build task. Everything under the key `DscTest:` controls the behavior.
+There are two sections `Pester` and `Script`.
+
+### Section Pester
+
+The section Pester control the behavior of `Invoke-Pester` that is run
+through the build task. There are two different ways of configuring this,
+they can be combined but it is limited to the parameter sets of `Invoke-Pester`,
+see the command syntax in the [`Invoke-Pester` documentation](https://pester.dev/docs/commands/Invoke-Pester).
+
+#### Passing parameters to Pester
+
+Any parameter that `Invoke-Pester` takes is valid to use as key in the
+build configuration. The exception is `Container`, it is handled by the
+build task to pass parameters to the scripts correctly (see [Section Script](#section-script)).
+Also the parameter `Path` can only point to test files that do not need
+any script parameters passed to them to run.
+
+>**NOTE:** A key that does not have a value will be ignored.
+
+```yaml
+DscTest:
+  Pester:
+    Path:
+    ExcludePath:
+    TagFilter:
+    FullNameFilter:
+    ExcludeTagFilter:
+      - Common Tests - New Error-Level Script Analyzer Rules
+    Output: Detailed
+```
+
+Important to note that if the key `Configuration` is present it limits
+what other parameters that can be passed to `Invoke-Pester` due to the
+parameter set that is then used. But the key `Configuration` gives more
+control over the behavior of `Invoke-Pester`. For more information what 
+can be configured see the [sections of the `[PesterConfiguration]` object](https://pester.dev/docs/commands/Invoke-Pester#-configuration).
+
+Under the key `Configuration` any section name in the `[PesterConfiguration]`
+object is valid to use as key. Any new sections or properties that will be
+added in future version of Pester will also be valid (as long as they follow
+the same pattern).
+
+```plaintext
+PS > [PesterConfiguration]::Default
+Run          : Run configuration.
+Filter       : Filter configuration
+CodeCoverage : CodeCoverage configuration.
+TestResult   : TestResult configuration.
+Should       : Should configuration.
+Debug        : Debug configuration for Pester. ⚠ Use at your own risk!
+Output       : Output configuration
+```
+
+This shows how to use the advanced configuration option to exclude tags
+and change the output verbosity. The keys `Filter:` and `Output:` are the
+section names from the list above, and the keys `ExcludeTag` and `Verbosity`
+are properties in the respective section in the `[PesterConfiguration]`
+object.
+
+>**NOTE:** A key that does not have a value will be ignored.
+
+```yaml
+DscTest:
+  Pester:
+    Configuration:
+      Filter:
+        Tag:
+        ExcludeTag:
+          - Common Tests - New Error-Level Script Analyzer Rules
+      Output:
+        Verbosity: Detailed
+```
+
+### Section Script
+
+#### Passing parameters to test scripts
+
+The key `Script:` is used to define values to pass to parameters in the
+test scripts. Each key defined under the key `Script:` is a parameter that
+can be used in one or more test script.
+
+See the section [Tests](#tests) for the parameters that can be defined here
+to control the behavior of the tests.
+
+>**NOTE:** The test scripts only used the parameters that is required and
+>ignore any other that is defined. If there are tests added that need a
+>different parameter name, that name can be defined under the key `Script:`
+>and will be passed to the test that require it without any change to the
+>build task.
+
+This defines three parameters `ExcludeSourceFile`, `ExcludeModuleFile`,
+and `MainGitBranch` and their corresponding values.
+
+```yaml
+DscTest:
+  Script:
+    ExcludeSourceFile:
+      - output
+      - source/DSCResources/DSC_ObsoleteResource1
+      - DSC_ObsoleteResource2
+    ExcludeModuleFile:
+      - Modules/DscResource.Common
+    MainGitBranch: main
+```
+
+## Tests
+
+This is the documentation for the Pester 5 tests. 
+
+### Changelog.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ProjectPath] <String> [-MainGitBranch] <String> [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### MainGitBranch
+
+The name of the default branch of the Git upstream repository.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$defaultBranch = 'main'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/Changelog.common.*.Tests.ps1" -Data @{
+    ProjectPath = '.'
+    MainGitBranch = $defaultBranch
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### ExampleFiles.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-SourcePath] <String> [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test. Default no files will be excluded from the test.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/ExampleFiles.common.*.Tests.ps1" -Data @{
+    SourcePath = './source'
+    # ExcludeSourceFile = @('MyExample.ps1')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### FileFormatting.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+ [-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>] 
+   [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
+   [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeModuleFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `ModuleBase`.
+Default no files will be excluded from the test.
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/FileFormatting.common.*.Tests.ps1" -Data @{
+    ProjectPath = '.'
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # SourcePath = './source'
+    # ExcludeModuleFile = @('Modules/DscResource.Common')
+    # ExcludeSourceFile = @('Examples')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### Localization.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+ [-ModuleBase] <String> [[-SourcePath] <String>] [[-ExcludeModuleFile] <String[]>] 
+   [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeModuleFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `ModuleBase`.
+Default no files will be excluded from the test.
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/Localization.common.*.Tests.ps1" -Data @{
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # SourcePath = './source'
+    # ExcludeModuleFile = @('Modules/DscResource.Common')
+    # ExcludeSourceFile = @('Examples')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### MarkdownLinks.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>] 
+  [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
+  [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeModuleFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `ModuleBase`.
+Default no files will be excluded from the test.
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/MarkdownLinks.common.*.Tests.ps1" -Data @{
+    $ProjectPath = '.'
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # SourcePath = './source'
+    # ExcludeModuleFile = @('Modules/DscResource.Common')
+    # ExcludeSourceFile = @('Examples')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### ModuleManifest.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ModuleName] <String> [-ModuleBase] <String> [[-Args] <Object>]
+  [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ModuleName
+
+The name of the module that is built, e.g. `FileSystemDsc`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$dscResourceModuleName = 'JeaDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/ModuleManifest.common.*.Tests.ps1" -Data @{
+    ModuleName = $dscResourceModuleName
+    ModuleBase = "./output/$dscResourceModuleName/*"
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### ModuleScriptFiles.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>]
+  [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
+  [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeModuleFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `ModuleBase`.
+Default no files will be excluded from the test.
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/ModuleScriptFiles.common.*.Tests.ps1" -Data @{
+    ProjectPath = '.'
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # SourcePath = './source'
+    # ExcludeModuleFile = @('Modules/DscResource.Common')
+    # ExcludeSourceFile = @('Examples')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### PSSAResource.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>]
+  [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
+  [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeModuleFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `ModuleBase`.
+Default no files will be excluded from the test.
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/PSSAResource.common.*.Tests.ps1" -Data @{
+    ProjectPath = '.'
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # SourcePath = './source'
+    # ExcludeModuleFile = @('Modules/DscResource.Common')
+    # ExcludeSourceFile = @('Examples')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### PublishExampleFiles.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-SourcePath] <String> [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] 
+  [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ExcludeSourceFile
+
+Any path or part of a path that will be excluded from the list of files
+gathered by the test from the path specified in the parameter `SourcePath`.
+Default no files will be excluded from the test.
+
+##### SourcePath
+
+The path to the source folder of the project, e.g. `./source`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/PublishExampleFiles.common.*.Tests.ps1" -Data @{
+    SourcePath = './source'
+    # ExcludeSourceFile = @('MyExample.ps1')
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### RelativePathLength.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ModuleBase] <String> [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/RelativePathLength.common.*.Tests.ps1" -Data @{
+    ModuleBase = "./output/$dscResourceModuleName/*"
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### ResourceSchema.common
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+[-ModuleBase] <String> [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/ResourceSchema.common.*.Tests.ps1" -Data @{
+    ModuleBase = "./output/$dscResourceModuleName/*"
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
