@@ -454,14 +454,14 @@ The build configuration (build.yaml) can be used to control the behavior
 of the build task. Everything under the key `DscTest:` controls the behavior.
 There are two sections `Pester` and `Script`.
 
-### Section Pester
+#### Section Pester
 
 The section Pester control the behavior of `Invoke-Pester` that is run
 through the build task. There are two different ways of configuring this,
 they can be combined but it is limited to the parameter sets of `Invoke-Pester`,
 see the command syntax in the [`Invoke-Pester` documentation](https://pester.dev/docs/commands/Invoke-Pester).
 
-#### Passing parameters to Pester
+##### Passing parameters to Pester
 
 Any parameter that `Invoke-Pester` takes is valid to use as key in the
 build configuration. The exception is `Container`, it is handled by the
@@ -525,9 +525,9 @@ DscTest:
         Verbosity: Detailed
 ```
 
-### Section Script
+#### Section Script
 
-#### Passing parameters to test scripts
+##### Passing parameters to test scripts
 
 The key `Script:` is used to define values to pass to parameters in the
 test scripts. Each key defined under the key `Script:` is a parameter that
@@ -556,6 +556,49 @@ DscTest:
       - Modules/DscResource.Common
     MainGitBranch: main
 ```
+
+### `Fail_Build_If_HQRM_Tests_Failed`
+
+This build task evaluates that there was no failed tests when the task
+`Invoke_HQRM_Tests` ran. This build task is normally not used on its own.
+It is meant to run through the meta task [`Invoke_HQRM_Tests_Stop_On_Fail`](#invoke-hqrm-tests-stop-on-fail).
+
+Below is an example how the build task can be used when a repository is
+based on the [Sampler](https://github.com/gaelcolas/Sampler) project.
+
+```yaml
+BuildWorkflow:
+  '.':
+    - build
+
+  hqrmtest:
+    - Invoke_HQRM_Tests
+    - Fail_Build_If_HQRM_Tests_Failed
+```
+
+### `Invoke_HQRM_Tests_Stop_On_Fail`
+
+This is a meta task meant to be used in the build configuration to run
+tests in the correct order to fail the test pipeline if there are any
+failed test.
+
+The order this meta task is running tasks:
+
+- Invoke_HQRM_Tests
+- Fail_Build_If_HQRM_Tests_Failed
+
+Below is an example how the build task can be used when a repository is
+based on the [Sampler](https://github.com/gaelcolas/Sampler) project.
+
+```yaml
+BuildWorkflow:
+  '.':
+    - build
+
+  hqrmtest:
+    - Invoke_HQRM_Tests_Stop_On_Fail
+```
+
 
 ## Tests
 
