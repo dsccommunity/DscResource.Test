@@ -13,7 +13,7 @@
             # ExcludeSourceFile = @('Examples')
         }
 
-        Invoke-Pester -Container $container -Output Detailed #-ExcludeTagFilter 'Common Tests - New Error-Level Script Analyzer Rules'
+        Invoke-Pester -Container $container -Output Detailed
 #>
 param
 (
