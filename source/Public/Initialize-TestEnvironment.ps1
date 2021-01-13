@@ -105,18 +105,18 @@ function Initialize-TestEnvironment
         $ResourceType = 'Mof',
 
         [Parameter()]
-        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [ValidateSet('AllSigned', 'Bypass', 'RemoteSigned', 'Unrestricted')]
         [String]
         $ProcessExecutionPolicy,
 
         [Parameter()]
-        [ValidateSet('AllSigned', 'Bypass','RemoteSigned','Unrestricted')]
+        [ValidateSet('AllSigned', 'Bypass', 'RemoteSigned', 'Unrestricted')]
         [String]
         $MachineExecutionPolicy
     )
 
     Write-Verbose -Message "Initializing test environment for $TestType testing of $DscResourceName in module $Module"
-    $ModuleUnderTest = Import-Module $Module -PassThru -ErrorAction Stop
+    $ModuleUnderTest = (Import-Module $Module -PassThru -ErrorAction Stop) | Where-Object -FilterScript { $_.Name -eq $Module } # The Where-Object filter is added to fix issue #97
     $moduleRootFilePath = $ModuleUnderTest.ModuleBase
     $moduleManifestFilePath = Join-Path -Path $moduleRootFilePath -ChildPath "$($ModuleUnderTest.Name).psd1"
 
@@ -130,7 +130,7 @@ function Initialize-TestEnvironment
     }
 
     # Import the module to test
-    if ($TestType -in ('Unit','All'))
+    if ($TestType -in ('Unit', 'All'))
     {
         switch ($ResourceType)
         {
@@ -206,7 +206,7 @@ function Initialize-TestEnvironment
 
     Set-PSModulePath -Path $newPSModulePath
 
-    if ($TestType -in ('Integration','All'))
+    if ($TestType -in ('Integration', 'All'))
     {
         <#
             Making sure setting up the LCM & Machine Path makes sense...
