@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
 ### Added
 
 - Added test helper functions `Get-InvalidResultRecord` and `Get-InvalidOperationRecord`.
 - Added alias `Get-ObjectNotFoundRecord` that points to `Get-InvalidResultRecord`.
+
+## [0.14.3] - 2021-01-13
 
 ### Fixed
 
