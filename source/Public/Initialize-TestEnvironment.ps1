@@ -116,7 +116,7 @@ function Initialize-TestEnvironment
     )
 
     Write-Verbose -Message "Initializing test environment for $TestType testing of $DscResourceName in module $Module"
-    $ModuleUnderTest = (Import-Module $Module -PassThru -ErrorAction Stop) | Where-Object -FilterScript { $_.Name -eq $Module }
+    $ModuleUnderTest = (Import-Module $Module -PassThru -ErrorAction Stop) | Where-Object -FilterScript { $_.Name -eq $Module } # The Where-Object filter is added to fix issue #97
     $moduleRootFilePath = $ModuleUnderTest.ModuleBase
     $moduleManifestFilePath = Join-Path -Path $moduleRootFilePath -ChildPath "$($ModuleUnderTest.Name).psd1"
 
