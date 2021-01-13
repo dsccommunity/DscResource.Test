@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.3] - 2021-01-13
+
 ### Fixed
 
 - Fix issue where the use of ScriptsToProcess causes the Initialize-TestEnvironment
