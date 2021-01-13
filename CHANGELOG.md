@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix issue where the use of ScriptsToProcess causes the Initialize-TestEnvironment
+  function to fail ([issue #97](https://github.com/dsccommunity/DscResource.Test/issues/97)).
+
+## [0.14.2] - 2021-01-05
+
+### Fixed
+
 - Now the path separators are handled correctly in the filter functions
   `WhereModuleFileNotExcluded` and `WhereSourceFileNotExcluded`.
 - Updated cmdlet documentation in README.md.
