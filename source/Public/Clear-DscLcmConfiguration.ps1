@@ -17,6 +17,7 @@
         This function should be called after each Describe block in an integration
         test to ensure the DSC LCM is reset before another test DSC configuration
         is applied.
+
     .EXAMPLE
         Clear-DscLcmConfiguration
 
