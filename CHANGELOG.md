@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       `DscTest:` will now be silently excluded due to how Pester does _Discovery_.
   - Added `PublishExampleFiles.v5.Tests.ps1`
   - Added `ResourceSchema.common.v5.Tests.ps1`
+- Added public function `Get-DscResourceTestContainer` which returns a Pester
+  container for each available Pester 5 HQRM test.
 
 ### Changed
 
@@ -45,7 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The function `Get-TextFilesList` can now take an optional parameter
   `FileExtension` to only return those files, e.g. `@('.psm1')`. This
   makes the function `Get-Psm1FileList` obsolete.
-  
+- `Get-DscResourceTestContainer`
+  - Changed to support the new Pester 5 HQRM tests, and code for an older
+    Pester 5 Beta iteration was removed.
+
 ## [0.14.3] - 2021-01-13
 
 ### Fixed
