@@ -128,21 +128,19 @@ Get-DscResourceTestContainers [-ProjectPath] <string> [-ModuleName] <string>
 #### Example
 
 ```powershell
-        $getDscResourceTestContainersParameters = @{
-            ProjectPath       = '.'
-            ModuleName        = 'SqlServerDsc'
-            DefaultBranch     = 'main'
-            SourcePath        = './source'
-            ExcludeSourceFile = @('Examples')
-            ModuleBase        = "./output/MyDscResourceName/*"
-            ExcludeModuleFile = @('Modules/DscResource.Common')
-        }
+$getDscResourceTestContainersParameters = @{
+    ProjectPath       = '.'
+    ModuleName        = 'MyDscResourceName'
+    DefaultBranch     = 'main'
+    SourcePath        = './source'
+    ExcludeSourceFile = @('Examples')
+    ModuleBase        = "./output/MyDscResourceName/*"
+    ExcludeModuleFile = @('Modules/DscResource.Common')
+}
 
-        $container = Get-DscResourceTestContainers @getDscResourceTestContainersParameters
+$container = Get-DscResourceTestContainers @getDscResourceTestContainersParameters
 
-        Invoke-Pester -Container $container -Output Detailed
-
-
+Invoke-Pester -Container $container -Output Detailed
 ```
 
 Returns a container for each available HQRM test script using the provided

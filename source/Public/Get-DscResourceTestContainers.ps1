@@ -5,7 +5,7 @@
     .EXAMPLE
         $getDscResourceTestContainersParameters = @{
             ProjectPath       = '.'
-            ModuleName        = 'SqlServerDsc'
+            ModuleName        = 'MyDscResourceName'
             DefaultBranch     = 'main'
             SourcePath        = './source'
             ExcludeSourceFile = @('Examples')
