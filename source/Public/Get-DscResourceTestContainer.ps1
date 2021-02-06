@@ -3,7 +3,7 @@
         This command will return a container for each available HQRM test script.
 
     .EXAMPLE
-        $getDscResourceTestContainersParameters = @{
+        $getDscResourceTestContainerParameters = @{
             ProjectPath       = '.'
             ModuleName        = 'MyDscResourceName'
             DefaultBranch     = 'main'
@@ -13,7 +13,7 @@
             ExcludeModuleFile = @('Modules/DscResource.Common')
         }
 
-        $container = Get-DscResourceTestContainer @getDscResourceTestContainersParameters
+        $container = Get-DscResourceTestContainer @getDscResourceTestContainerParameters
 
         Invoke-Pester -Container $container -Output Detailed
 

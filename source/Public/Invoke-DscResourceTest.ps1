@@ -518,7 +518,7 @@ function Invoke-DscResourceTest
 
             $invokePesterParameters = @{}
 
-            $getDscResourceTestContainersParameters = @{
+            $getDscResourceTestContainerParameters = @{
                 ProjectPath       = $ProjectPath
                 ModuleName        = $ModuleName
                 DefaultBranch     = $MainGitBranch
@@ -528,7 +528,7 @@ function Invoke-DscResourceTest
                 ExcludeModuleFile = $ExcludeModuleFile
             }
 
-            $container = Get-DscResourceTestContainer @getDscResourceTestContainersParameters
+            $container = Get-DscResourceTestContainer @getDscResourceTestContainerParameters
 
             $invokePesterParameters['Container'] = $container
 
