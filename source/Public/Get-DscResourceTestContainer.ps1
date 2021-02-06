@@ -13,14 +13,14 @@
             ExcludeModuleFile = @('Modules/DscResource.Common')
         }
 
-        $container = Get-DscResourceTestContainers @getDscResourceTestContainersParameters
+        $container = Get-DscResourceTestContainer @getDscResourceTestContainersParameters
 
         Invoke-Pester -Container $container -Output Detailed
 
         Returns a container for each available HQRM test script using the provided
         values as script parameters. Then Pester is invoked on the containers.
 #>
-function Get-DscResourceTestContainers
+function Get-DscResourceTestContainer
 {
     [CmdletBinding()]
     param

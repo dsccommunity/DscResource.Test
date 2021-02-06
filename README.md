@@ -107,7 +107,7 @@ Clear-DscLcmConfiguration
 
 This command will Stop the DSC LCM and clear out any DSC configurations.
 
-### `Get-DscResourceTestContainers`
+### `Get-DscResourceTestContainer`
 
 This command will return a container for each available HQRM test script.
 
@@ -115,7 +115,7 @@ This command will return a container for each available HQRM test script.
 
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
-Get-DscResourceTestContainers [-ProjectPath] <string> [-ModuleName] <string> 
+Get-DscResourceTestContainer [-ProjectPath] <string> [-ModuleName] <string> 
   [-DefaultBranch] <string> [-SourcePath] <string> [[-ExcludeSourceFile] <string[]>] 
   [-ModuleBase] <string> [[-ExcludeModuleFile] <string[]>] [<CommonParameters>]
 ```
@@ -138,7 +138,7 @@ $getDscResourceTestContainersParameters = @{
     ExcludeModuleFile = @('Modules/DscResource.Common')
 }
 
-$container = Get-DscResourceTestContainers @getDscResourceTestContainersParameters
+$container = Get-DscResourceTestContainer @getDscResourceTestContainersParameters
 
 Invoke-Pester -Container $container -Output Detailed
 ```
