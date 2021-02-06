@@ -107,6 +107,47 @@ Clear-DscLcmConfiguration
 
 This command will Stop the DSC LCM and clear out any DSC configurations.
 
+### `Get-DscResourceTestContainers`
+
+This command will return a container for each available HQRM test script.
+
+#### Syntax
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+Get-DscResourceTestContainers [-ProjectPath] <string> [-ModuleName] <string> 
+  [-DefaultBranch] <string> [-SourcePath] <string> [[-ExcludeSourceFile] <string[]>] 
+  [-ModuleBase] <string> [[-ExcludeModuleFile] <string[]>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+#### Outputs
+
+**Pester.ContainerInfo[]**
+
+#### Example
+
+```powershell
+        $getDscResourceTestContainersParameters = @{
+            ProjectPath       = '.'
+            ModuleName        = 'SqlServerDsc'
+            DefaultBranch     = 'main'
+            SourcePath        = './source'
+            ExcludeSourceFile = @('Examples')
+            ModuleBase        = "./output/MyDscResourceName/*"
+            ExcludeModuleFile = @('Modules/DscResource.Common')
+        }
+
+        $container = Get-DscResourceTestContainers @getDscResourceTestContainersParameters
+
+        Invoke-Pester -Container $container -Output Detailed
+
+
+```
+
+Returns a container for each available HQRM test script using the provided
+values as script parameters. Then Pester is invoked on the containers.
+
 ### `Get-InvalidOperationRecord`
 
 Returns an invalid operation exception object.
