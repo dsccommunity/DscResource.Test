@@ -406,142 +406,110 @@ function Invoke-DscResourceTest
 
             $ModuleUnderTestManifest = Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath "$($ModuleUnderTest.Name).psd1"
 
-            $isPester5 = (Get-Module -Name 'Pester').Version -ge '5.0.0'
-
-            if (-not $isPester5)
+            $ScriptItems = foreach ($item in $PSBoundParameters['Path'])
             {
-                $ScriptItems = foreach ($item in $PSBoundParameters['Path'])
+                if ($item -is [System.Collections.IDictionary])
                 {
-                    if ($item -is [System.Collections.IDictionary])
+                    if ($item['Parameters'] -isNot [System.Collections.IDictionary])
                     {
-                        if ($item['Parameters'] -isNot [System.Collections.IDictionary])
-                        {
-                            $item['Parameters'] = @{ }
-                        }
-                        $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
-                        $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
-                        $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
-                        $item['Parameters']['ProjectPath'] = $ProjectPath
-                        $item['Parameters']['SourcePath'] = $SourcePath
-                        $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
-                        $item['Parameters']['Tag'] = $PSBoundParameters['TagFilter']
-                        $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTagFilter']
-                        $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
-                        $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
-                        $item['Parameters']['MainGitBranch'] = $MainGitBranch
+                        $item['Parameters'] = @{ }
                     }
-                    else
-                    {
-                        $item = @{
-                            Path       = $item
-                            Parameters = @{
-                                ModuleBase         = $ModuleUnderTest.ModuleBase
-                                ModuleName         = $ModuleUnderTest.Name
-                                ModuleManifest     = $ModuleUnderTestManifest
-                                ProjectPath        = $ProjectPath
-                                SourcePath         = $SourcePath
-                                SourceManifest     = $SourceManifest.FullName
-                                Tag                = $PSBoundParameters['TagFilter']
-                                ExcludeTag         = $PSBoundParameters['ExcludeTagFilter']
-                                ExcludeModuleFile  = $ExcludeModuleFile
-                                ExcludeSourceFile  = $ExcludeSourceFile
-                                MainGitBranch      = $MainGitBranch
-                            }
+                    $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
+                    $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
+                    $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
+                    $item['Parameters']['ProjectPath'] = $ProjectPath
+                    $item['Parameters']['SourcePath'] = $SourcePath
+                    $item['Parameters']['SourceManifest'] = $SourceManifest.FullName
+                    $item['Parameters']['Tag'] = $PSBoundParameters['TagFilter']
+                    $item['Parameters']['ExcludeTag'] = $PSBoundParameters['ExcludeTagFilter']
+                    $item['Parameters']['ExcludeModuleFile'] = $ExcludeModuleFile
+                    $item['Parameters']['ExcludeSourceFile'] = $ExcludeSourceFile
+                    $item['Parameters']['MainGitBranch'] = $MainGitBranch
+                }
+                else
+                {
+                    $item = @{
+                        Path       = $item
+                        Parameters = @{
+                            ModuleBase         = $ModuleUnderTest.ModuleBase
+                            ModuleName         = $ModuleUnderTest.Name
+                            ModuleManifest     = $ModuleUnderTestManifest
+                            ProjectPath        = $ProjectPath
+                            SourcePath         = $SourcePath
+                            SourceManifest     = $SourceManifest.FullName
+                            Tag                = $PSBoundParameters['TagFilter']
+                            ExcludeTag         = $PSBoundParameters['ExcludeTagFilter']
+                            ExcludeModuleFile  = $ExcludeModuleFile
+                            ExcludeSourceFile  = $ExcludeSourceFile
+                            MainGitBranch      = $MainGitBranch
                         }
                     }
-
-                    $item
                 }
 
-                $PSBoundParameters['Path'] = $ScriptItems
+                $item
             }
+
+            $PSBoundParameters['Path'] = $ScriptItems
 
             $invokePesterParameters = @{
                 PassThru = $PSBoundParameters.PassThru
             }
 
-            if ($isPester5)
+            $invokePesterParameters['Script'] = $PSBoundParameters.Path
+
+            if ($PSBoundParameters.ContainsKey('TestName'))
             {
-                $invokePesterParameters['Path'] = $PSBoundParameters.Path
-
-                if ($PSBoundParameters.ContainsKey('TagFilter'))
-                {
-                    $invokePesterParameters['TagFilter'] = $PSBoundParameters.TagFilter
-                }
-
-                if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
-                {
-                    $invokePesterParameters['ExcludeTagFilter'] = $PSBoundParameters.ExcludeTagFilter
-                }
-
-                if ($PSBoundParameters.ContainsKey('Output'))
-                {
-                    $invokePesterParameters['Output'] = $PSBoundParameters.Output
-                }
-
-                if ($PSBoundParameters.ContainsKey('FullNameFilter'))
-                {
-                    $invokePesterParameters['FullNameFilter'] = $PSBoundParameters.TestName
-                }
+                $invokePesterParameters['TestName'] = $PSBoundParameters.TestName
             }
-            else
+
+            if ($PSBoundParameters.ContainsKey('EnableExit'))
             {
-                $invokePesterParameters['Script'] = $PSBoundParameters.Path
+                $invokePesterParameters['EnableExit'] = $PSBoundParameters.EnableExit
+            }
 
-                if ($PSBoundParameters.ContainsKey('TestName'))
-                {
-                    $invokePesterParameters['TestName'] = $PSBoundParameters.TestName
-                }
+            if ($PSBoundParameters.ContainsKey('TagFilter'))
+            {
+                $invokePesterParameters['Tag'] = $PSBoundParameters.TagFilter
+            }
 
-                if ($PSBoundParameters.ContainsKey('EnableExit'))
-                {
-                    $invokePesterParameters['EnableExit'] = $PSBoundParameters.EnableExit
-                }
+            if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
+            {
+                $invokePesterParameters['ExcludeTag'] = $PSBoundParameters.ExcludeTagFilter
+            }
 
-                if ($PSBoundParameters.ContainsKey('TagFilter'))
-                {
-                    $invokePesterParameters['Tag'] = $PSBoundParameters.TagFilter
-                }
+            if ($PSBoundParameters.ContainsKey('OutputFile'))
+            {
+                $invokePesterParameters['OutputFile'] = $PSBoundParameters.OutputFile
+            }
 
-                if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
-                {
-                    $invokePesterParameters['ExcludeTag'] = $PSBoundParameters.ExcludeTagFilter
-                }
+            if ($PSBoundParameters.ContainsKey('OutputFormat'))
+            {
+                $invokePesterParameters['OutputFormat'] = $PSBoundParameters.OutputFormat
+            }
 
-                if ($PSBoundParameters.ContainsKey('OutputFile'))
-                {
-                    $invokePesterParameters['OutputFile'] = $PSBoundParameters.OutputFile
-                }
+            if ($PSBoundParameters.ContainsKey('CodeCoverage'))
+            {
+                $invokePesterParameters['CodeCoverage'] = $PSBoundParameters.CodeCoverage
+            }
 
-                if ($PSBoundParameters.ContainsKey('OutputFormat'))
-                {
-                    $invokePesterParameters['OutputFormat'] = $PSBoundParameters.OutputFormat
-                }
+            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFile'))
+            {
+                $invokePesterParameters['CodeCoverageOutputFile'] = $PSBoundParameters.CodeCoverageOutputFile
+            }
 
-                if ($PSBoundParameters.ContainsKey('CodeCoverage'))
-                {
-                    $invokePesterParameters['CodeCoverage'] = $PSBoundParameters.CodeCoverage
-                }
+            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFileFormat'))
+            {
+                $invokePesterParameters['CodeCoverageOutputFileFormat'] = $PSBoundParameters.CodeCoverageOutputFileFormat
+            }
 
-                if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFile'))
-                {
-                    $invokePesterParameters['CodeCoverageOutputFile'] = $PSBoundParameters.CodeCoverageOutputFile
-                }
+            if ($PSBoundParameters.ContainsKey('PesterOption'))
+            {
+                $invokePesterParameters['PesterOption'] = $PSBoundParameters.PesterOption
+            }
 
-                if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFileFormat'))
-                {
-                    $invokePesterParameters['CodeCoverageOutputFileFormat'] = $PSBoundParameters.CodeCoverageOutputFileFormat
-                }
-
-                if ($PSBoundParameters.ContainsKey('PesterOption'))
-                {
-                    $invokePesterParameters['PesterOption'] = $PSBoundParameters.PesterOption
-                }
-
-                if ($PSBoundParameters.ContainsKey('Show'))
-                {
-                    $invokePesterParameters['Show'] = $PSBoundParameters.Show
-                }
+            if ($PSBoundParameters.ContainsKey('Show'))
+            {
+                $invokePesterParameters['Show'] = $PSBoundParameters.Show
             }
         }
         else
