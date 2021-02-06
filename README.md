@@ -312,14 +312,34 @@ the DSC_Firewall DSC resource in the NetworkingDsc DSC resource module.
 
 ### `Invoke-DscResourceTest`
 
+This cmdlet behaves differently between Pester 4 and Pester 5. For Pester 5
+the cmdlet has been made so that it can run on any module by providing
+the correct paths. When only Pester 4 is available it is limited to the
+pattern of the [Sampler](https://github.com/gaelcolas/Sampler) project.
+
+#### Using Pester 4
+
 Wrapper for Invoke-Pester. It is used primarily by the pipeline and can
 be used to run test by providing a project path, module specification,
 by module name, or path.
+
+#### Pester 5
+
+Wrapper for Invoke-Pester's Simple parameter set. It can be used to run 
+all the HQRM test with a single command. Only the parameter set `Pester5` 
+is supported, the first parameter set in the section _Syntax_ below.
+Mandatory parameters are those necessary to run the test scripts.
 
 #### Syntax
 
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
+Invoke-DscResourceTest -ProjectPath <string> -MainGitBranch <string> 
+  -ModuleName <string> -SourcePath <string> -ModuleBase <string> 
+  [-TagFilter <string[]>] [-ExcludeTagFilter <string[]>] 
+  [-ExcludeModuleFile <string[]>] [-ExcludeSourceFile <string[]>] 
+  [-PassThru] [-Output <string>] [<CommonParameters>]
+
 Invoke-DscResourceTest [[-ProjectPath] <string>] [[-Path] <Object[]>] [[-TestName] <string[]>]
   [[-EnableExit]] [[-TagFilter] <string[]>] [-ExcludeTagFilter <string[]>] [-ExcludeModuleFile <string[]>]
   [-ExcludeSourceFile <string[]>] [-PassThru] [-CodeCoverage <Object[]>] [-CodeCoverageOutputFile <string>]
@@ -352,7 +372,46 @@ Invoke-DscResourceTest [[-FullyQualifiedModule] <ModuleSpecification>] [[-Path] 
 
 #### Example
 
-None.
+```powershell
+$invokeDscResourceTestParameters = @{
+    # Test script parameters
+    ProjectPath       = '.'
+    ModuleName        = 'SqlServerDsc'
+    MainGitBranch     = 'main'
+    SourcePath        = './source'
+    ModuleBase        = "./output/SqlServerDsc/*"
+}
+
+Invoke-DscResourceTest @invokeDscResourceTestParameters
+```
+
+This passes all mandatory parameters to `Invoke-DscResourceTest` which
+run all the HQRM tests. This will only output minimal information, by using
+the default value for `Invoke-Pester`'s `Output` parameter.
+
+```powershell
+$invokeDscResourceTestParameters = @{
+    # Test script parameters
+    ProjectPath       = '.'
+    ModuleName        = 'SqlServerDsc'
+    MainGitBranch     = 'main'
+    SourcePath        = './source'
+    ExcludeSourceFile = @('Examples')
+    ModuleBase        = "./output/SqlServerDsc/*"
+    ExcludeModuleFile = @('Modules/DscResource.Common')
+
+    # Invoke-Pester parameters
+    Output            = 'Detailed'
+    ExcludeTagFilter  = 'Common Tests - New Error-Level Script Analyzer Rules'
+    PassThru          = $true
+}
+
+$testResult = Invoke-DscResourceTest @invokeDscResourceTestParameters
+```
+
+This run all the HQRM tests except the tests tagged with
+`'Common Tests - New Error-Level Script Analyzer Rules'` and also outputs
+details of every tests as it runs.
 
 ### `New-DscSelfSignedCertificate`
 
