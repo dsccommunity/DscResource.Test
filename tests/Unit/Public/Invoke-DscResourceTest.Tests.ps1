@@ -93,13 +93,13 @@ InModuleScope $ProjectName {
 
             It 'works when using an existing module' {
                 {
-                    Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing #-verbose
+                    Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing
                 } | Should -Not -Throw
                 Assert-MockCalled -CommandName Get-Command -Scope It
             }
 
             It 'Should call Invoke-Pester with correct parameters' {
-                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing #-verbose
+                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing
                 $result.Script.Path | Should -BeExactly '.'
                 $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
                 $result.Script.Parameters.keys | Should -HaveCount 11
@@ -110,7 +110,7 @@ InModuleScope $ProjectName {
 
         Context 'When with alternate MainGitBranch' {
             It 'Should call Invoke-Pester with correct parameters' {
-                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main' #-verbose
+                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main'
                 $result.Script.Path | Should -BeExactly '.'
                 $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
                 $result.Script.Parameters.keys | Should -HaveCount 11
@@ -153,7 +153,7 @@ InModuleScope $ProjectName {
             }
 
             It 'Should invoke pester using correct parameters when using an existing module path' {
-                $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1' #-verbose
+                $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1'
                 $result.Script.Parameters.ProjectPath | Should -BeNullOrEmpty
                 $result.Script.Parameters.ModuleName | Should -BeExactly 'C:\MyModuleNameDoesNotExist.psd1'
             }
@@ -164,7 +164,7 @@ InModuleScope $ProjectName {
                 ModuleName    = 'Microsoft.PowerShell.Utility'
                 ModuleVersion = '1.0.0.0'
             }
-            $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script . #-verbose
+            $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .
             $result.Script.Path | Should -BeExactly '.'
             $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
             $result.Script.Parameters.keys | Should -HaveCount 11
@@ -216,7 +216,7 @@ InModuleScope $ProjectName {
         }
 
         It 'Should override properly the Script parameters for Invoke-Pester' {
-            $result = Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets #-verbose
+            $result = Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets
             Assert-MockCalled Get-Command -Scope Describe
             $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
             $result.script.Parameters.Keys | Should -HaveCount 11
@@ -246,7 +246,7 @@ InModuleScope $ProjectName {
                 Parameters = @{
                     'ModuleName' = 'dummy'
                 }
-            } -Module 'Microsoft.PowerShell.Utility'  #-verbose
+            } -Module 'Microsoft.PowerShell.Utility'
             $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
             $result.script.Parameters.Keys | Should -HaveCount 11
         }
