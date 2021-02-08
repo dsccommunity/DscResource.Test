@@ -17,6 +17,11 @@ Encoding: UTF8
 # suffix: suffix.ps1
 VersionedOutputDirectory: true
 
+AliasesToExport:
+  - 'Task.Invoke_HQRM_Tests'
+  - 'Task.Fail_Build_If_HQRM_Tests_Failed'
+  - 'Task.Invoke_HQRM_Tests_Stop_On_Fail'
+
 ####################################################
 #      ModuleBuilder Submodules Configuration      #
 ####################################################
@@ -46,6 +51,36 @@ BuildWorkflow:
       Invoke-DscResourceTest -ExcludeTag 'Common Tests - Validate Localization'
     }
 
+  Add_Aliases_To_Module_Manifest: |
+    {
+        <#
+            This is quick fix for issue https://github.com/PoshCode/ModuleBuilder/issues/103.
+            Aliases need to be added to module manifest, and we can only use
+            New-Alias or Set-Alias together with build tasks. This module
+            already automatically exports aliases using [Alias()] so this quick
+            fix is meant as a workaround until the above issue is resolved.
+        #>
+        param
+        (
+            $OutputDirectory = (property OutputDirectory (Join-Path $BuildRoot 'output')),
+            $ProjectName = (property ProjectName ''),
+            $BuildInfo = (property BuildInfo @{ })
+        )
+
+        $ProjectName = Get-ProjectName -BuildRoot $BuildRoot
+
+        $pathToModuleManifest = Resolve-Path -Path "$OutputDirectory/$ProjectName/**/$ProjectName.psd1"
+        $existingAliases = @((Test-ModuleManifest -Path $pathToModuleManifest).ExportedAliases.Values.Name)
+
+        "`tProject Name             = {0}" -f $ProjectName
+        "`tOutput Directory         = {0}" -f $OutputDirectory
+        "`ModuleManifestPath        = {0}" -f $pathToModuleManifest
+        "`tAlready Exported Aliases = {0}" -f ($existingAliases -join ', ')
+        "`tNew Aliases To Export    = {0}" -f ($BuildInfo.AliasesToExport -join ', ')
+
+        Update-ModuleManifest -AliasesToExport ($existingAliases + $BuildInfo.AliasesToExport) -Path $pathToModuleManifest
+    }
+
   t:
     - build
     - DscTest
@@ -54,6 +89,7 @@ BuildWorkflow:
     - Clean
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
+    - Add_Aliases_To_Module_Manifest
     - Create_changelog_release_output
 
   pack:

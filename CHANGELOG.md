@@ -50,6 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Get-DscResourceTestContainer`
   - Changed to support the new Pester 5 HQRM tests, and code for an older
     Pester 5 Beta iteration was removed.
+- Added a `build.yaml` task script `Add_Aliases_To_Module_Manifest` that
+  update module manifest with a list of aliases that is configured in
+  the `build.yaml` file under the key `AliasesToExport:`. This is quick
+  fix for the issue [Export alias create with Set-Alias and New-Alias](https://github.com/PoshCode/ModuleBuilder/issues/103).
 
 ## [0.14.3] - 2021-01-13
 
