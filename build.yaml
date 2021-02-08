@@ -74,7 +74,7 @@ BuildWorkflow:
 
         "`tProject Name             = {0}" -f $ProjectName
         "`tOutput Directory         = {0}" -f $OutputDirectory
-        "`ModuleManifestPath        = {0}" -f $pathToModuleManifest
+        "`tModule Manifest Path     = {0}" -f $pathToModuleManifest
         "`tAlready Exported Aliases = {0}" -f ($existingAliases -join ', ')
         "`tNew Aliases To Export    = {0}" -f ($BuildInfo.AliasesToExport -join ', ')
 
