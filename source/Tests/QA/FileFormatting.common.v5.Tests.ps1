@@ -53,7 +53,7 @@ if (-not $isPester5)
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
-    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1')
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
