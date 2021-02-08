@@ -1,5 +1,11 @@
 filter WhereModuleFileNotExcluded
 {
+    param
+    (
+        # This will set the $ExcludeModuleFile from the parent scope if it exist
+        $ExcludeModuleFile = $ExcludeModuleFile
+    )
+
     foreach ($excludePath in $ExcludeModuleFile)
     {
         # Replace any path separator to the one used in the current operating system.

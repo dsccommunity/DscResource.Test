@@ -16,6 +16,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - Validate Script Files' -Tag 'Script','Common Tests - Validate Script Files' {
     $scriptFiles = @(Get-ChildItem $ModuleBase -Recurse -Include *.ps1 | WhereModuleFileNotExcluded).ForEach{
         $_ | Add-Member -NotePropertyName ModuleBase -NotePropertyValue $ModuleBase -PassThru

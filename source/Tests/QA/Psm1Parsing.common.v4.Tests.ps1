@@ -1,3 +1,7 @@
+<#
+    .NOTES
+        For Pester 5 these tests was added to ModuleScriptFiles.common.v5.Tests.ps1
+#>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('DscResource.AnalyzerRules\Measure-ParameterBlockParameterAttribute', '', Scope='Function', Target='*')]
 param
 (
@@ -15,6 +19,14 @@ param
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
 )
+
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
 
 Describe 'Common Tests - .psm1 File Parsing' -Tag 'Common Tests - .psm1 File Parsing' {
     $psm1Files = @(Get-Psm1FileList -FilePath $ModuleBase | WhereModuleFileNotExcluded)

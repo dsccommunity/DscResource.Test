@@ -16,6 +16,14 @@ param
     $Args
 )
 
+$isPester5 = (Get-Module -Name Pester).Version -lt '5.0.0'
+
+# Only run if _not_ Pester 5.
+if (-not $isPester5)
+{
+    return
+}
+
 Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA','Common Tests - PS Script Analyzer on Resource Files') {
     if ($PSVersionTable.PSVersion.Major -lt 5)
     {

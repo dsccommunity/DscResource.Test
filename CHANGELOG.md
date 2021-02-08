@@ -11,6 +11,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added test helper functions `Get-InvalidResultRecord` and `Get-InvalidOperationRecord`.
 - Added alias `Get-ObjectNotFoundRecord` that points to `Get-InvalidResultRecord`.
+- Added build task `Invoke_HQRM_Tests` and `Fail_Build_If_HQRM_Tests_Failed`.
+- Added meta build task `Invoke_HQRM_Tests_Stop_On_Fail` that runs both
+  build tasks `Invoke_HQRM_Tests` and `Fail_Build_If_HQRM_Tests_Failed`
+  in correct order.
+- New QA (HQRM) tests for Pester 5 was added that will only run if Pester 5.1
+  is used by the test pipeline.
+- Added (converted) HQRM test for Pester 5
+  - Added `Changelog.common.v5.Tests.ps1`
+  - Added `ExampleFiles.common.v5.Tests.ps1`
+  - Added `FileFormatting.common.v5.Tests.ps1`
+    - The individual test for checking BOM on markdown files was remove
+      and replaced by a test that checks for BOM on all text files (code,
+      configuration, and markdown). That also replaced the Pester 4 tests
+      `ModuleFiles.common.v4.Tests.ps1` (that only checked for BOM on
+      `.psm1`files), and `ScriptFiles.common.v4.Tests.ps1` (that only
+      checked for BOM on `.ps1` files). No changes were made to the
+      Pester 4 tests, just the Pester 5 tests.
+  - Added `MarkdownLinks.common.v5.Tests.ps1`
+  - Added `ModuleManifest.common.v5.Tests.ps1`
+  - Added `ModuleScriptFiles.common.v5.Tests.ps1`
+    - Contain the converted Pester 4 tests from `Psm1Parsing.common.v4.Tests.ps1`.
+  - Added `PSSAResource.common.v5.Tests.ps1`
+    - Any test that is excluded by using Pester `ExcludeTag` under the key
+      `DscTest:` will now be silently excluded due to how Pester does _Discovery_.
+  - Added `PublishExampleFiles.v5.Tests.ps1`
+  - Added `ResourceSchema.common.v5.Tests.ps1`
+- Added public function `Get-DscResourceTestContainer` which returns a Pester
+  container for each available Pester 5 HQRM test.
+
+### Changed
+
+- Renamed all existing QA (HQRM) tests to `*.v4.Tests.ps1*` and made
+  them not run if test pipeline is using Pester 5.
+- The function `Get-TextFilesList` can now take an optional parameter
+  `FileExtension` to only return those files, e.g. `@('.psm1')`. This
+  makes the function `Get-Psm1FileList` obsolete.
+- `Get-DscResourceTestContainer`
+  - Changed to support the new Pester 5 HQRM tests, and code for an older
+    Pester 5 Beta iteration was removed.
+- Added a `build.yaml` task script `Add_Aliases_To_Module_Manifest` that
+  update module manifest with a list of aliases that is configured in
+  the `build.yaml` file under the key `AliasesToExport:`. This is quick
+  fix for the issue [Export alias create with Set-Alias and New-Alias](https://github.com/PoshCode/ModuleBuilder/issues/103).
 
 ## [0.14.3] - 2021-01-13
 
