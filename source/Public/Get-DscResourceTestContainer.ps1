@@ -25,7 +25,8 @@ function Get-DscResourceTestContainer
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
+        [AllowNull()]
         [System.String]
         $ProjectPath,
 
@@ -37,7 +38,8 @@ function Get-DscResourceTestContainer
         [System.String]
         $DefaultBranch,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter()]
+        [AllowNull()]
         [System.String]
         $SourcePath,
 

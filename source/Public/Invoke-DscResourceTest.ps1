@@ -7,20 +7,15 @@ function Invoke-DscResourceTest
     [CmdletBinding(DefaultParameterSetName = 'ByProjectPath')]
     param
     (
-        # [Parameter(Mandatory = $true, ParameterSetName = 'Pester5', Position = 0)]
-        # [System.String]
-        # $v5,
-
-        [Parameter(ParameterSetName = 'ByModuleNameOrPath', Position = 0)]
+        [Parameter(ParameterSetName = 'ByModuleNameOrPath', Mandatory = $true, Position = 0)]
         [System.String]
         $Module,
 
-        [Parameter(ParameterSetName = 'ByModuleSpecification', Position = 0)]
+        [Parameter(ParameterSetName = 'ByModuleSpecification', Mandatory = $true, Position = 0)]
         [Microsoft.PowerShell.Commands.ModuleSpecification]
         $FullyQualifiedModule,
 
-        [Parameter(ParameterSetName = 'ByProjectPath', Position = 0)]
-        [Parameter(Mandatory = $true, ParameterSetName = 'Pester5')]
+        [Parameter(ParameterSetName = 'ByProjectPath', Mandatory = $true, Position = 0)]
         [System.String]
         $ProjectPath,
 
@@ -42,20 +37,19 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByModuleSpecification', Position = 3)]
         [Parameter(ParameterSetName = 'ByProjectPath', Position = 3)]
         [System.Management.Automation.SwitchParameter]
-        $EnableExit,
+        $EnableExit, #v4
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath', Position = 5)]
         [Parameter(ParameterSetName = 'ByModuleSpecification', Position = 5)]
         [Parameter(ParameterSetName = 'ByProjectPath', Position = 5)]
-        [Parameter(ParameterSetName = 'Pester5')]
         [Alias('Tags','Tag')]
         [System.String[]]
-        $TagFilter,
+        $TagFilter, #v4 Filter.Tag
 
         [Parameter()]
         [Alias('ExcludeTag')]
         [System.String[]]
-        $ExcludeTagFilter,
+        $ExcludeTagFilter,  #v4 Filter.ExcludeTag
 
         [Parameter()]
         [System.String[]]
@@ -73,339 +67,347 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.Object[]]
-        $CodeCoverage,
+        $CodeCoverage,  #v4 CodeCoverage.Enabled = $true
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.String]
-        $CodeCoverageOutputFile,
+        $CodeCoverageOutputFile,  #v4
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [ValidateSet('JaCoCo')]
         [System.String]
-        $CodeCoverageOutputFileFormat,
+        $CodeCoverageOutputFileFormat, #v4 CodeCoverage.CodeCoverageOutputFileFormat = 'JaCoCo'
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.Management.Automation.SwitchParameter]
-        $Strict,
+        $Strict, #v4
 
         [Parameter()]
         [System.String]
-        $Output,
+        $Output, #v4
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.String]
-        $OutputFile,
+        $OutputFile, #v4 TestResult.OutputFile
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [ValidateSet('NUnitXml', 'JUnitXml')]
         [System.String]
-        $OutputFormat,
+        $OutputFormat, #v4 TestResult.OutputFormat
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.Management.Automation.SwitchParameter]
-        $Quiet,
+        $Quiet, #v4 $Show = 'none'
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.Object]
-        $PesterOption,
+        $PesterOption, #v4
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [Pester.OutputTypes]
-        $Show,
+        $Show, #v4 Output.Verbosity Default,Passed,Failed,Pending,Skipped,Inconclusive,Describe,Context,Summary,Header,All,Fails
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
-        [System.Collections.Hashtable]
+        [System.Collections.IDictionary]
+        [Alias('Configuration')]
         $Settings,
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
-        [Parameter(Mandatory = $true, ParameterSetName = 'Pester5')]
         [System.String]
         $MainGitBranch = 'master',
 
-        [Parameter(Mandatory = $true, ParameterSetName = 'Pester5')]
-        [System.String]
-        $ModuleName,
-
-        [Parameter(Mandatory = $true, ParameterSetName = 'Pester5')]
-        [System.String]
-        $SourcePath,
-
-        [Parameter(Mandatory = $true, ParameterSetName = 'Pester5')]
-        [System.String]
-        $ModuleBase
+        [Parameter(ParameterSetName = 'ByModuleNameOrPath', DontShow = $true)]
+        [Parameter(ParameterSetName = 'ByModuleSpecification', DontShow = $true)]
+        [Parameter(ParameterSetName = 'ByProjectPath', DontShow = $true)]
+        [System.Management.Automation.SwitchParameter]
+        $Pesterv5 = $(
+            if ( # Pester 5 is loaded, or we don't have pester 4 loaded and 5 is available
+                (Get-Module -FullyQualifiedName @{ModuleName = 'Pester'; ModuleVersion = '5.0'}) -or
+                (-not (Get-Module -FullyQualifiedName @{ModuleName = 'Pester'; MaximumVersion = '4.99'}) -and (Get-Module -ListAvailable -FullyQualifiedName @{ModuleName = 'Pester'; ModuleVersion = '5.0'} ))
+            )
+            {
+                $true
+            }
+            else
+            {
+                $false
+            }
+        )
     )
 
     begin
     {
-        if ($PSCmdlet.ParameterSetName -ne 'Pester5')
+
+        switch ($PSCmdlet.ParameterSetName)
         {
-            <#
-                Run old Pester 4 workflow.
-
-                Make sure Invoke-DscResourceTest runs against the Built Module either:
-
-                By $Module (Name, Path, ModuleSpecification): enables to run some tests on installed modules (even without source)
-                By $ProjectPath (detect source from there based on .psd1): Target both the source when relevant and the expected files
-            #>
-
-            switch ($PSCmdlet.ParameterSetName)
+            'ByModuleNameOrPath'
             {
-                'ByModuleNameOrPath'
+                Write-Verbose -Message 'Calling DscResource Test by Module Name (or Path).'
+
+                if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
-                    Write-Verbose -Message 'Calling DscResource Test by Module Name (or Path).'
-
-                    if (-not $PSBoundParameters.ContainsKey('Path'))
-                    {
-                        $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
-                    }
-
-                    $null = $PSBoundParameters.Remove('Module')
-
-                    $ModuleUnderTest = Import-Module -Name $Module -ErrorAction 'Stop' -Force -PassThru
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
 
-                'ByModuleSpecification'
+                $null = $PSBoundParameters.Remove('Module')
+
+                $ModuleUnderTest = Import-Module -Name $Module -ErrorAction 'Stop' -Force -PassThru
+            }
+
+            'ByModuleSpecification'
+            {
+                Write-Verbose -Message 'Calling DscResource Test by Module Specification.'
+
+                if (-not $PSBoundParameters.ContainsKey('Path'))
                 {
-                    Write-Verbose -Message 'Calling DscResource Test by Module Specification.'
-
-                    if (-not $PSBoundParameters.ContainsKey('Path'))
-                    {
-                        $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
-                    }
-
-                    $null = $PSBoundParameters.Remove('FullyQualifiedModule')
-
-                    $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction 'Stop'
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
                 }
 
-                'ByProjectPath'
+                $null = $PSBoundParameters.Remove('FullyQualifiedModule')
+
+                $ModuleUnderTest = Import-Module -FullyQualifiedName $FullyQualifiedModule -Force -PassThru -ErrorAction 'Stop'
+            }
+
+            'ByProjectPath'
+            {
+                Write-Verbose -Message 'Calling DscResource Test by Project Path.'
+
+                if (-not $ProjectPath)
                 {
-                    Write-Verbose -Message 'Calling DscResource Test by Project Path.'
+                    $ProjectPath = $PWD.Path
+                }
 
-                    if (-not $ProjectPath)
-                    {
-                        $ProjectPath = $PWD.Path
-                    }
+                try
+                {
+                    $null = $PSBoundParameters.Remove('ProjectPath')
+                }
+                catch
+                {
+                    Write-Debug -Message 'The function was called via default param set. Using $PWD for Project Path.'
+                }
 
-                    try
-                    {
-                        $null = $PSBoundParameters.Remove('ProjectPath')
-                    }
-                    catch
-                    {
-                        Write-Debug -Message 'The function was called via default param set. Using $PWD for Project Path.'
-                    }
+                if (-not $PSBoundParameters.ContainsKey('Path'))
+                {
+                    $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
+                }
 
-                    if (-not $PSBoundParameters.ContainsKey('Path'))
-                    {
-                        $PSBoundParameters['Path'] = Join-Path -Path $MyInvocation.MyCommand.Module.ModuleBase -ChildPath 'Tests/QA'
-                    }
-
-                    # Find the Source Manifest under ProjectPath
-                    $SourceManifest = ((Get-ChildItem -Path "$ProjectPath\*\*.psd1").Where{
-                            ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-                            $(
-                                try
-                                {
-                                    Test-ModuleManifest -Path $_.FullName -ErrorAction 'Stop'
-                                }
-                                catch
-                                {
-                                    $false
-                                }
-                            )
-                        }
-                    )
-
-                    $SourcePath = $SourceManifest.Directory.FullName
-                    $OutputPath = Join-Path -Path $ProjectPath -ChildPath 'output'
-
-                    $GetOutputModuleParams = @{
-                        Path        = $OutputPath
-                        Include     = $SourceManifest.Name
-                        Name        = $true # Or it doesn't behave properly on PS5.1
-                        Exclude     = 'RequiredModules'
-                        ErrorAction = 'Stop'
-                        Depth       = 3
-                    }
-
-                    Write-Verbose -Message (
-                        "Finding Output Module with `r`n {0}" -f (
-                            $GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String
+                # Find the Source Manifest under ProjectPath
+                $SourceManifest = ((Get-ChildItem -Path "$ProjectPath\*\*.psd1").Where{
+                        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
+                        $(
+                            try
+                            {
+                                Test-ModuleManifest -Path $_.FullName -ErrorAction 'Stop'
+                            }
+                            catch
+                            {
+                                $false
+                            }
                         )
+                    }
+                )
+
+                $SourcePath = $SourceManifest.Directory.FullName
+                $OutputPath = Join-Path -Path $ProjectPath -ChildPath 'output'
+
+                $GetOutputModuleParams = @{
+                    Path        = $OutputPath
+                    Include     = $SourceManifest.Name
+                    Name        = $true # Or it doesn't behave properly on PS5.1
+                    Exclude     = 'RequiredModules'
+                    ErrorAction = 'Stop'
+                    Depth       = 3
+                }
+
+                Write-Verbose -Message (
+                    "Finding Output Module with `r`n {0}" -f (
+                        $GetOutputModuleParams | Format-Table -Property * -AutoSize | Out-String
                     )
-
-                    $modulePsd1 = Join-Path -Path $OutputPath -ChildPath (
-                        Get-ChildItem @GetOutputModuleParams |
-                            Select-Object -First 1
-                    )
-
-                    <#
-                        Importing the module psd1 ensures the filtered Import-Module
-                        passthru returns only one PSModuleInfo Object: Issue #71
-                    #>
-                    $dataFileImport = Import-PowerShellDataFile -Path $modulePsd1
-
-                    Write-Verbose -Message "Loading $modulePsd1."
-
-                    $ModuleUnderTest = Import-Module -Name $modulePsd1 -ErrorAction 'Stop' -PassThru |
-                        Where-Object -FilterScript {
-                            $PSItem.Guid -eq $dataFileImport['GUID']
-                        }
-                }
-            }
-
-            $ExcludeSourceFile = foreach ($projectFileOrFolder in $ExcludeSourceFile)
-            {
-                if (-not [System.String]::IsNullOrEmpty($projectFileOrFolder) -and -not (Split-Path -IsAbsolute $projectFileOrFolder))
-                {
-                    Join-Path -Path $SourcePath -ChildPath $projectFileOrFolder
-                }
-                elseif (-not [System.String]::IsNullOrEmpty($projectFileOrFolder))
-                {
-                    $projectFileOrFolder
-                }
-            }
-
-            if ($PSBoundParameters.ContainsKey('ExcludeSourceFile'))
-            {
-                $null = $PSBoundParameters.Remove('ExcludeSourceFile')
-            }
-
-            $ExcludeModuleFile = foreach ($moduleFileOrFolder in $ExcludeModuleFile)
-            {
-                if (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder) -and -not (Split-Path -IsAbsolute $moduleFileOrFolder))
-                {
-                    Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath $moduleFileOrFolder
-                }
-                elseif (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder))
-                {
-                    $moduleFileOrFolder
-                }
-            }
-
-            if ($PSBoundParameters.ContainsKey('ExcludeModuleFile'))
-            {
-                $null = $PSBoundParameters.Remove('ExcludeModuleFile')
-            }
-
-
-            <#
-                In case of ByProjectPath Opt-ins will be done by tags:
-                The Describe Name will be one of the Tag for the Describe block
-                If a Opt-In file is found, it will default to auto-populate -Tag
-                (cumulative from Command parameters).
-            #>
-            if ($ProjectPath -and -not $PSBoundParameters.ContainsKey('TagFilter') -and -not $PSBoundParameters.ContainsKey('ExcludeTagFilter'))
-            {
-                $expectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
-
-                if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptInFile))
-                {
-                    Write-Verbose -Message "Loading OptIns from $expectedMetaOptInFile."
-
-                    $optIns = Get-StructuredObjectFromFile -Path $expectedMetaOptInFile -ErrorAction 'Stop'
-                }
-
-                # Opt-Outs should be preferred, and we can do similar ways with ExcludeTags
-                $expectedMetaOptOutFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptOut.json'
-
-                if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptOutFile))
-                {
-                    Write-Verbose -Message "Loading OptOuts from $expectedMetaOptOutFile."
-
-                    $optOuts = Get-StructuredObjectFromFile -Path $expectedMetaOptOutFile -ErrorAction 'Stop'
-                }
-            }
-
-            # For each Possible parameters, use BoundParameters if exists, or use $Settings.ParameterName if exists otherwise
-            $possibleParamName = $PSCmdlet.MyInvocation.MyCommand.Parameters.Name
-
-            foreach ($paramName in $possibleParamName)
-            {
-                if (
-                    -not $PSBoundParameters.ContainsKey($paramName) `
-                    -and ($paramValue = $Settings.($paramName))
                 )
-                {
-                    Write-Verbose -Message "Adding setting $paramName."
 
-                    $PSBoundParameters.Add($paramName, $paramValue)
-                }
-            }
-
-            $newTag = @()
-            $newExcludeTag = @()
-
-            # foreach OptIns, add them to `-Tag`, unless in the ExcludeTags or already in Tag
-            foreach ($optInTag in $optIns)
-            {
-                if (
-                    $optInTag -notin $PSBoundParameters['ExcludeTagFilter'] `
-                    -and $optInTag -notin $PSBoundParameters['TagFilter']
+                $modulePsd1 = Join-Path -Path $OutputPath -ChildPath (
+                    Get-ChildItem @GetOutputModuleParams |
+                        Select-Object -First 1
                 )
-                {
-                    Write-Debug -Message "Adding tag $optInTag."
-                    $newTag += $optInTag
-                }
-            }
 
-            if ($newTag.Count -gt 0)
+                <#
+                    Importing the module psd1 ensures the filtered Import-Module
+                    passthru returns only one PSModuleInfo Object: Issue #71
+                #>
+                $dataFileImport = Import-PowerShellDataFile -Path $modulePsd1
+
+                Write-Verbose -Message "Loading $modulePsd1."
+
+                $ModuleUnderTest = Import-Module -Name $modulePsd1 -ErrorAction 'Stop' -PassThru |
+                    Where-Object -FilterScript {
+                        $PSItem.Guid -eq $dataFileImport['GUID']
+                    }
+            }
+        }
+
+        $ModuleName = $ModuleUnderTest.Name
+        $ModuleBase = $ModuleUnderTest.ModuleBase
+
+        # ExcludeSourceFile may be used by the Pester test files, and will be sent as a parameter (container in v5)
+        $ExcludeSourceFile = foreach ($projectFileOrFolder in $ExcludeSourceFile)
+        {
+            if (-not [System.String]::IsNullOrEmpty($projectFileOrFolder) -and -not (Split-Path -IsAbsolute $projectFileOrFolder))
             {
-                $PSBoundParameters['TagFilter'] = $newTag
+                Join-Path -Path $SourcePath -ChildPath $projectFileOrFolder
             }
-
-            # foreach OptOuts, add them to `-ExcludeTag`, unless in `-Tag`
-            foreach ($optOutTag in $optOuts)
+            elseif (-not [System.String]::IsNullOrEmpty($projectFileOrFolder))
             {
-                if (
-                    $optOutTag -notin $PSBoundParameters['TagFilter'] `
-                    -and $optOutTag -notin $PSBoundParameters['ExcludeTagFilter']
-                )
-                {
-                    Write-Debug -Message "Adding ExcludeTag $optOutTag."
-
-                    $newExcludeTag += $optOutTag
-                }
+                $projectFileOrFolder
             }
+        }
 
-            if ($newExcludeTag.Count -gt 0)
+        # Remove ExcludeSourceFile from PSBoundParameters (so we can use PSBoundParameters directly to Invoke-Pester)
+        if ($PSBoundParameters.ContainsKey('ExcludeSourceFile'))
+        {
+            $null = $PSBoundParameters.Remove('ExcludeSourceFile')
+        }
+
+        # ExcludeModuleFile may be used by the Pester test files, and will be sent as a parameter (container in v5)
+        $ExcludeModuleFile = foreach ($moduleFileOrFolder in $ExcludeModuleFile)
+        {
+            if (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder) -and -not (Split-Path -IsAbsolute $moduleFileOrFolder))
             {
-                $PSBoundParameters['ExcludeTagFilter'] = $newExcludeTag
+                Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath $moduleFileOrFolder
+            }
+            elseif (-not [System.String]::IsNullOrEmpty($moduleFileOrFolder))
+            {
+                $moduleFileOrFolder
+            }
+        }
+
+        # Remove ExcludeModuleFile from PSBoundParameters (so we can use PSBoundParameters directly to Invoke-Pester)
+        if ($PSBoundParameters.ContainsKey('ExcludeModuleFile'))
+        {
+            $null = $PSBoundParameters.Remove('ExcludeModuleFile')
+        }
+
+
+        <#
+            In case of ByProjectPath Opt-ins will be done by tags:
+            The Describe Name will be one of the Tag for the Describe block
+            If a Opt-In file is found, it will default to auto-populate -Tag
+            (cumulative from Command parameters).
+        #>
+        if ($ProjectPath -and -not $PSBoundParameters.ContainsKey('TagFilter') -and -not $PSBoundParameters.ContainsKey('ExcludeTagFilter'))
+        {
+            $expectedMetaOptInFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptIn.json'
+
+            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptInFile))
+            {
+                Write-Verbose -Message "Loading OptIns from $expectedMetaOptInFile."
+
+                $optIns = Get-StructuredObjectFromFile -Path $expectedMetaOptInFile -ErrorAction 'Stop'
             }
 
-            <#
-                This won't display the warning message for the skipped blocks
-                But should save time by not running initialization code within a Describe Block
-                And we can add such warning if we create a static list of the things we can opt-in
-                I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is preferred
+            # Opt-Outs should be preferred, and we can do similar ways with ExcludeTags
+            $expectedMetaOptOutFile = Join-Path -Path $ProjectPath -ChildPath '.MetaTestOptOut.json'
 
-                Most tests should run against the built module
-                PSSA could be run against source, or against built module & convert lines/file
-            #>
+            if ($PSCmdlet.ParameterSetName -eq 'ByProjectPath' -and (Test-Path -Path $expectedMetaOptOutFile))
+            {
+                Write-Verbose -Message "Loading OptOuts from $expectedMetaOptOutFile."
 
-            $ModuleUnderTestManifest = Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath "$($ModuleUnderTest.Name).psd1"
+                $optOuts = Get-StructuredObjectFromFile -Path $expectedMetaOptOutFile -ErrorAction 'Stop'
+            }
+        }
 
+        # For each Possible parameters, use BoundParameters if exists, or use $Settings.ParameterName if exists otherwise
+        $possibleParamName = $PSCmdlet.MyInvocation.MyCommand.Parameters.Name
+
+        foreach ($paramName in $possibleParamName)
+        {
+            if (
+                -not $PSBoundParameters.ContainsKey($paramName) `
+                -and ($paramValue = $Settings.($paramName))
+            )
+            {
+                Write-Verbose -Message "Adding setting $paramName."
+
+                $PSBoundParameters.Add($paramName, $paramValue)
+            }
+        }
+
+        $newTag = @()
+        $newExcludeTag = @()
+
+        # foreach OptIns, add them to `-Tag`, unless in the ExcludeTags or already in Tag
+        foreach ($optInTag in $optIns)
+        {
+            if (
+                $optInTag -notin $PSBoundParameters['ExcludeTagFilter'] `
+                -and $optInTag -notin $PSBoundParameters['TagFilter']
+            )
+            {
+                Write-Debug -Message "Adding tag $optInTag."
+                $newTag += $optInTag
+            }
+        }
+
+        if ($newTag.Count -gt 0)
+        {
+            $PSBoundParameters['TagFilter'] = $newTag
+        }
+
+        # foreach OptOuts, add them to `-ExcludeTag`, unless in `-Tag`
+        foreach ($optOutTag in $optOuts)
+        {
+            if (
+                $optOutTag -notin $PSBoundParameters['TagFilter'] `
+                -and $optOutTag -notin $PSBoundParameters['ExcludeTagFilter']
+            )
+            {
+                Write-Debug -Message "Adding ExcludeTag $optOutTag."
+
+                $newExcludeTag += $optOutTag
+            }
+        }
+
+        if ($newExcludeTag.Count -gt 0)
+        {
+            $PSBoundParameters['ExcludeTagFilter'] = $newExcludeTag
+        }
+
+        <#
+            This won't display the warning message for the skipped blocks
+            But should save time by not running initialization code within a Describe Block
+            And we can add such warning if we create a static list of the things we can opt-in
+            I'd prefer to not keep anything static, and AST risks not to cover 100% (maybe...), and OptOut is preferred
+
+            Most tests should run against the built module
+            PSSA could be run against source, or against built module & convert lines/file
+        #>
+
+        $ModuleUnderTestManifest = Join-Path -Path $ModuleUnderTest.ModuleBase -ChildPath "$($ModuleUnderTest.Name).psd1"
+
+
+        if (-not $Pesterv5)
+        {
+            # In Pester v4, parameters are in hashtable with path @{Script = ''; Parameters = @{...}}
+            # In Pester v5 this is now in "Container"
             $ScriptItems = foreach ($item in $PSBoundParameters['Path'])
             {
                 if ($item -is [System.Collections.IDictionary])
@@ -414,6 +416,7 @@ function Invoke-DscResourceTest
                     {
                         $item['Parameters'] = @{ }
                     }
+
                     $item['Parameters']['ModuleBase'] = $ModuleUnderTest.ModuleBase
                     $item['Parameters']['ModuleName'] = $ModuleUnderTest.Name
                     $item['Parameters']['ModuleManifest'] = $ModuleUnderTestManifest
@@ -449,108 +452,136 @@ function Invoke-DscResourceTest
                 $item
             }
 
-            $PSBoundParameters['Path'] = $ScriptItems
+            $PSBoundParameters['Script'] = $ScriptItems
 
-            $invokePesterParameters = @{
-                PassThru = $PSBoundParameters.PassThru
-            }
-
-            $invokePesterParameters['Script'] = $PSBoundParameters.Path
-
-            if ($PSBoundParameters.ContainsKey('TestName'))
+            if ($PSBoundParameters.ContainsKey('Path'))
             {
-                $invokePesterParameters['TestName'] = $PSBoundParameters.TestName
+                $PSBoundParameters.Remove('Path')
             }
 
-            if ($PSBoundParameters.ContainsKey('EnableExit'))
-            {
-                $invokePesterParameters['EnableExit'] = $PSBoundParameters.EnableExit
-            }
-
+            # Remove Pester v5 specific parameter
             if ($PSBoundParameters.ContainsKey('TagFilter'))
             {
-                $invokePesterParameters['Tag'] = $PSBoundParameters.TagFilter
+                $PSBoundParameters['Tag'] = $PSBoundParameters['TagFilter']
+                $PSBoundParameters.Remove('TagFilter')
             }
 
             if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
             {
-                $invokePesterParameters['ExcludeTag'] = $PSBoundParameters.ExcludeTagFilter
+                $PSBoundParameters['ExcludeTag'] = $PSBoundParameters['ExcludeTagFilter']
+                $PSBoundParameters.Remove('ExcludeTagFilter')
             }
 
-            if ($PSBoundParameters.ContainsKey('OutputFile'))
+            if ($PSBoundParameters.ContainsKey('Configuration'))
             {
-                $invokePesterParameters['OutputFile'] = $PSBoundParameters.OutputFile
-            }
-
-            if ($PSBoundParameters.ContainsKey('OutputFormat'))
-            {
-                $invokePesterParameters['OutputFormat'] = $PSBoundParameters.OutputFormat
-            }
-
-            if ($PSBoundParameters.ContainsKey('CodeCoverage'))
-            {
-                $invokePesterParameters['CodeCoverage'] = $PSBoundParameters.CodeCoverage
-            }
-
-            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFile'))
-            {
-                $invokePesterParameters['CodeCoverageOutputFile'] = $PSBoundParameters.CodeCoverageOutputFile
-            }
-
-            if ($PSBoundParameters.ContainsKey('CodeCoverageOutputFileFormat'))
-            {
-                $invokePesterParameters['CodeCoverageOutputFileFormat'] = $PSBoundParameters.CodeCoverageOutputFileFormat
-            }
-
-            if ($PSBoundParameters.ContainsKey('PesterOption'))
-            {
-                $invokePesterParameters['PesterOption'] = $PSBoundParameters.PesterOption
-            }
-
-            if ($PSBoundParameters.ContainsKey('Show'))
-            {
-                $invokePesterParameters['Show'] = $PSBoundParameters.Show
+                $PSBoundParameters.Remove('Configuration')
             }
         }
         else
         {
             # Pester 5 tests
+            $PesterV5AdvancedConfig = @{
+                Run          = @{}
+                Filter       = @{}
+                CodeCoverage = @{}
+                TestResult   = @{}
+                Should       = @{}
+                Debug        = @{}
+                Output       = @{}
+            }
 
-            $invokePesterParameters = @{}
+            # Remove v4 deprecated parameters for v5 invocation (they're in $Configuration)
+            @(
+                'EnableExit',
+                'TagFilter',
+                'ExcludeTagFilter',
+                'CodeCoverage',
+                'CodeCoverageOutputFile',
+                'CodeCoverageOutputFileFormat',
+                'Strict',
+                'Output',
+                'OutputFile',
+                'OutputFormat',
+                'Quiet',
+                'PesterOption',
+                'Show',
+                'MainGitBranch'
+            ).ForEach{
+                if ($PSBoundParameters.ContainsKey($_))
+                {
+                    switch ($_) {
+                        'EnableExit' { $PesterV5AdvancedConfig['Run']['EnableExit'] = $PSBoundParameters[$_]  }
+
+                        'TagFilter' {
+                            $PesterV5AdvancedConfig['Filter']['Tag'] = $PSBoundParameters[$_]
+                        }
+
+                        'ExcludeTagFilter' {
+                            $PesterV5AdvancedConfig['Filter']['ExcludeTag'] = $PSBoundParameters[$_]
+                        }
+
+                        'Output' {
+                            $PesterV5AdvancedConfig['Output']['Verbosity'] = $PSBoundParameters[$_]
+                        }
+
+                        'CodeCoverage' {
+                            $PesterV5AdvancedConfig['CodeCoverage']['Enabled'] = $true
+                            $PesterV5AdvancedConfig['CodeCoverage']['Path'] = $PSBoundParameters[$_]
+                        }
+
+                        'CodeCoverageOutputFile' {
+                            $PesterV5AdvancedConfig['CodeCoverage']['OutputPath'] = $PSBoundParameters[$_]
+                        }
+
+                        'CodeCoverageOutputFileFormat' {
+                            $PesterV5AdvancedConfig['CodeCoverage']['CodeCoverageOutputFileFormat'] = $PSBoundParameters[$_]
+                        }
+
+                        'OutputFile' {
+                            $PesterV5AdvancedConfig['TestResult']['OutputFile'] = $PSBoundParameters[$_]
+                        }
+
+                        'OutputFormat' {
+                            $PesterV5AdvancedConfig['TestResult']['OutputFormat'] = $PSBoundParameters[$_]
+                        }
+
+                        'Quiet' {
+                            $PesterV5AdvancedConfig['Output']['Verbosity'] = 'none'
+                        }
+
+                        'Show' {
+                            $PesterV5AdvancedConfig['Output']['Verbosity'] = $PSBoundParameters[$_]
+                        }
+                    }
+
+                    $PSBoundParameters.Remove($_)
+                }
+            }
 
             $getDscResourceTestContainerParameters = @{
-                ProjectPath       = $ProjectPath
-                ModuleName        = $ModuleName
-                DefaultBranch     = $MainGitBranch
-                SourcePath        = $SourcePath
-                ExcludeSourceFile = $ExcludeSourceFile
                 ModuleBase        = $ModuleBase
+                ModuleName        = $ModuleName
+                # ModuleManifest    = $ModuleUnderTestManifest
+                # ProjectPath       = $ProjectPath
+                # SourcePath        = $SourcePath
+                # SourceManifest   = $SourceManifest.FullName
                 ExcludeModuleFile = $ExcludeModuleFile
+                ExcludeSourceFile = $ExcludeSourceFile
+                DefaultBranch     = $MainGitBranch
+            }
+
+            if ($ProjectPath)
+            {
+                $getDscResourceTestContainerParameters.Add('ProjectPath',$ProjectPath)
+            }
+
+            if ($SourcePath)
+            {
+                $getDscResourceTestContainerParameters.Add('SourcePath', $SourcePath)
             }
 
             $container = Get-DscResourceTestContainer @getDscResourceTestContainerParameters
-
-            $invokePesterParameters['Container'] = $container
-
-            if ($PSBoundParameters.ContainsKey('Output'))
-            {
-                $invokePesterParameters['Output'] = $Output
-            }
-
-            if ($PSBoundParameters.ContainsKey('ExcludeTagFilter'))
-            {
-                $invokePesterParameters['ExcludeTagFilter'] = $ExcludeTagFilter
-            }
-
-            if ($PSBoundParameters.ContainsKey('TagFilter'))
-            {
-                $invokePesterParameters['TagFilter'] = $TagFilter
-            }
-
-            if ($PSBoundParameters.ContainsKey('PassThru'))
-            {
-                $invokePesterParameters['PassThru'] = $PassThru
-            }
+            $PSBoundParameters['Container'] = $container
         }
 
         # Below is default command proxy handling
@@ -566,7 +597,7 @@ function Invoke-DscResourceTest
             $wrappedCmd = Get-Command -CommandType 'Function' -Name 'Invoke-Pester'
 
             $scriptCmd = {
-                & $wrappedCmd @invokePesterParameters
+                & $wrappedCmd @PSBoundParameters
             }
 
             $steppablePipeline = $scriptCmd.GetSteppablePipeline()

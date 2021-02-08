@@ -14,7 +14,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $SourcePath,
 
@@ -33,6 +33,11 @@ $isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    return
+}
+
+if (-not $SourcePath) {
+    Write-Verbose -Message 'The Publish Example files tests only apply to Source repository testing.'
     return
 }
 

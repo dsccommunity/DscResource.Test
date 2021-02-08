@@ -13,7 +13,7 @@
 #>
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $SourcePath,
 
@@ -37,7 +37,12 @@ if (-not $isPester5)
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
-    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1')
+
+    if (-not $SourcePath)
+    {
+        return
+    }
 
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
 

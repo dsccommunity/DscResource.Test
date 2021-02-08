@@ -14,7 +14,7 @@
 #>
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ProjectPath,
 

@@ -17,7 +17,7 @@
 #>
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ProjectPath,
 
@@ -78,8 +78,15 @@ BeforeDiscovery {
         $moduleFiles += @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
     }
 
-    # Expand the project folder if it is a relative path.
-    $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
+    if ($ProjectPath)
+    {
+        # Expand the project folder if it is a relative path.
+        $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
+    }
+    else
+    {
+        $resolvedProjectPath = $ModuleBase
+    }
 
     $moduleFileToTest = @()
 

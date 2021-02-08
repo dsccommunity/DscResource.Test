@@ -17,7 +17,7 @@
 #>
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ProjectPath,
 
@@ -52,6 +52,12 @@ if (-not $isPester5)
 }
 
 BeforeDiscovery {
+    if (-not $ProjectPath)
+    {
+        Write-Verbose -Message 'The Markdown links check only applies when testing a Source repository'
+        return
+    }
+
     <#
         This check need to be done in discovery otherwise the tests will
         fail when pester does "Run" on the missing cmdlet Get-MarkdownLink.

@@ -17,7 +17,7 @@
 #>
 param
 (
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ProjectPath,
 
@@ -53,7 +53,7 @@ if (-not $isPester5)
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
-    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
+    Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1')
 
     $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
@@ -62,8 +62,15 @@ BeforeDiscovery {
         $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
     }
 
-    # Expand the project folder if it is a relative path.
-    $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
+    if ($ProjectPath)
+    {
+        # Expand the project folder if it is a relative path.
+        $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
+    }
+    else
+    {
+        $resolvedProjectPath = $ModuleBase
+    }
 
     #region Setup text file test cases.
     $textFileToTest = @()
