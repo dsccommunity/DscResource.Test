@@ -78,7 +78,7 @@ BuildWorkflow:
         "`tAlready Exported Aliases = {0}" -f ($existingAliases -join ', ')
         "`tNew Aliases To Export    = {0}" -f ($BuildInfo.AliasesToExport -join ', ')
 
-        Update-ModuleManifest -AliasesToExport ($existingAliases + $BuildInfo.AliasesToExport) -Path $pathToModuleManifest
+        Update-Metadata -Path $pathToModuleManifest -PropertyName AliasesToExport -Value ($existingAliases + $BuildInfo.AliasesToExport)
     }
 
   t:
