@@ -36,7 +36,8 @@ if (-not $isPester5)
     return
 }
 
-if (-not $SourcePath) {
+if (-not $SourcePath)
+{
     Write-Verbose -Message 'The Publish Example files tests only apply to Source repository testing.'
     return
 }
