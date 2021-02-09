@@ -55,6 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the `build.yaml` file under the key `AliasesToExport:`. This is quick
   fix for the issue [Export alias create with Set-Alias and New-Alias](https://github.com/PoshCode/ModuleBuilder/issues/103).
 
+### Fixed
+
+- Fix issue with running pester 4 HQRM test after preview release `v0.15.0-preview0002`.
+
 ## [0.14.3] - 2021-01-13
 
 ### Fixed
