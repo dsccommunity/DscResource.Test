@@ -42,14 +42,14 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByModuleNameOrPath', Position = 5)]
         [Parameter(ParameterSetName = 'ByModuleSpecification', Position = 5)]
         [Parameter(ParameterSetName = 'ByProjectPath', Position = 5)]
-        [Alias('Tags','Tag')]
+        [Alias('Tags', 'Tag')]
         [System.String[]]
         $TagFilter, #v4 Filter.Tag
 
         [Parameter()]
         [Alias('ExcludeTag')]
         [System.String[]]
-        $ExcludeTagFilter,  #v4 Filter.ExcludeTag
+        $ExcludeTagFilter, #v4 Filter.ExcludeTag
 
         [Parameter()]
         [System.String[]]
@@ -67,13 +67,13 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.Object[]]
-        $CodeCoverage,  #v4 CodeCoverage.Enabled = $true
+        $CodeCoverage, #v4 CodeCoverage.Enabled = $true
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.String]
-        $CodeCoverageOutputFile,  #v4
+        $CodeCoverageOutputFile, #v4
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath')]
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
@@ -141,9 +141,23 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByProjectPath', DontShow = $true)]
         [System.Management.Automation.SwitchParameter]
         $Pesterv5 = $(
-            if ( # Pester 5 is loaded, or we don't have pester 4 loaded and 5 is available
-                (Get-Module -FullyQualifiedName @{ModuleName = 'Pester'; ModuleVersion = '5.0'}) -or
-                (-not (Get-Module -FullyQualifiedName @{ModuleName = 'Pester'; MaximumVersion = '4.99'}) -and (Get-Module -ListAvailable -FullyQualifiedName @{ModuleName = 'Pester'; ModuleVersion = '5.0'} ))
+            $moduleInformationPester5 = @{
+                ModuleName = 'Pester'
+                ModuleVersion = '5.0'
+            }
+
+            $moduleInformationPester4 = @{
+                ModuleName = 'Pester'
+                MaximumVersion = '4.99'
+            }
+
+            if (
+                # Pester 5 is loaded, or we don't have pester 4 loaded and 5 is available
+                (Get-Module -FullyQualifiedName $moduleInformationPester5) `
+                -or (
+                    -not (Get-Module -FullyQualifiedName $moduleInformationPester4) `
+                    -and (Get-Module -ListAvailable -FullyQualifiedName $moduleInformationPester5 )
+                )
             )
             {
                 $true
@@ -434,17 +448,17 @@ function Invoke-DscResourceTest
                     $item = @{
                         Path       = $item
                         Parameters = @{
-                            ModuleBase         = $ModuleUnderTest.ModuleBase
-                            ModuleName         = $ModuleUnderTest.Name
-                            ModuleManifest     = $ModuleUnderTestManifest
-                            ProjectPath        = $ProjectPath
-                            SourcePath         = $SourcePath
-                            SourceManifest     = $SourceManifest.FullName
-                            Tag                = $PSBoundParameters['TagFilter']
-                            ExcludeTag         = $PSBoundParameters['ExcludeTagFilter']
-                            ExcludeModuleFile  = $ExcludeModuleFile
-                            ExcludeSourceFile  = $ExcludeSourceFile
-                            MainGitBranch      = $MainGitBranch
+                            ModuleBase        = $ModuleUnderTest.ModuleBase
+                            ModuleName        = $ModuleUnderTest.Name
+                            ModuleManifest    = $ModuleUnderTestManifest
+                            ProjectPath       = $ProjectPath
+                            SourcePath        = $SourcePath
+                            SourceManifest    = $SourceManifest.FullName
+                            Tag               = $PSBoundParameters['TagFilter']
+                            ExcludeTag        = $PSBoundParameters['ExcludeTagFilter']
+                            ExcludeModuleFile = $ExcludeModuleFile
+                            ExcludeSourceFile = $ExcludeSourceFile
+                            MainGitBranch     = $MainGitBranch
                         }
                     }
                 }
@@ -457,6 +471,11 @@ function Invoke-DscResourceTest
             if ($PSBoundParameters.ContainsKey('Path'))
             {
                 $PSBoundParameters.Remove('Path')
+            }
+
+            if ($PSBoundParameters.ContainsKey('MainGitBranch'))
+            {
+                $PSBoundParameters.Remove('MainGitBranch')
             }
 
             # Remove Pester v5 specific parameter
@@ -509,47 +528,61 @@ function Invoke-DscResourceTest
             ).ForEach{
                 if ($PSBoundParameters.ContainsKey($_))
                 {
-                    switch ($_) {
-                        'EnableExit' { $PesterV5AdvancedConfig['Run']['EnableExit'] = $PSBoundParameters[$_]  }
+                    switch ($_)
+                    {
+                        'EnableExit'
+                        {
+                            $PesterV5AdvancedConfig['Run']['EnableExit'] = $PSBoundParameters[$_]
+                        }
 
-                        'TagFilter' {
+                        'TagFilter'
+                        {
                             $PesterV5AdvancedConfig['Filter']['Tag'] = $PSBoundParameters[$_]
                         }
 
-                        'ExcludeTagFilter' {
+                        'ExcludeTagFilter'
+                        {
                             $PesterV5AdvancedConfig['Filter']['ExcludeTag'] = $PSBoundParameters[$_]
                         }
 
-                        'Output' {
+                        'Output'
+                        {
                             $PesterV5AdvancedConfig['Output']['Verbosity'] = $PSBoundParameters[$_]
                         }
 
-                        'CodeCoverage' {
+                        'CodeCoverage'
+                        {
                             $PesterV5AdvancedConfig['CodeCoverage']['Enabled'] = $true
                             $PesterV5AdvancedConfig['CodeCoverage']['Path'] = $PSBoundParameters[$_]
                         }
 
-                        'CodeCoverageOutputFile' {
+                        'CodeCoverageOutputFile'
+                        {
                             $PesterV5AdvancedConfig['CodeCoverage']['OutputPath'] = $PSBoundParameters[$_]
                         }
 
-                        'CodeCoverageOutputFileFormat' {
+                        'CodeCoverageOutputFileFormat'
+                        {
                             $PesterV5AdvancedConfig['CodeCoverage']['CodeCoverageOutputFileFormat'] = $PSBoundParameters[$_]
                         }
 
-                        'OutputFile' {
+                        'OutputFile'
+                        {
                             $PesterV5AdvancedConfig['TestResult']['OutputFile'] = $PSBoundParameters[$_]
                         }
 
-                        'OutputFormat' {
+                        'OutputFormat'
+                        {
                             $PesterV5AdvancedConfig['TestResult']['OutputFormat'] = $PSBoundParameters[$_]
                         }
 
-                        'Quiet' {
+                        'Quiet'
+                        {
                             $PesterV5AdvancedConfig['Output']['Verbosity'] = 'none'
                         }
 
-                        'Show' {
+                        'Show'
+                        {
                             $PesterV5AdvancedConfig['Output']['Verbosity'] = $PSBoundParameters[$_]
                         }
                     }
@@ -572,7 +605,7 @@ function Invoke-DscResourceTest
 
             if ($ProjectPath)
             {
-                $getDscResourceTestContainerParameters.Add('ProjectPath',$ProjectPath)
+                $getDscResourceTestContainerParameters.Add('ProjectPath', $ProjectPath)
             }
 
             if ($SourcePath)
