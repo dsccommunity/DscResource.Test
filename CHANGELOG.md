@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rename the default branch to `main` ([issue #104](https://github.com/dsccommunity/DscResource.Test/issues/104)).
+
 ## [0.15.0] - 2021-02-09
 
 ### Added

@@ -1,8 +1,8 @@
 # DscResource.Test
 
-[![Build Status](https://dev.azure.com/dsccommunity/DscResource.Test/_apis/build/status/dsccommunity.DscResource.Test?branchName=master)](https://dev.azure.com/dsccommunity/DscResource.Test/_build/latest?definitionId=3&branchName=master)
-![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/DscResource.Test/3/master)
-[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/DscResource.Test/3/master)](https://dsccommunity.visualstudio.com/DscResource.Test/_test/analytics?definitionId=3&contextType=build)
+[![Build Status](https://dev.azure.com/dsccommunity/DscResource.Test/_apis/build/status/dsccommunity.DscResource.Test?branchName=main)](https://dev.azure.com/dsccommunity/DscResource.Test/_build/latest?definitionId=3&branchName=main)
+![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/DscResource.Test/3/main)
+[![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/DscResource.Test/3/main)](https://dsccommunity.visualstudio.com/DscResource.Test/_test/analytics?definitionId=3&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/DscResource.Test?label=DscResource.Test%20Preview)](https://www.powershellgallery.com/packages/DscResource.Test/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/DscResource.Test?label=DscResource.Test)](https://www.powershellgallery.com/packages/DscResource.Test/)
 
