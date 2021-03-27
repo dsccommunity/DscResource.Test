@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     This will prevent the pipeline to loop indefinitely when an integration
     test fails and the property `LCMState` is set to `PendingConfiguration`.
 
+### Fixed
+
+- `Invoke_HQRM_Tests`
+  - Fixed the task so it runs together with latest PowerShell module Sampler.
+- `Fail_Build_If_HQRM_Tests_Failed`
+  - Fixed the task so it runs together with latest PowerShell module Sampler.
+
 ## [0.15.0] - 2021-02-09
 
 ### Added
