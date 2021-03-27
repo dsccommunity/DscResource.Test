@@ -36,7 +36,7 @@ param
 
     [Parameter()]
     [System.String]
-    $ProjectName = (property ProjectName ''),
+    $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
 
     [Parameter()]
     [System.String]
@@ -74,11 +74,6 @@ param
 
 # Synopsis: Making sure the Module meets some quality standard (help, tests)
 task Invoke_HQRM_Tests {
-    if ([System.String]::IsNullOrEmpty($ProjectName))
-    {
-        $ProjectName = Get-ProjectName -BuildRoot $BuildRoot
-    }
-
     if ([System.String]::IsNullOrEmpty($SourcePath))
     {
         $SourcePath = Get-SourcePath -BuildRoot $BuildRoot

@@ -33,7 +33,7 @@ param
 
     [Parameter()]
     [System.String]
-    $ProjectName = (property ProjectName ''),
+    $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
 
     [Parameter()]
     [System.String]
@@ -48,11 +48,6 @@ param
 # Synopsis: This task ensures the build job fails if the test aren't successful.
 task Fail_Build_If_HQRM_Tests_Failed {
     "Asserting that no test failed."
-
-    if ([System.String]::IsNullOrEmpty($ProjectName))
-    {
-        $ProjectName = Get-ProjectName -BuildRoot $BuildRoot
-    }
 
     if (-not (Split-Path -IsAbsolute $OutputDirectory))
     {
