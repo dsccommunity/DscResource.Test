@@ -57,7 +57,7 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
             } -ModuleName $ProjectName
 
             Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
-                if ($script:mockStartSleepWasCalled)
+                $mockLcmState = if ($script:mockStartSleepWasCalled)
                 {
                     @{
                         LCMState = 'Idle'
@@ -66,11 +66,11 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
                 else
                 {
                     @{
-                        LCMState = 'Running'
+                        LCMState = 'Busy'
                     }
                 }
 
-                return
+                return $mockLcmState
             } -ModuleName $ProjectName
         }
 
@@ -83,6 +83,27 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
 
             Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Exactly -Times 2 -Scope It -ModuleName $ProjectName
             Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It -ModuleName $ProjectName
+        }
+    }
+
+    Context 'When timeout is reached when waiting for the LCM to become idle' {
+        BeforeAll {
+            <#
+                We must not mock Start-Sleep in this test, if we do the loop will
+                run several thousands of times.
+            #>
+
+            Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
+                return @{
+                    LCMState = 'Busy'
+                }
+            } -ModuleName $ProjectName
+        }
+
+        It 'Should not throw and call the expected mocks' {
+            { Wait-ForIdleLcm -Timeout 8 } | Should -Not -Throw
+
+            Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Times 3 -Scope It -ModuleName $ProjectName
         }
     }
 
