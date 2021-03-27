@@ -33,6 +33,14 @@ param
 
     [Parameter()]
     [System.String]
+    $BuiltModuleSubdirectory = (property BuiltModuleSubdirectory ''),
+
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $VersionedOutputDirectory = (property VersionedOutputDirectory $true),
+
+    [Parameter()]
+    [System.String]
     $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
 
     [Parameter()]
@@ -49,12 +57,56 @@ param
 task Fail_Build_If_HQRM_Tests_Failed {
     "Asserting that no test failed."
 
-    if (-not (Split-Path -IsAbsolute $OutputDirectory))
-    {
-        $OutputDirectory = Join-Path -Path $ProjectPath -ChildPath $OutputDirectory
+    $OutputDirectory = Get-SamplerAbsolutePath -Path $OutputDirectory -RelativeTo $BuildRoot
 
-        Write-Build -Color 'Yellow' -Text "Absolute path to Output Directory is $OutputDirectory"
+    "`tOutputDirectory       = '$OutputDirectory'"
+
+    $BuiltModuleSubdirectory = Get-SamplerAbsolutePath -Path $BuiltModuleSubdirectory -RelativeTo $OutputDirectory
+
+    if ($VersionedOutputDirectory)
+    {
+        # VersionedOutputDirectory is not [bool]'' nor $false nor [bool]$null
+        # Assume true, wherever it was set
+        $VersionedOutputDirectory = $true
     }
+    else
+    {
+        # VersionedOutputDirectory may be [bool]'' but we can't tell where it's
+        # coming from, so assume the build info (Build.yaml) is right
+        $VersionedOutputDirectory = $BuildInfo['VersionedOutputDirectory']
+    }
+
+    $GetBuiltModuleManifestParams = @{
+        OutputDirectory          = $OutputDirectory
+        BuiltModuleSubdirectory  = $BuiltModuleSubDirectory
+        ModuleName               = $ProjectName
+        VersionedOutputDirectory = $VersionedOutputDirectory
+        ErrorAction              = 'Stop'
+    }
+
+    $builtModuleManifest = Get-SamplerBuiltModuleManifest @GetBuiltModuleManifestParams
+    $builtModuleManifest = [string](Get-Item -Path $builtModuleManifest).FullName
+
+    "`tBuilt Module Manifest = '$builtModuleManifest'"
+
+    $builtModuleBase = Get-SamplerBuiltModuleBase @GetBuiltModuleManifestParams
+    $builtModuleBase = [string](Get-Item -Path $builtModuleBase).FullName
+
+    "`tBuilt Module Base     = '$builtModuleBase'"
+
+    $moduleVersion = Get-BuiltModuleVersion @GetBuiltModuleManifestParams
+
+    $moduleVersionObject = Split-ModuleVersion -ModuleVersion $moduleVersion
+    $moduleVersionFolder = $moduleVersionObject.Version
+    $preReleaseTag       = $moduleVersionObject.PreReleaseString
+
+    "`tModule Version        = '$ModuleVersion'"
+    "`tModule Version Folder = '$moduleVersionFolder'"
+    "`tPre-release Tag       = '$preReleaseTag'"
+
+    "`tProject Path          = $ProjectPath"
+    "`tProject Name          = $ProjectName"
+    "`tBuilt Module Base     = $builtModuleBase"
 
     if (-not (Split-Path -IsAbsolute $DscTestOutputFolder))
     {
@@ -74,23 +126,13 @@ task Fail_Build_If_HQRM_Tests_Failed {
         'Linux'
     }
 
-    $getModuleVersionParameters = @{
-        OutputDirectory = $OutputDirectory
-        ProjectName     = $ProjectName
-    }
-
-    $ModuleVersion = Get-BuiltModuleVersion @getModuleVersionParameters
-
     $psVersion = 'PSv.{0}' -f $PSVersionTable.PSVersion
     $DscTestOutputFileFileName = "DscTest_{0}_v{1}.{2}.{3}.xml" -f $ProjectName, $ModuleVersion, $os, $psVersion
     $DscTestResultObjectClixml = Join-Path -Path $DscTestOutputFolder -ChildPath "DscTestObject_$DscTestOutputFileFileName"
 
     "`t"
-    "`tProject Path        = $ProjectPath"
-    "`tProject Name        = $ProjectName"
-    "`tOutput Directory    = $OutputDirectory"
-    "`tTest Output Folder  = $DscTestOutputFolder"
-    "`tTest Output Object  = $DscTestResultObjectClixml"
+    "`tTest Output Folder    = $DscTestOutputFolder"
+    "`tTest Output Object    = $DscTestResultObjectClixml"
     "`t"
 
     if (-not (Test-Path -Path $DscTestResultObjectClixml))

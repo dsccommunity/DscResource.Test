@@ -36,11 +36,19 @@ param
 
     [Parameter()]
     [System.String]
+    $BuiltModuleSubdirectory = (property BuiltModuleSubdirectory ''),
+
+    [Parameter()]
+    [System.Management.Automation.SwitchParameter]
+    $VersionedOutputDirectory = (property VersionedOutputDirectory $true),
+
+    [Parameter()]
+    [System.String]
     $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
 
     [Parameter()]
     [System.String]
-    $SourcePath = (property SourcePath ''),
+    $SourcePath = (property SourcePath $(Get-SamplerSourcePath -BuildRoot $BuildRoot)),
 
     [Parameter()]
     [System.String]
@@ -74,17 +82,57 @@ param
 
 # Synopsis: Making sure the Module meets some quality standard (help, tests)
 task Invoke_HQRM_Tests {
-    if ([System.String]::IsNullOrEmpty($SourcePath))
+    $OutputDirectory = Get-SamplerAbsolutePath -Path $OutputDirectory -RelativeTo $BuildRoot
+
+    "`tOutputDirectory       = '$OutputDirectory'"
+
+    $BuiltModuleSubdirectory = Get-SamplerAbsolutePath -Path $BuiltModuleSubdirectory -RelativeTo $OutputDirectory
+
+    if ($VersionedOutputDirectory)
     {
-        $SourcePath = Get-SourcePath -BuildRoot $BuildRoot
+        # VersionedOutputDirectory is not [bool]'' nor $false nor [bool]$null
+        # Assume true, wherever it was set
+        $VersionedOutputDirectory = $true
+    }
+    else
+    {
+        # VersionedOutputDirectory may be [bool]'' but we can't tell where it's
+        # coming from, so assume the build info (Build.yaml) is right
+        $VersionedOutputDirectory = $BuildInfo['VersionedOutputDirectory']
     }
 
-    if (-not (Split-Path -IsAbsolute $OutputDirectory))
-    {
-        $OutputDirectory = Join-Path -Path $ProjectPath -ChildPath $OutputDirectory
-
-        Write-Build Yellow "Absolute path to Output Directory is $OutputDirectory"
+    $GetBuiltModuleManifestParams = @{
+        OutputDirectory          = $OutputDirectory
+        BuiltModuleSubdirectory  = $BuiltModuleSubDirectory
+        ModuleName               = $ProjectName
+        VersionedOutputDirectory = $VersionedOutputDirectory
+        ErrorAction              = 'Stop'
     }
+
+    $builtModuleManifest = Get-SamplerBuiltModuleManifest @GetBuiltModuleManifestParams
+    $builtModuleManifest = [string](Get-Item -Path $builtModuleManifest).FullName
+
+    "`tBuilt Module Manifest = '$builtModuleManifest'"
+
+    $builtModuleBase = Get-SamplerBuiltModuleBase @GetBuiltModuleManifestParams
+    $builtModuleBase = [string](Get-Item -Path $builtModuleBase).FullName
+
+    "`tBuilt Module Base     = '$builtModuleBase'"
+
+    $moduleVersion = Get-BuiltModuleVersion @GetBuiltModuleManifestParams
+
+    $moduleVersionObject = Split-ModuleVersion -ModuleVersion $moduleVersion
+    $moduleVersionFolder = $moduleVersionObject.Version
+    $preReleaseTag       = $moduleVersionObject.PreReleaseString
+
+    "`tModule Version        = '$ModuleVersion'"
+    "`tModule Version Folder = '$moduleVersionFolder'"
+    "`tPre-release Tag       = '$preReleaseTag'"
+
+    "`tProject Path          = $ProjectPath"
+    "`tProject Name          = $ProjectName"
+    "`tSource Path           = $SourcePath"
+    "`tBuilt Module Base     = $builtModuleBase"
 
     if (-not (Split-Path -IsAbsolute $DscTestOutputFolder))
     {
@@ -95,8 +143,6 @@ task Invoke_HQRM_Tests {
         OutputDirectory = $OutputDirectory
         ProjectName     = $ProjectName
     }
-
-    $ModuleVersion = Get-BuiltModuleVersion @getModuleVersionParameters
 
     if (-not (Test-Path -Path $DscTestOutputFolder))
     {
@@ -346,13 +392,8 @@ task Invoke_HQRM_Tests {
         }
     }
 
-    "`tProject Path        = $ProjectPath"
-    "`tProject Name        = $ProjectName"
-    "`tSource Path         = $SourcePath"
-    "`tOutput Directory    = $OutputDirectory"
-    "`tBuild Module Output = $BuildModuleOutput"
-    "`tModule Version      = $ModuleVersion"
-    "`tTest Output Folder  = $DscTestOutputFolder"
+    "`tBuild Module Output   = $BuildModuleOutput"
+    "`tTest Output Folder    = $DscTestOutputFolder"
     "`t"
 
     $pesterParameters = @{}
