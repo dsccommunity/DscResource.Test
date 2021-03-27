@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Rename the default branch to `main` ([issue #104](https://github.com/dsccommunity/DscResource.Test/issues/104)).
+- Updated pipeline files.
 
 ## [0.15.0] - 2021-02-09
 
