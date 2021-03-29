@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - DscResource.Test
   - Rename the default branch to `main` ([issue #104](https://github.com/dsccommunity/DscResource.Test/issues/104)).
-  - Updated pipeline files.
+  - Updated pipeline files, using the latest Sampler deploy tasks.
 - `Wait-ForIdleLcm`
   - Updated to wait as long as the `LCMState` property has the state `'Busy'` ([issue #101](https://github.com/dsccommunity/DscResource.Test/issues/101)).
     This will prevent the pipeline to loop indefinitely when an integration
