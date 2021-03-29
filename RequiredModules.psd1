@@ -1,9 +1,9 @@
 @{
-    # Set up a mini virtual environment...
     PSDependOptions             = @{
-        AddToPath  = $True
+        AddToPath  = $true
         Target     = 'output\RequiredModules'
         Parameters = @{
+           Repository = 'PSGallery'
         }
     }
 
@@ -15,6 +15,7 @@
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
+    'Sampler.GitHubTasks'       = 'latest'
     xDscResourceDesigner        = 'latest'
     MarkdownLinkCheck           = 'latest'
 }

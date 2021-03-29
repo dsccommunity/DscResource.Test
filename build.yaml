@@ -63,11 +63,9 @@ BuildWorkflow:
         param
         (
             $OutputDirectory = (property OutputDirectory (Join-Path $BuildRoot 'output')),
-            $ProjectName = (property ProjectName ''),
+            $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
             $BuildInfo = (property BuildInfo @{ })
         )
-
-        $ProjectName = Get-ProjectName -BuildRoot $BuildRoot
 
         $pathToModuleManifest = Resolve-Path -Path "$OutputDirectory/$ProjectName/**/$ProjectName.psd1"
         $existingAliases = @((Test-ModuleManifest -Path $pathToModuleManifest).ExportedAliases.Values.Name)

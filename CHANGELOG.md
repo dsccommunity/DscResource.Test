@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Wait-ForIdleLcm`
+  - Added new parameter `Timeout` to be able to return after the specified
+    elapsed time ([issue #101](https://github.com/dsccommunity/DscResource.Test/issues/101)).
+
 ### Changed
 
-- Rename the default branch to `main` ([issue #104](https://github.com/dsccommunity/DscResource.Test/issues/104)).
+- DscResource.Test
+  - Rename the default branch to `main` ([issue #104](https://github.com/dsccommunity/DscResource.Test/issues/104)).
+  - Updated pipeline files.
+- `Wait-ForIdleLcm`
+  - Updated to wait as long as the `LCMState` property has the state `'Busy'` ([issue #101](https://github.com/dsccommunity/DscResource.Test/issues/101)).
+    This will prevent the pipeline to loop indefinitely when an integration
+    test fails and the property `LCMState` is set to `PendingConfiguration`.
+
+### Fixed
+
+- `Invoke_HQRM_Tests`
+  - Fixed the task so it runs together with latest PowerShell module Sampler.
+- `Fail_Build_If_HQRM_Tests_Failed`
+  - Fixed the task so it runs together with latest PowerShell module Sampler.
 
 ## [0.15.0] - 2021-02-09
 
