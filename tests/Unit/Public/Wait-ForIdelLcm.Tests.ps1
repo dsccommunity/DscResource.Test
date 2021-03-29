@@ -101,7 +101,7 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
         }
 
         It 'Should not throw and call the expected mocks' {
-            { Wait-ForIdleLcm -Timeout 8 } | Should -Not -Throw
+            { Wait-ForIdleLcm -Timeout '00:00:08' } | Should -Not -Throw
 
             Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Times 3 -Scope It -ModuleName $ProjectName
         }

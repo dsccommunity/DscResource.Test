@@ -24,7 +24,7 @@ function Wait-ForIdleLcm
         $Clear,
 
         [Parameter()]
-        [System.UInt32]
+        [System.TimeSpan]
         $Timeout
     )
 
@@ -47,7 +47,7 @@ function Wait-ForIdleLcm
     {
         Write-Verbose -Message 'Waiting for the LCM to become idle'
 
-        if ($timer -and $timer.Elapsed.Seconds -ge $Timeout)
+        if ($timer -and $timer.Elapsed -ge $Timeout)
         {
             break
         }
