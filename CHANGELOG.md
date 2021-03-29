@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Wait-ForIdleLcm`
   - Added new parameter `Timeout` to be able to return after the specified
-    number of seconds ([issue #101](https://github.com/dsccommunity/DscResource.Test/issues/101)).
+    elapsed time ([issue #101](https://github.com/dsccommunity/DscResource.Test/issues/101)).
 
 ### Changed
 
