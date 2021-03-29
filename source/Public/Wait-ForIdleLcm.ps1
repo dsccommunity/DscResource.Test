@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Waits for LCM to become idle.
+        Waits for LCM to return from busy state.
 
     .PARAMETER Clear
         If specified, the LCM will also be cleared of DSC configurations.
@@ -13,6 +13,9 @@
     .NOTES
         Used in integration test where integration tests run to quickly before
         LCM have time to cool down.
+
+        It will return if the LCM state is other than 'Busy'. The other states are
+        'Idle', 'PendingConfiguration', or 'PendingReboot'.
 #>
 function Wait-ForIdleLcm
 {

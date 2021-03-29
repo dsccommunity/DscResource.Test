@@ -491,11 +491,14 @@ Waits for LCM to become idle and optionally clears the LCM by running
 It is meant to be used in integration test where integration tests run to
 quickly before LCM have time to cool down.
 
+It will return if the LCM state is other than 'Busy'. The other states are
+'Idle', 'PendingConfiguration', or 'PendingReboot'.
+
 #### Syntax
 
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
-Wait-ForIdleLcm [-Clear] [<CommonParameters>]
+Wait-ForIdleLcm [[-Timeout] <timespan>] [-Clear] [<CommonParameters>]
 ```
 <!-- markdownlint-enable MD013 - Line length -->
 
@@ -509,7 +512,15 @@ None.
 Wait-ForIdleLcm -Clear
 ```
 
-This will wait for the LCM to become idle and then clear the LCM.
+This will wait for the LCM to return from busy state and then clear the LCM.
+
+```powershell
+Wait-ForIdleLcm -Clear -Timeout '00:00:08'
+```
+
+This will wait for the LCM to return from busy state. If the LCM has not
+returned from busy state within the elapsed time specified in the parameter
+`Timeout` then it will stop waiting and clear the LCM.
 
 ## Tasks
 
