@@ -11,7 +11,6 @@ CopyPaths:
   - Tests
   - Config
   - tasks
-  - scripts
 Encoding: UTF8
 # SemVer: '1.2.3'
 # Suffix to add to Root module PSM1 after merge (here, the Set-Alias exporting IB tasks)
