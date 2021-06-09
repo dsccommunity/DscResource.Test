@@ -57,56 +57,10 @@ param
 task Fail_Build_If_HQRM_Tests_Failed {
     "Asserting that no test failed."
 
-    $OutputDirectory = Get-SamplerAbsolutePath -Path $OutputDirectory -RelativeTo $BuildRoot
-
-    "`tOutputDirectory       = '$OutputDirectory'"
-
-    $BuiltModuleSubdirectory = Get-SamplerAbsolutePath -Path $BuiltModuleSubdirectory -RelativeTo $OutputDirectory
-
-    if ($VersionedOutputDirectory)
-    {
-        # VersionedOutputDirectory is not [bool]'' nor $false nor [bool]$null
-        # Assume true, wherever it was set
-        $VersionedOutputDirectory = $true
-    }
-    else
-    {
-        # VersionedOutputDirectory may be [bool]'' but we can't tell where it's
-        # coming from, so assume the build info (Build.yaml) is right
-        $VersionedOutputDirectory = $BuildInfo['VersionedOutputDirectory']
-    }
-
-    $GetBuiltModuleManifestParams = @{
-        OutputDirectory          = $OutputDirectory
-        BuiltModuleSubdirectory  = $BuiltModuleSubDirectory
-        ModuleName               = $ProjectName
-        VersionedOutputDirectory = $VersionedOutputDirectory
-        ErrorAction              = 'Stop'
-    }
-
-    $builtModuleManifest = Get-SamplerBuiltModuleManifest @GetBuiltModuleManifestParams
-    $builtModuleManifest = [string](Get-Item -Path $builtModuleManifest).FullName
-
-    "`tBuilt Module Manifest = '$builtModuleManifest'"
-
-    $builtModuleBase = Get-SamplerBuiltModuleBase @GetBuiltModuleManifestParams
-    $builtModuleBase = [string](Get-Item -Path $builtModuleBase).FullName
-
-    "`tBuilt Module Base     = '$builtModuleBase'"
-
-    $moduleVersion = Get-BuiltModuleVersion @GetBuiltModuleManifestParams
-
-    $moduleVersionObject = Split-ModuleVersion -ModuleVersion $moduleVersion
-    $moduleVersionFolder = $moduleVersionObject.Version
-    $preReleaseTag       = $moduleVersionObject.PreReleaseString
-
-    "`tModule Version        = '$ModuleVersion'"
-    "`tModule Version Folder = '$moduleVersionFolder'"
-    "`tPre-release Tag       = '$preReleaseTag'"
+    # Get the values for task variables
+    . Set-SamplerTaskVariable
 
     "`tProject Path          = $ProjectPath"
-    "`tProject Name          = $ProjectName"
-    "`tBuilt Module Base     = $builtModuleBase"
 
     if (-not (Split-Path -IsAbsolute $DscTestOutputFolder))
     {
