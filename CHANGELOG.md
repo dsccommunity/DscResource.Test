@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactoring all tasks to initialise variable with `Set-SamplerTaskVariable` script ([issue #110](https://github.com/dsccommunity/DscResource.Test/issues/110)).
+- Now the data for the Pester containers are cloned to not hit the issue
+  [Using same data with two or more containers fail](https://github.com/pester/Pester/issues/2073).
 
 ## [0.15.1] - 2021-03-29
 
