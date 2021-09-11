@@ -42,6 +42,24 @@ InModuleScope $ProjectName {
             }
         }
 
+        Context 'When a script file has the correct name but is a LCM meta configuration' {
+            BeforeAll {
+                $definition = '
+                [DSCLocalConfigurationManager()]
+                Configuration TestConfig
+                {
+                }
+            '
+
+                $definition | Out-File -FilePath $mockScriptPath -Encoding utf8 -Force
+            }
+
+            It 'Should return true' {
+                $result = Test-ConfigurationName -Path $mockScriptPath
+                $result | Should -BeTrue
+            }
+        }
+
         Context 'When a script file has the different name than the configuration name' {
             BeforeAll {
                 $definition = '
