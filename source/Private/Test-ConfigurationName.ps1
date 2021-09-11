@@ -30,7 +30,10 @@ function Test-ConfigurationName
 
     $configurationDefinition = $definitionAst.Find($astFilter, $true)
 
-    $isOfCorrectType = $configurationDefinition.ConfigurationType -eq [System.Management.Automation.Language.ConfigurationType]::Resource
+    $isOfCorrectType = $configurationDefinition.ConfigurationType -in @(
+        [System.Management.Automation.Language.ConfigurationType]::Resource
+        [System.Management.Automation.Language.ConfigurationType]::Meta
+    )
 
     $configurationName = $configurationDefinition.InstanceName.Value
     $hasEqualName = $configurationName -eq $publishFilename
