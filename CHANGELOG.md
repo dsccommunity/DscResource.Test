@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for examples for LCM Meta Configurations to
   `Test-ConfigurationName` ([issue #116](https://github.com/dsccommunity/DscResource.Test/issues/116)).
 
+## [0.15.2] - 2021-09-08
+
 ### Changed
 
 - Refactoring all tasks to initialise variable with `Set-SamplerTaskVariable` script ([issue #110](https://github.com/dsccommunity/DscResource.Test/issues/110)).
