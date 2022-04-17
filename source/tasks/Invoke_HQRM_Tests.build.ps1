@@ -218,6 +218,9 @@ task Invoke_HQRM_Tests {
             #>
             $pesterConfiguration = [PesterConfiguration]::Default
 
+            # Default to throw an error if for example discovery fails, so that test pipeline fails.
+            $pesterConfiguration.Run.Throw = $true
+
             $pesterConfigurationSectionNames = ($pesterConfiguration | Get-Member -Type 'Properties').Name
 
             foreach ($sectionName in $pesterConfigurationSectionNames)
