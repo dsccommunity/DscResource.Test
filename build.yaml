@@ -109,7 +109,7 @@ Pester:
     - source/potential
 
 CodeCoverage:
-  CodeCoverageFilePattern: JaCoCo_Merge.xml # the pattern used to search all pipeline test job artifacts
+  CodeCoverageFilePattern: JaCoCo*.xml # the pattern used to search all pipeline test job artifacts
   CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
 
 ModuleBuildTasks:
