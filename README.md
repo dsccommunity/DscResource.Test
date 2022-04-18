@@ -1,22 +1,43 @@
 # DscResource.Test
 
+This module contains tasks and the HQRM (High Quality Resource Module) tests for the PowerShell DSC Community's DSC resources. This is a PowerShell module designed to help testing your projects against HQRM guidelines.
+
 [![Build Status](https://dev.azure.com/dsccommunity/DscResource.Test/_apis/build/status/dsccommunity.DscResource.Test?branchName=main)](https://dev.azure.com/dsccommunity/DscResource.Test/_build/latest?definitionId=3&branchName=main)
-![Code Coverage](https://img.shields.io/azure-devops/coverage/dsccommunity/DscResource.Test/3/main)
+![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/DscResource.Test/3/main)
+[![codecov](https://codecov.io/gh/dsccommunity/DscResource.Test/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/DscResource.Test)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/DscResource.Test/3/main)](https://dsccommunity.visualstudio.com/DscResource.Test/_test/analytics?definitionId=3&contextType=build)
 [![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/DscResource.Test?label=DscResource.Test%20Preview)](https://www.powershellgallery.com/packages/DscResource.Test/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/DscResource.Test?label=DscResource.Test)](https://www.powershellgallery.com/packages/DscResource.Test/)
 
-This is a PowerShell module designed to help testing your projects against HQRM guidelines.
+## Code of Conduct
 
-You can run the tests against the source of your project or against a built module.  
-The format expected for your project follows [the Sampler](https://github.com/gaelcolas/Sampler)
-template (basically the source code in a source/src/ModuleName folder, and
-a built version in the output folder).
+This project has adopted this [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Releases
+
+For each merge to the branch `main` a preview release will be
+deployed to [PowerShell Gallery](https://www.powershellgallery.com/).
+Periodically a release version tag will be pushed which will deploy a
+full release to [PowerShell Gallery](https://www.powershellgallery.com/).
+
+## Contributing
+
+Please check out common DSC Community [contributing guidelines](https://dsccommunity.org/guidelines/contributing).
+
+## Change log
+
+A full list of changes in each version can be found in the [change log](CHANGELOG.md).
+
 
 ## Usage
 
 Although this module is best used as part of the Sampler template pipeline
 automation, you can also use this in a standalone or custom way.
+
+You can run the tests against the source of your project or against a built module.  
+The format expected for your project follows [the Sampler](https://github.com/gaelcolas/Sampler)
+template (basically the source code in a source/src/ModuleName folder, and
+a built version in the output folder).
 
 Install the module from the PowerShell Gallery:
 
