@@ -1,8 +1,7 @@
 # Contributing
 
-Thank you for considering contributing to this resource module. Every little
-change helps make the DSC resources even better for everyone to use.
-
-## Common contribution guidelines
-
 Please check out common DSC Community [contributing guidelines](https://dsccommunity.org/guidelines/contributing).
+
+## Running the Tests
+
+If want to know how to run this module's tests you can look at the [Testing Guidelines](https://dsccommunity.org/guidelines/testing-guidelines/#running-tests)
