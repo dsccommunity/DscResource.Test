@@ -101,14 +101,16 @@ Pester:
   CodeCoverageThreshold: 50
   CodeCoverageOutputFile: JaCoCo_Merge.xml # the file that is created for each pipeline test job
   CodeCoverageOutputFileEncoding: ascii
-  CodeCoverageFilePattern: JaCoCo_Merge.xml # the pattern used to search all pipeline test job artifacts
-  CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
   ExcludeTag:
     - helpQuality
     - testQuality
   Tag:
   ExcludeSourceFile:
     - source/potential
+
+CodeCoverage:
+  CodeCoverageFilePattern: JaCoCo_Merge.xml # the pattern used to search all pipeline test job artifacts
+  CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
 
 ModuleBuildTasks:
   Sampler:
