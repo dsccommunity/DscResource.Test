@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated pipeline to use the latest build and pipeline files from Sampler.
 
+### Fixed
+
+- Now the pipeline will fail if the Pester discovery phase fails. Prior
+  if discovery failed the pipeline still passed ([issue #112](https://github.com/dsccommunity/DscResource.Test/issues/112)).
+
 ## [0.16.0] - 2021-09-11
 
 ### Added

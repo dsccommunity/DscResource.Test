@@ -485,4 +485,13 @@ task Invoke_HQRM_Tests {
     $DscTestResultObjectCliXml = Join-Path -Path $DscTestOutputFolder -ChildPath "DscTestObject_$DscTestOutputFileFileName"
 
     $null = $script:testResults | Export-CliXml -Path $DscTestResultObjectCliXml -Force
+
+    <#
+        Verify so that all containers (discovery phase) ran and all tests passed,
+        if not make sure the test pipeline correctly fails.
+    #>
+    if ($script:testResults.Result -eq 'Failed')
+    {
+        throw 'Pester reported failure. Tests did not pass.'
+    }
 }
