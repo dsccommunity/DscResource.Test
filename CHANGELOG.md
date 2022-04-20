@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.1] - 2022-04-20
+
 ### Changed
 
 - Updated pipeline to use the latest build and pipeline files from Sampler.
