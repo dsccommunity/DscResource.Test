@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Restore-TestEnvironment`
+  - A new parameter `KeepNewMachinePSModulePath` was added and only works
+    if the test type is `Integration` or `All`. The new parameter will
+    keep any new paths that was added to the machine environment variable
+    `PSModulePath` after the command `Initialize-TestEnvironment` was called.
+    This is helpful if a a path is added by an integration test and is needed
+    by a second integration test and there is a need to run `Restore-TestEnvironment`
+    between tests.
+- Added private function `Join-PSModulePath` that will concatenate two
+  strings with semi-colon separated paths.
+
 ### Fixed
 
 - `Initialize-TestEnvironment`

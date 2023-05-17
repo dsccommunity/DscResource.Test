@@ -86,9 +86,44 @@ InModuleScope $ProjectName {
                     $Path -eq $testEnvironmentParameter.OldPSModulePath `
                         -and $PSBoundParameters.ContainsKey('Machine') -eq $false
                 } -Exactly -Times 1 -Scope It
+            }
+        }
+
+        Context 'When restoring the test environment from an integration test that changed the machine PSModulePath' {
+            BeforeAll {
+                if ($script:machineOldPSModulePath)
+                {
+                    throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
+                }
+
+                $script:machineOldPSModulePath = 'SavedPath'
+            }
+
+            AfterAll {
+                $script:machineOldPSModulePath = $null
+            }
+
+            It 'Should restore without throwing and call the correct mocks' {
+                $testEnvironmentParameter = @{
+                    DSCModuleName      = 'TestModule'
+                    DSCResourceName    = 'TestResource'
+                    TestType           = 'Integration'
+                    ImportedModulePath = $moduleToImportFilePath
+                    OldPSModulePath    = 'Wrong paths'
+                    OldExecutionPolicy = Get-ExecutionPolicy
+                }
+
+                { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter -KeepNewMachinePSModulePath } | Should -Not -Throw
+
+                Assert-MockCalled -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
 
                 Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
                     $Path -eq $testEnvironmentParameter.OldPSModulePath `
+                        -and $PSBoundParameters.ContainsKey('Machine') -eq $false
+                } -Exactly -Times 1 -Scope It
+
+                Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
+                    $Path -match 'SavedPath' `
                         -and $PSBoundParameters.ContainsKey('Machine') -eq $true
                 } -Exactly -Times 1 -Scope It
             }
@@ -126,5 +161,4 @@ InModuleScope $ProjectName {
             }
         }
     }
-
 }
