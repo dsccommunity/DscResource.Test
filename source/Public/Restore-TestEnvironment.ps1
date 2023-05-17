@@ -38,12 +38,6 @@ function Restore-TestEnvironment
     if ($TestEnvironment.OldPSModulePath -ne $env:PSModulePath)
     {
         Set-PSModulePath -Path $TestEnvironment.OldPSModulePath
-
-        if ($TestEnvironment.TestType -in ('Integration','All'))
-        {
-            # Restore the machine PSModulePath for integration tests.
-            Set-PSModulePath -Path $TestEnvironment.OldPSModulePath -Machine
-        }
     }
 
     # Restore the Execution Policy
@@ -52,9 +46,15 @@ function Restore-TestEnvironment
         Set-ExecutionPolicy -ExecutionPolicy $TestEnvironment.OldExecutionPolicy -Scope 'Process' -Force
     }
 
-    if ($script:MachineOldPSModulePath)
+    if ($TestEnvironment.TestType -in ('Integration','All') -and $script:MachineOldPSModulePath)
     {
-        [System.Environment]::SetEnvironmentVariable('PSModulePath', $script:MachineOldPSModulePath, 'Machine')
+        <#
+            Restore the machine PSModulePath. The variable $script:machineOldPSModulePath
+            is also used in suffix.ps1.
+        #>
+        Set-PSModulePath -Path $script:MachineOldPSModulePath -Machine -ErrorAction 'Stop'
+
+        $script:MachineOldPSModulePath = $null
     }
 
     if ($script:MachineOldExecutionPolicy)

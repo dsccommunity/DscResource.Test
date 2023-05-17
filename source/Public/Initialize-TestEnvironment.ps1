@@ -219,12 +219,10 @@ function Initialize-TestEnvironment
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         )
         {
-            if (!$script:MachineOldPSModulePath)
+            if ($script:MachineOldPSModulePath)
             {
-                Write-Warning "This will change your Machine Environment Variable"
-                $script:MachineOldPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
+                Write-Error -Message 'There were already saved paths of the machine environment variable PSModulePath from a previous call to the command. The previous saved paths will be overwritten if ErrorAction is not set to Stop. To avoid this error run the command Restore-TestEnvironment before subsequent calls of the command Initialize-TestEnvironment' -Category 'InvalidData' -ErrorId 'IT0001' -TargetObject 'PSModulePath'
             }
-
             # Preserve and set the execution policy so that the DSC MOF can be created
             $currentMachineExecutionPolicy = Get-ExecutionPolicy -Scope 'LocalMachine'
             if ($PSBoundParameters.ContainsKey('MachineExecutionPolicy'))
@@ -254,6 +252,11 @@ function Initialize-TestEnvironment
             }
 
             Write-Verbose -Message ('The machine execution policy is set to ''{0}''' -f $currentMachineExecutionPolicy)
+
+            Write-Warning -Message 'This will change your machine environment variable PSModulePath but can be restored by running the command Restore-TestEnvironment.'
+
+            # The variable $script:machineOldPSModulePath is also used in suffix.ps1.
+            $script:machineOldPSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
 
             <#
                 For integration tests we have to set the machine's PSModulePath because otherwise the
