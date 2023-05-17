@@ -56,8 +56,6 @@ stages:
   - stage: Test
     dependsOn: Build
     jobs:
-
-
       - job: test_windows_wps
         displayName: 'Test Windows (WPS)'
         pool:

@@ -16,7 +16,10 @@ InModuleScope $ProjectName {
             }
         }
 
-        AfterAll {
+        AfterEach {
+            <#
+                Make sure to set this to $null so that the unit tests won't fail.
+            #>
             $script:machineOldPSModulePath = $null
         }
 
@@ -110,6 +113,7 @@ InModuleScope $ProjectName {
                     DSCResourceName = $mockDscResourceName
                     TestType        = $TestType
                     ResourceType    = $ResourceType
+                    ErrorAction     = 'SilentlyContinue'
                 }
 
                 { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
