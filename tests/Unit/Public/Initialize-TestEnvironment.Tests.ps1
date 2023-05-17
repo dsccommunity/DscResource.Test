@@ -113,7 +113,6 @@ InModuleScope $ProjectName {
                     DSCResourceName = $mockDscResourceName
                     TestType        = $TestType
                     ResourceType    = $ResourceType
-                    ErrorAction     = 'SilentlyContinue'
                 }
 
                 { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
