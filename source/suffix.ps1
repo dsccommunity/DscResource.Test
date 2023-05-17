@@ -1,7 +1,9 @@
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    if ($script:MachineOldPSModulePath)
+    if ($script:machineOldPSModulePath)
     {
-        [System.Environment]::SetEnvironmentVariable('PSModulePath', $script:MachineOldPSModulePath, 'Machine')
+        Set-PSModulePath -Path $script:machineOldPSModulePath -Machine -ErrorAction 'Stop'
+
+        $script:machineOldPSModulePath = $null
     }
 
     if ($script:MachineOldExecutionPolicy)

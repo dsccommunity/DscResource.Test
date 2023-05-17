@@ -9,6 +9,20 @@ Import-Module $ProjectName -Force
 
 InModuleScope $ProjectName {
     Describe 'Initialize-TestEnvironment' {
+        BeforeAll {
+            if ($script:machineOldPSModulePath)
+            {
+                throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
+            }
+        }
+
+        AfterEach {
+            <#
+                Make sure to set this to $null so that the unit tests won't fail.
+            #>
+            $script:machineOldPSModulePath = $null
+        }
+
         Context 'When initializing the test environment' {
             BeforeAll {
                 $mockDscModuleName = 'TestModule'

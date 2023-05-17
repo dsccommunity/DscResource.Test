@@ -22,8 +22,12 @@ function Restore-TestEnvironment
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [Hashtable]
-        $TestEnvironment
+        [System.Collections.Hashtable]
+        $TestEnvironment,
+
+        [Parameter()]
+        [System.Management.Automation.SwitchParameter]
+        $KeepNewMachinePSModulePath
     )
 
     Write-Verbose -Message "Cleaning up Test Environment after $($TestEnvironment.TestType) testing of $($TestEnvironment.DSCResourceName) in module $($TestEnvironment.DSCModuleName)."
@@ -32,29 +36,39 @@ function Restore-TestEnvironment
     {
         # Clear the DSC LCM & Configurations
         Clear-DscLcmConfiguration
+
+        if ($script:machineOldPSModulePath)
+        {
+            if ($KeepNewMachinePSModulePath.IsPresent)
+            {
+                $currentMachinePSModulePath = [System.Environment]::GetEnvironmentVariable('PSModulePath', 'Machine')
+
+                if ($currentMachinePSModulePath)
+                {
+                    $script:machineOldPSModulePath = Join-PSModulePath -Path $script:machineOldPSModulePath -NewPath $currentMachinePSModulePath
+                }
+            }
+
+            <#
+                Restore the machine PSModulePath. The variable $script:machineOldPSModulePath
+                is also used in suffix.ps1.
+            #>
+            Set-PSModulePath -Path $script:machineOldPSModulePath -Machine -ErrorAction 'Stop'
+
+            $script:machineOldPSModulePath = $null
+        }
     }
 
     # Restore PSModulePath
     if ($TestEnvironment.OldPSModulePath -ne $env:PSModulePath)
     {
         Set-PSModulePath -Path $TestEnvironment.OldPSModulePath
-
-        if ($TestEnvironment.TestType -in ('Integration','All'))
-        {
-            # Restore the machine PSModulePath for integration tests.
-            Set-PSModulePath -Path $TestEnvironment.OldPSModulePath -Machine
-        }
     }
 
     # Restore the Execution Policy
     if ($TestEnvironment.OldExecutionPolicy -ne (Get-ExecutionPolicy))
     {
         Set-ExecutionPolicy -ExecutionPolicy $TestEnvironment.OldExecutionPolicy -Scope 'Process' -Force
-    }
-
-    if ($script:MachineOldPSModulePath)
-    {
-        [System.Environment]::SetEnvironmentVariable('PSModulePath', $script:MachineOldPSModulePath, 'Machine')
     }
 
     if ($script:MachineOldExecutionPolicy)

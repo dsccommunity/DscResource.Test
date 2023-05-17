@@ -1,13 +1,37 @@
 # Changelog for DscResource.Test
 
-# Changelog
-
 All notable changes to this project will be documented in this file.
 
 The format is based on and uses the types of changes according to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- `Restore-TestEnvironment`
+  - A new parameter `KeepNewMachinePSModulePath` was added and only works
+    if the test type is `Integration` or `All`. The new parameter will
+    keep any new paths that was added to the machine environment variable
+    `PSModulePath` after the command `Initialize-TestEnvironment` was called.
+    This is helpful if a a path is added by an integration test and is needed
+    by a second integration test and there is a need to run `Restore-TestEnvironment`
+    between tests.
+- Added private function `Join-PSModulePath` that will concatenate two
+  strings with semi-colon separated paths.
+
+### Fixed
+
+- `Initialize-TestEnvironment`
+  - Now `$script:machineOldPSModulePath` is always set when called with the
+    test type `Integration` or `All`. Before it reverted to the paths on the
+    event `OnRemove` that were the current paths when `Initialize-TestEnvironment`
+    was first called. On subsequent calls any new paths were ignored.
+  - If there are a subsequent call to `Initialize-TestEnvironment` without the
+    command `Restore-TestEnvironment` was called prior the command will now
+    fail with a non-terminating exception asking the user to run `Restore-TestEnvironment`
+    to avoid the previously saved paths (`$script:machineOldPSModulePath`)
+    to be overwritten.
 
 ## [0.16.1] - 2022-04-20
 
