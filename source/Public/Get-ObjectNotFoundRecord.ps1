@@ -9,10 +9,9 @@
         The error record containing the exception that is causing this terminating
         error.
 #>
-function Get-InvalidResultRecord
+function Get-ObjectNotFoundRecord
 {
     [CmdletBinding()]
-    [Alias('Get-ObjectNotFoundRecord')]
     param
     (
         [Parameter(Mandatory = $true)]
