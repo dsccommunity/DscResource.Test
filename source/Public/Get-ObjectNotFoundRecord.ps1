@@ -24,7 +24,7 @@ function Get-ObjectNotFoundRecord
         $ErrorRecord
     )
 
-    $PSBoundParameters.Add('ExceptionType', 'System.Exception')
+    $null = $PSBoundParameters.Add('ExceptionType', 'System.Exception')
 
     return Get-SystemExceptionRecord @PSBoundParameters
 }

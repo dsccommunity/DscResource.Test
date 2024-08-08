@@ -24,7 +24,7 @@ function Get-InvalidOperationRecord
         $ErrorRecord
     )
 
-    $PSBoundParameters.Add('ExceptionType', 'System.InvalidOperationException')
+    $null = $PSBoundParameters.Add('ExceptionType', 'System.InvalidOperationException')
 
     return Get-SystemExceptionRecord @PSBoundParameters
 }
