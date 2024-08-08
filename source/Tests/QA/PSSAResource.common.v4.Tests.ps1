@@ -115,7 +115,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
                 {
                     $suppressedRuleNameNoQuotes = $suppressedRuleName.Replace("'", '')
 
-                    if ($requiredPssaRuleNames -icontains $suppressedRuleNameNoQuotes)
+                    if ($PSSA_rule_config.required_rules -icontains $suppressedRuleNameNoQuotes)
                     {
                         Write-Warning -Message "The file $($dscResourcesPsm1File.Name) contains a suppression of the required PS Script Analyser rule $suppressedRuleNameNoQuotes. Please remove the rule suppression."
                         $requiredRuleIsSuppressed = $true
