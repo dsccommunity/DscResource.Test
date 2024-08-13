@@ -24,35 +24,7 @@ function Get-InvalidOperationRecord
         $ErrorRecord
     )
 
-    $newObjectParameters = @{
-        TypeName = 'System.InvalidOperationException'
-    }
+    $null = $PSBoundParameters.Add('ExceptionType', 'System.InvalidOperationException')
 
-    if ($PSBoundParameters.ContainsKey('Message') -and $PSBoundParameters.ContainsKey('ErrorRecord'))
-    {
-        $newObjectParameters['ArgumentList'] = @(
-            $Message,
-            $ErrorRecord.Exception
-        )
-    }
-    elseif ($PSBoundParameters.ContainsKey('Message'))
-    {
-        $newObjectParameters['ArgumentList'] = @(
-            $Message
-        )
-    }
-
-    $invalidOperationException = New-Object @newObjectParameters
-
-    $newObjectParameters = @{
-        TypeName     = 'System.Management.Automation.ErrorRecord'
-        ArgumentList = @(
-            $invalidOperationException.ToString(),
-            'MachineStateIncorrect',
-            'InvalidOperation',
-            $null
-        )
-    }
-
-    return New-Object @newObjectParameters
+    return Get-SystemExceptionRecord @PSBoundParameters
 }

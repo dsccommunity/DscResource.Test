@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Get-SystemExceptionRecord`
+  - Added private command fixes ([Issue [#126](https://github.com/dsccommunity/DscResource.Test/issues/126)]).
+- Public command `Get-ObjectNotFoundRecord`
+  - Use private function `Get-SystemExceptionRecord`.
+
+### Changed
+
+- `Get-InvalidOperationRecord`
+  - Use private function `Get-SystemExceptionRecord`.
+- `Get-InvalidResultRecord`
+  - Removed alias `Get-ObjectNotFoundRecord` and added as it's own public command.
+
+### Fixed
+
+- `azure-pipelines`
+  - Pin gitversion to V5.
+
 ## [0.16.2] - 2023-05-18
 
 ### Added
