@@ -28,7 +28,6 @@ Please check out common DSC Community [contributing guidelines](https://dsccommu
 
 A full list of changes in each version can be found in the [change log](CHANGELOG.md).
 
-
 ## Usage
 
 Although this module is best used as part of the Sampler template pipeline
@@ -386,8 +385,8 @@ by module name, or path.
 
 #### Pester 5
 
-Wrapper for Invoke-Pester's Simple parameter set. It can be used to run 
-all the HQRM test with a single command. Only the parameter set `Pester5` 
+Wrapper for Invoke-Pester's Simple parameter set. It can be used to run
+all the HQRM test with a single command. Only the parameter set `Pester5`
 is supported, the first parameter set in the section _Syntax_ below.
 Mandatory parameters are those necessary to run the test scripts.
 
