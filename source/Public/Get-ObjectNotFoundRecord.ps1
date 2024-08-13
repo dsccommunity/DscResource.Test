@@ -1,6 +1,6 @@
 <#
     .SYNOPSIS
-        Returns an invalid result exception object.
+        Returns an object not found exception object.
 
     .PARAMETER Message
         The message explaining why this error is being thrown.
