@@ -223,10 +223,6 @@ Get-InvalidResultRecord [-Message] <string> [[-ErrorRecord] <ErrorRecord>] [<Com
 ```
 <!-- markdownlint-enable MD013 - Line length -->
 
-#### Aliases
-
-`Get-ObjectNotFound`
-
 #### Outputs
 
 **System.Object**
@@ -250,6 +246,50 @@ try
 catch
 {
     $mockErrorRecord = Get-InvalidResultRecord -ErrorRecord $_ -Message (
+        $script:localizedData.FailedToGetAllFromName -f $name
+    )
+}
+```
+
+This will return an error record. The exception message will be concatenated
+to include both the localized string and all the inner exceptions messages
+from error record that was passed from the `catch`-block.
+
+### `Get-ObjectNotFoundRecord`
+
+Returns an invalid result exception object.
+
+#### Syntax
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+Get-ObjectNotFoundRecord [-Message] <string> [[-ErrorRecord] <ErrorRecord>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+#### Outputs
+
+**System.Object**
+
+#### Example
+
+```powershell
+$mockErrorRecord = Get-ObjectNotFoundRecord -Message (
+    $script:localizedData.FailedToGetAllFromName -f $name
+)
+```
+
+This will return an error record with the localized string as the exception
+message.
+
+```powershell
+try
+{
+    # Something that tries to return an expected result.
+}
+catch
+{
+    $mockErrorRecord = Get-ObjectNotFoundRecord -ErrorRecord $_ -Message (
         $script:localizedData.FailedToGetAllFromName -f $name
     )
 }
