@@ -12,7 +12,6 @@
 function Get-InvalidResultRecord
 {
     [CmdletBinding()]
-    [Alias('Get-ObjectNotFoundRecord')]
     param
     (
         [Parameter(Mandatory = $true)]
