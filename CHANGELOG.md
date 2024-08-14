@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Use private function `Get-SystemExceptionRecord`.
 - `Get-InvalidResultRecord`
   - Removed alias `Get-ObjectNotFoundRecord` and added as it's own public command.
+- `PSSAResource.common.v4.Tests`
+  - Fixed rule suppression by using correct variable.
 
 ### Fixed
 
