@@ -94,13 +94,13 @@ BeforeDiscovery {
 
         # Remove any 'nnn.' from the class filename
         $normalizedClassName = $file.BaseName -replace '^\d{3}.', ''
-        $_localizationFolder = (Resolve-Path (Join-Path -Path $file.Directory.FullName -ChildPath '../en-US'))
+        $localizationFolderPath = (Join-Path -Path $ModuleBase -ChildPath 'en-US')
 
         $testProperties = @{
             File                   = $file
             ParentFolderName       = Split-Path -Path $file.Directory.FullName -Leaf
-            LocalizationFolderPath = $_localizationFolder
-            LocalizationFile       = (Join-Path -Path $_localizationFolder -ChildPath "$normalizedClassName.strings.psd1")
+            LocalizationFolderPath = $localizationFolderPath
+            LocalizationFile       = (Join-Path -Path $localizationFolderPath -ChildPath "$normalizedClassName.strings.psd1")
             ClassName              = $normalizedClassName
         }
 
@@ -165,7 +165,7 @@ BeforeDiscovery {
         $otherLanguageToTest = @()
 
         # Get all localization folders except the en-US (regardless of casing).
-        $localizationFolders = Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*' |
+        $localizationFolders = Get-ChildItem -Path $SourcePath -Directory -Filter '*-*' |
             Where-Object -FilterScript {
                 $_.Name -ne 'en-US'
             }
@@ -261,9 +261,9 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
 
         Context 'When a resource or module is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
-                $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$($File.BaseName).strings.psd1"
+                $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$ClassName.strings.psd1"
 
-                Test-Path -Path $localizationResourceFilePath | Should -BeTrue -Because ('there must exist a string resource file ''{0}.strings.psd1'' in the localization folder ''{1}''' -f $File.BaseName, $LocalizationFolderPath)
+                Test-Path -Path $localizationResourceFilePath | Should -BeTrue -Because ('there must exist a string resource file ''{0}.strings.psd1'' in the localization folder ''{1}''' -f $ClassName, $LocalizationFolderPath)
             }
 
             It 'Should be an accurate localization folder with the correct casing' {
