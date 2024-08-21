@@ -58,7 +58,7 @@ BeforeDiscovery {
     }
 
     <#
-        Exclude empty PSM1. Only expect localization for Module files with some
+        Exclude empty PS1. Only expect localization for Module files with some
         functions defined
     #>
     $moduleFiles = $moduleFiles | Where-Object -FilterScript {
@@ -134,17 +134,27 @@ BeforeDiscovery {
 
             if ($parseErrors)
             {
+                # TODO: class files have parse errors due to not knowing about the base classes
                 #Write-Warning $parseErrors
             }
 
-            $astFilter = {
+            $thisLocalizationAstFilter = {
                 $args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
                 $args[0].Parent -is [System.Management.Automation.Language.MemberExpressionAst] -and
                 $args[0].Parent.Parent -isnot [System.Management.Automation.Language.UnaryExpressionAst] -and
                 $args[0].Parent.Expression.Member.Value -eq 'localizedData'
             }
 
-            $localizationStringConstantsAst = $definitionAst.FindAll($astFilter, $true)
+            $localizationStringConstantsAst = $definitionAst.FindAll($thisLocalizationAstFilter, $true)
+
+            $scriptLocalizationAstFilter = {
+                $args[0] -is [System.Management.Automation.Language.StringConstantExpressionAst] `
+                    -and $args[0].Parent -is [System.Management.Automation.Language.MemberExpressionAst] `
+                    -and $args[0].Parent.Expression -is [System.Management.Automation.Language.VariableExpressionAst] `
+                    -and $args[0].Parent.Expression.VariablePath.UserPath -eq 'script:localizedData'
+            }
+
+            $localizationStringConstantsAst += $definitionAst.FindAll($scriptLocalizationAstFilter, $true)
 
             if ($localizationStringConstantsAst)
             {
