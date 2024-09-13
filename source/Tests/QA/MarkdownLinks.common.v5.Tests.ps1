@@ -76,10 +76,6 @@ BeforeDiscovery {
     # This will fetch files in the root of the project (repository) folder.
     $markdownFiles = Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
 
-    # # This will recursively fetch all files in the built module's folder.
-    # $markdownFiles += Get-ChildItem -Path $ModuleBase -Recurse -Filter $markdownFileFilter | `
-    #     WhereModuleFileNotExcluded
-
     # This will recursively fetch all files in the source folder.
     $markdownFiles = Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
 
