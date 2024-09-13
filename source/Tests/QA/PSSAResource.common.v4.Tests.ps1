@@ -79,7 +79,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
     $PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path -Path (Get-CurrentModuleBase) -ChildPath 'Config/PSSA_rules_config.json')
     $dscResourceAnalyzerRulesModule = Import-Module DscResource.AnalyzerRules -PassThru -ErrorAction 'Stop'
 
-    $dscResourcesPsm1Files = @(Get-Psm1FileList -FilePath $SourcePath | WhereSourceFileNotExcluded)
+    $dscResourcesPsm1Files = @(Get-ChildItem -Path $SourcePath -Include *.psm1 -Recurse | WhereSourceFileNotExcluded)
 
     foreach ($dscResourcesPsm1File in $dscResourcesPsm1Files)
     {
