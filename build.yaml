@@ -9,7 +9,7 @@ CopyPaths:
   - Config
   - tasks
 Encoding: UTF8
-
+BuiltModuleSubdirectory: builtModule
 VersionedOutputDirectory: true
 
 AliasesToExport:
@@ -47,7 +47,7 @@ BuildWorkflow:
             $BuildInfo = (property BuildInfo @{ })
         )
 
-        $pathToModuleManifest = Resolve-Path -Path "$OutputDirectory/$ProjectName/**/$ProjectName.psd1"
+        $pathToModuleManifest = Resolve-Path -Path "$OutputDirectory/builtModule/$ProjectName/**/$ProjectName.psd1"
         $existingAliases = @((Test-ModuleManifest -Path $pathToModuleManifest).ExportedAliases.Values.Name)
 
         "`tProject Name             = {0}" -f $ProjectName
