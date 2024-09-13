@@ -26,7 +26,7 @@ function Test-FileContainsClassResource
 
     foreach ($fileAttributeAst in $fileAst.FindAll( {$args[0] -is [System.Management.Automation.Language.AttributeAst]}, $false))
     {
-        if ($fileAttributeAst.Extent.Text -ieq '[DscResource()]' -or $fileAttributeAst.Extent.Text -ilike '`[DscProperty(*')
+        if ($fileAttributeAst.Extent.Text -ieq '[DscResource()]')
         {
             return $true
         }

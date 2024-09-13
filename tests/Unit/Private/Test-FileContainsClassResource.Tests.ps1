@@ -16,7 +16,7 @@ InModuleScope $ProjectName {
             $scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
         }
 
-        Context 'When module file contain class-based resources ''DscResource''' {
+        Context 'When module file contain class-based resources' {
             It 'Should return $true' {
                 "
                 [DscResource()]
@@ -27,29 +27,6 @@ InModuleScope $ProjectName {
                 [DscResource()]
                 class $mockResourceName2
                 {
-                }
-                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
-
-                $result = Test-FileContainsClassResource -FilePath $scriptPath
-                $result | Should -BeTrue
-            }
-        }
-
-        Context 'When module file contain class-based resources ''DscProperty''' {
-            It 'Should return $true' {
-                "
-                class $mockResourceName1
-                {
-                    [DscProperty(Key)]
-                    [System.String]
-                    $SomeProperty
-                }
-
-                class $mockResourceName2
-                {
-                    [DscProperty()]
-                    [System.String]
-                    $SomeProperty
                 }
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
