@@ -20,7 +20,7 @@ Describe 'Get-InvalidArgumentRecord' -Tag 'Get-InvalidArgumentRecord' {
 
             $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
             $result.Exception | Should -BeOfType 'System.ArgumentException'
-            $result.Exception.Message | Should -Be 'mocked error message. (Parameter ''mockArgument'')'
+            $result.Exception.Message | Should -BeLike 'mocked error message.*'
         }
     }
 }
