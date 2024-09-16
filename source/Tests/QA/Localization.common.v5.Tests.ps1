@@ -5,19 +5,16 @@
         $dscResourceModuleName = 'FileSystemDsc'
         $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
 
-        $container = New-PesterContainer -Path "$pathToHQRMTests/Localization.mofResource.*.Tests.ps1" -Data @{
+        $container = New-PesterContainer -Path "$pathToHQRMTests/Localization.common.*.Tests.ps1" -Data @{
             ModuleBase = "./output/$dscResourceModuleName/*"
             # ExcludeModuleFile = @('Modules/DscResource.Common')
+            # ProjectPath = '.'
         }
 
         Invoke-Pester -Container $container -Output Detailed
 #>
 param
 (
-    [Parameter()]
-    [System.String]
-    $ProjectPath,
-
     [Parameter(Mandatory = $true)]
     [System.String]
     $ModuleBase,
@@ -25,6 +22,10 @@ param
     [Parameter()]
     [System.String[]]
     $ExcludeModuleFile,
+
+    [Parameter()]
+    [System.String]
+    $ProjectPath,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
