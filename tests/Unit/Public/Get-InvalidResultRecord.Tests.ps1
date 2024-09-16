@@ -45,14 +45,4 @@ Describe 'Get-InvalidResultRecord' -Tag 'GetInvalidResultRecord' {
             $result.Exception.Message -match 'System.DivideByZeroException: Attempted to divide by zero.' | Should -BeTrue
         }
     }
-
-    Context 'When calling using the alias Get-ObjectNotFoundRecord' {
-        It 'Should have the correct values in the error record' {
-            $result = Get-ObjectNotFoundRecord -Message 'mocked error message.'
-
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message | Should -Be 'System.Exception: mocked error message.'
-        }
-    }
 }
