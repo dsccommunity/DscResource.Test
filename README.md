@@ -166,15 +166,15 @@ Invoke-Pester -Container $container -Output Detailed
 Returns a container for each available HQRM test script using the provided
 values as script parameters. Then Pester is invoked on the containers.
 
-### `Get-InvalidOperationRecord`
+### `Get-InvalidArgumentRecord`
 
-Returns an invalid operation exception object.
+Returns an invalid argument exception object.
 
 #### Syntax
 
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
-Get-InvalidOperationRecord [-Message] <string> [[-ErrorRecord] <ErrorRecord>] [<CommonParameters>]
+Get-InvalidArgumentRecord [-Message] <string> [-ArgumentName] <string> [<CommonParameters>]
 ```
 <!-- markdownlint-enable MD013 - Line length -->
 
@@ -185,8 +185,35 @@ Get-InvalidOperationRecord [-Message] <string> [[-ErrorRecord] <ErrorRecord>] [<
 #### Example
 
 ```powershell
-$mockErrorRecord = Get-InvalidOperationRecord -Message (
-    $script:localizedData.FailedToRename -f $name
+$errorRecord = Get-InvalidArgumentRecord `
+    -Message ($script:localizedData.InterfaceNotAvailableError -f $interfaceAlias) `
+    -ArgumentName 'Interface'
+```
+
+This will return an error record with the localized string as the exception
+message.
+
+### `Get-InvalidResultRecord`
+
+Returns an invalid result exception object.
+
+#### Syntax
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+Get-InvalidResultRecord [-Message] <string> [[-ErrorRecord] <ErrorRecord>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+#### Outputs
+
+**System.Object**
+
+#### Example
+
+```powershell
+$mockErrorRecord = Get-InvalidResultRecord -Message (
+    $script:localizedData.FailedToGetAllFromName -f $name
 )
 ```
 
@@ -196,12 +223,12 @@ message.
 ```powershell
 try
 {
-    # Something that tries an operation.
+    # Something that tries to return an expected result.
 }
 catch
 {
-    $mockErrorRecord = Get-InvalidOperationRecord -ErrorRecord $_ -Message (
-        $script:localizedData.FailedToRename -f $name
+    $mockErrorRecord = Get-InvalidResultRecord -ErrorRecord $_ -Message (
+        $script:localizedData.FailedToGetAllFromName -f $name
     )
 }
 ```

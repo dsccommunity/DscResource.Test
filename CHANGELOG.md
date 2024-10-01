@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enable ModuleFast and PSResourceGet.
 - `build.yaml`
   - Add `BuiltModuleSubdirectory` and update task to suit.
+- `Get-InvalidResultRecord.Tests`
+  - Remove test that referenced previous alias
+
+### Added
+
+- `Get-InvalidArgumentRecord`
+  - Add function and test
 
 ## [0.16.3] - 2024-08-29
 
