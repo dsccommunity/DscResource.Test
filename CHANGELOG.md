@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added private command fixes ([Issue [#126](https://github.com/dsccommunity/DscResource.Test/issues/126)]).
 - Public command `Get-ObjectNotFoundRecord`
   - Use private function `Get-SystemExceptionRecord`.
+- `QA/Localization.builtModule.v5.Tests`
+  - Added new test for checking the localization strings are correct in the resource and strings.psd1 within the built module.
+- `Get-ClassDefinitionAst`
+  - Added helper function to get all class definition AST from a file.
 
 ### Changed
 
@@ -46,6 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed alias `Get-ObjectNotFoundRecord` and added as it's own public command.
 - `PSSAResource.common.v4.Tests`
   - Fixed rule suppression by using correct variable.
+- `Test-FileContainsClassResource`
+  - Add additional check for files that may only have a DscProperty within.
+- `Test-FileContainsClassResource.Tests`
+  - Update tests to check the class property declarations are matched.
+- `QA/Localization.common.v5.Tests`
+  - Just check remaining `psm1` files in the built module not covered by `QA/Localization.builtModule.v5.Tests`.
 
 ### Fixed
 
