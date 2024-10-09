@@ -7,9 +7,8 @@
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/Localization.common.*.Tests.ps1" -Data @{
             ModuleBase = "./output/$dscResourceModuleName/*"
-            # SourcePath = './source'
             # ExcludeModuleFile = @('Modules/DscResource.Common')
-            # ExcludeSourceFile = @('Examples')
+            # ProjectPath = '.'
         }
 
         Invoke-Pester -Container $container -Output Detailed
@@ -21,16 +20,12 @@ param
     $ModuleBase,
 
     [Parameter()]
-    [System.String]
-    $SourcePath,
-
-    [Parameter()]
     [System.String[]]
     $ExcludeModuleFile,
 
     [Parameter()]
-    [System.String[]]
-    $ExcludeSourceFile,
+    [System.String]
+    $ProjectPath,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     $Args
@@ -50,11 +45,17 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
+    # This will find all *.psm1 files, excluding the ones listed in the build.yaml
     $moduleFiles = @(Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
 
-    if ($SourcePath)
+    if ($ProjectPath)
     {
-        $moduleFiles += @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
+        # Expand the project folder if it is a relative path.
+        $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
+    }
+    else
+    {
+        $resolvedProjectPath = $ModuleBase
     }
 
     <#
@@ -94,9 +95,12 @@ BeforeDiscovery {
             Write-Verbose -Message "$($file | ConvertTo-Json)"
         }
 
+        # Use the project folder to extrapolate relative path.
+        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
+
         $testProperties = @{
             File                   = $file
-            ParentFolderName       = Split-Path -Path $file.Directory.FullName -Leaf
+            DescriptiveName        = $descriptiveName
             LocalizationFolderPath = (Join-Path -Path $file.Directory.FullName -ChildPath 'en-US')
             LocalizationFile       = (Join-Path -Path $file.Directory.FullName -ChildPath (Join-Path -Path 'en-US' -ChildPath "$($file.BaseName).strings.psd1"))
         }
@@ -220,7 +224,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
-    Context 'When a resource or module ''<ParentFolderName>'' exist' -ForEach $fileToTest {
+    Context 'When resource or module ''<descriptiveName>'' exists' -ForEach $fileToTest {
         It 'Should have en-US localization folder' {
             Test-Path -Path $LocalizationFolderPath | Should -BeTrue -Because "the en-US folder $LocalizationFolderPath must exist"
         }
@@ -244,7 +248,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 that is set on the Context-block's ForEach above.
             #>
             It 'Should use the localized string key ''<LocalizedKey>'' in the code' -ForEach $EnUsLocalizedKeys {
-                $UsedLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key exists in the localized string resource file so it should also exist in the resource/module script file'
+                $UsedLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key exists in the localized string resource file so it should also exist in the resource script file'
             }
 
             <#
@@ -252,11 +256,11 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
                 that is set on the Context-block's ForEach above.
             #>
             It 'Should not be missing the localized string key ''<LocalizedKey>'' in the localization resource file' -ForEach $UsedLocalizedKeys {
-                $EnUsLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key is used in the resource/module script file so it should also exist in the localized string resource files'
+                $EnUsLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key is used in the resource script file so it should also exist in the localized string resource files'
             }
         }
 
-        Context 'When a resource or module is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
+        Context 'When a mof resource is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
                 $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$($File.BaseName).strings.psd1"
 

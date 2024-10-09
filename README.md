@@ -936,8 +936,8 @@ Invoke-Pester -Container $container -Output Detailed
 
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
- [-ModuleBase] <String> [[-SourcePath] <String>] [[-ExcludeModuleFile] <String[]>] 
-   [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] [<CommonParameters>]
+  [-ModuleBase] <String> [[-ExcludeModuleFile] <String[]>]  [[-ProjectPath] <String[]>]
+  [[-Args] <Object>] [<CommonParameters>]
 ```
 <!-- markdownlint-enable MD013 - Line length -->
 
@@ -947,12 +947,6 @@ Any path or part of a path that will be excluded from the list of files
 gathered by the test from the path specified in the parameter `ModuleBase`.
 Default no files will be excluded from the test.
 
-##### ExcludeSourceFile
-
-Any path or part of a path that will be excluded from the list of files
-gathered by the test from the path specified in the parameter `SourcePath`.
-Default no files will be excluded from the test.
-
 ##### ModuleBase
 
 The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
@@ -960,9 +954,10 @@ The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
 If using the build task the default value for this parameter will be set
 to the value that comes from the pipeline.
 
-##### SourcePath
+##### ProjectPath
 
-The path to the source folder of the project, e.g. `./source`.
+The path to the root of the project, for example the root of the local
+Git repository.
 
 If using the build task the default value for this parameter will be set
 to the value that comes from the pipeline.
@@ -975,9 +970,48 @@ $pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -Chi
 
 $container = New-PesterContainer -Path "$pathToHQRMTests/Localization.common.*.Tests.ps1" -Data @{
     ModuleBase = "./output/$dscResourceModuleName/*"
-    # SourcePath = './source'
     # ExcludeModuleFile = @('Modules/DscResource.Common')
-    # ExcludeSourceFile = @('Examples')
+    # ProjectPath = '.'
+}
+
+Invoke-Pester -Container $container -Output Detailed
+```
+
+### Localization.builtModule
+
+#### Parameters
+
+<!-- markdownlint-disable MD013 - Line length -->
+```plaintext
+  [-ModuleBase] <String> [[-ProjectPath] <String[]>]
+  [[-Args] <Object>] [<CommonParameters>]
+```
+<!-- markdownlint-enable MD013 - Line length -->
+
+##### ModuleBase
+
+The path to the root of built module, e.g. `./output/FileSystemDsc/1.2.0`.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+##### ProjectPath
+
+The path to the root of the project, for example the root of the local
+Git repository.
+
+If using the build task the default value for this parameter will be set
+to the value that comes from the pipeline.
+
+#### Example
+
+```powershell
+$dscResourceModuleName = 'FileSystemDsc'
+$pathToHQRMTests = Join-Path -Path (Get-Module DscResource.Test).ModuleBase -ChildPath 'Tests\QA'
+
+$container = New-PesterContainer -Path "$pathToHQRMTests/Localization.builtModule.*.Tests.ps1" -Data @{
+    ModuleBase = "./output/$dscResourceModuleName/*"
+    # ProjectPath = '.'
 }
 
 Invoke-Pester -Container $container -Output Detailed
