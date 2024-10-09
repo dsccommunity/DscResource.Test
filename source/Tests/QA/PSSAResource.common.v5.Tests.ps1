@@ -15,23 +15,22 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+
+# Suppressing this rule because Script Analyzer does not understand Pester's syntax.
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
     [System.String]
     $ProjectPath,
 
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ModuleBase,
 
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [System.String]
     $SourcePath,
-
-    [Parameter()]
-    [System.String[]]
-    $ExcludeModuleFile,
 
     [Parameter()]
     [System.String[]]
@@ -71,12 +70,7 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = @(Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
-
-    if ($SourcePath)
-    {
-        $moduleFiles += @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
-    }
+    $moduleFiles = @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
     if ($ProjectPath)
     {

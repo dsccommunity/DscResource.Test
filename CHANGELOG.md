@@ -7,15 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `PSSAResource.common.v4.Tests`
+  - Only target source files.
+- `PSSAResource.common.v5.Tests`
+  - Only target source files.
+- `MarkdownLinks.common.v4.Tests`
+  - Only target source files and moduleroot.
+- `MarkdownLinks.common.v5.Tests`
+  - Only target source files and moduleroot.
+- `Resolve-Dependency.psd1`
+  - Enable ModuleFast and PSResourceGet.
+- `build.yaml`
+  - Add `BuiltModuleSubdirectory` and update task to suit.
+- `Get-InvalidResultRecord.Tests`
+  - Remove test that referenced previous alias
+
 ### Added
 
 - `Get-InvalidArgumentRecord`
   - Add function and test
-
-### Changed
-
-- `Get-InvalidResultRecord.Tests`
-  - Remove test that referenced previous alias
 
 ## [0.16.3] - 2024-08-29
 

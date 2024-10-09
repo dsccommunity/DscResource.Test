@@ -1024,16 +1024,9 @@ Invoke-Pester -Container $container -Output Detailed
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
 [-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>] 
-  [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
-  [[-Args] <Object>] [<CommonParameters>]
+  [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] [<CommonParameters>]
 ```
 <!-- markdownlint-enable MD013 - Line length -->
-
-##### ExcludeModuleFile
-
-Any path or part of a path that will be excluded from the list of files
-gathered by the test from the path specified in the parameter `ModuleBase`.
-Default no files will be excluded from the test.
 
 ##### ExcludeSourceFile
 
@@ -1071,7 +1064,6 @@ $container = New-PesterContainer -Path "$pathToHQRMTests/MarkdownLinks.common.*.
     $ProjectPath = '.'
     ModuleBase = "./output/$dscResourceModuleName/*"
     # SourcePath = './source'
-    # ExcludeModuleFile = @('Modules/DscResource.Common')
     # ExcludeSourceFile = @('Examples')
 }
 
@@ -1187,16 +1179,9 @@ Invoke-Pester -Container $container -Output Detailed
 <!-- markdownlint-disable MD013 - Line length -->
 ```plaintext
 [-ProjectPath] <String> [-ModuleBase] <String> [[-SourcePath] <String>]
-  [[-ExcludeModuleFile] <String[]>] [[-ExcludeSourceFile] <String[]>] 
-  [[-Args] <Object>] [<CommonParameters>]
+  [[-ExcludeSourceFile] <String[]>] [[-Args] <Object>] [<CommonParameters>]
 ```
 <!-- markdownlint-enable MD013 - Line length -->
-
-##### ExcludeModuleFile
-
-Any path or part of a path that will be excluded from the list of files
-gathered by the test from the path specified in the parameter `ModuleBase`.
-Default no files will be excluded from the test.
 
 ##### ExcludeSourceFile
 
@@ -1234,7 +1219,6 @@ $container = New-PesterContainer -Path "$pathToHQRMTests/PSSAResource.common.*.T
     ProjectPath = '.'
     ModuleBase = "./output/$dscResourceModuleName/*"
     # SourcePath = './source'
-    # ExcludeModuleFile = @('Modules/DscResource.Common')
     # ExcludeSourceFile = @('Examples')
 }
 

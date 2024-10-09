@@ -8,7 +8,6 @@ param (
     $SourceManifest,
     $Tag,
     $ExcludeTag,
-    $ExcludeModuleFile,
     $ExcludeSourceFile,
     $MainGitBranch
 )
@@ -32,14 +31,9 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
 
     $markdownFiles = Get-ChildItem -Path $ProjectPath -File -Filter $markdownFileFilter
 
-    $markdownFiles += Get-ChildItem -Path $ModuleBase -File -Recurse -Filter $markdownFileFilter | `
-        WhereModuleFileNotExcluded
+    $markdownFiles = Get-ChildItem -Path $SourcePath -File -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
 
-    if ($SourcePath)
-    {
-        $markdownFiles += Get-ChildItem -Path $SourcePath -File -Recurse -Filter $markdownFileFilter | `
-            WhereSourceFileNotExcluded
-    }
+    $markdownFiles += Get-ChildItem -Path $SourcePath -File -Filter $markdownFileFilter
 
     foreach ($markdownFile in $markdownFiles)
     {

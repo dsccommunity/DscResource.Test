@@ -21,17 +21,13 @@ param
     [System.String]
     $ProjectPath,
 
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [System.String]
     $ModuleBase,
 
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [System.String]
     $SourcePath,
-
-    [Parameter()]
-    [System.String[]]
-    $ExcludeModuleFile,
 
     [Parameter()]
     [System.String[]]
@@ -80,16 +76,10 @@ BeforeDiscovery {
     # This will fetch files in the root of the project (repository) folder.
     $markdownFiles = Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
 
-    # This will recursively fetch all files in the built module's folder.
-    $markdownFiles += Get-ChildItem -Path $ModuleBase -Recurse -Filter $markdownFileFilter | `
-        WhereModuleFileNotExcluded
+    # This will recursively fetch all files in the source folder.
+    $markdownFiles = Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
 
-    if ($SourcePath)
-    {
-        # This will recursively fetch all files in the source folder.
-        $markdownFiles += Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | `
-            WhereSourceFileNotExcluded
-    }
+    $markdownFiles += Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
 
     # Expand the project folder if it is a relative path.
     $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
