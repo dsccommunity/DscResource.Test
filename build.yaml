@@ -2,15 +2,14 @@
 ####################################################
 #          ModuleBuilder Configuration             #
 ####################################################
-
 CopyPaths:
   - en-US
   - Tests
   - Config
   - tasks
 Encoding: UTF8
-BuiltModuleSubdirectory: builtModule
 VersionedOutputDirectory: true
+BuiltModuleSubdirectory: builtModule
 
 AliasesToExport:
   - 'Task.Invoke_HQRM_Tests'
@@ -31,34 +30,6 @@ BuildWorkflow:
       Invoke-DscResourceTest -ExcludeTag 'Common Tests - Validate Localization'
     }
 
-  Add_Aliases_To_Module_Manifest: |
-    {
-        <#
-            This is quick fix for issue https://github.com/PoshCode/ModuleBuilder/issues/103.
-            Aliases need to be added to module manifest, and we can only use
-            New-Alias or Set-Alias together with build tasks. This module
-            already automatically exports aliases using [Alias()] so this quick
-            fix is meant as a workaround until the above issue is resolved.
-        #>
-        param
-        (
-            $OutputDirectory = (property OutputDirectory (Join-Path $BuildRoot 'output')),
-            $ProjectName = (property ProjectName $(Get-SamplerProjectName -BuildRoot $BuildRoot)),
-            $BuildInfo = (property BuildInfo @{ })
-        )
-
-        $pathToModuleManifest = Resolve-Path -Path "$OutputDirectory/builtModule/$ProjectName/**/$ProjectName.psd1"
-        $existingAliases = @((Test-ModuleManifest -Path $pathToModuleManifest).ExportedAliases.Values.Name)
-
-        "`tProject Name             = {0}" -f $ProjectName
-        "`tOutput Directory         = {0}" -f $OutputDirectory
-        "`tModule Manifest Path     = {0}" -f $pathToModuleManifest
-        "`tAlready Exported Aliases = {0}" -f ($existingAliases -join ', ')
-        "`tNew Aliases To Export    = {0}" -f ($BuildInfo.AliasesToExport -join ', ')
-
-        Update-Metadata -Path $pathToModuleManifest -PropertyName AliasesToExport -Value ($existingAliases + $BuildInfo.AliasesToExport)
-    }
-
   t:
     - build
     - DscTest
@@ -67,11 +38,20 @@ BuildWorkflow:
     - Clean
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
-    - Add_Aliases_To_Module_Manifest
     - Create_changelog_release_output
+
+  docs:
+    - Generate_Wiki_Content
+    - Generate_Conceptual_Help
+    - Generate_Markdown_For_Public_Commands
+    - Generate_External_Help_File_For_Public_Commands
+    - Clean_Markdown_Of_Public_Commands
+    - Generate_Wiki_Sidebar
+    - Clean_Markdown_Metadata
 
   pack:
     - build
+    #- docs
     - package_module_nupkg
 
   test:
@@ -82,13 +62,13 @@ BuildWorkflow:
     - Merge_CodeCoverage_Files
 
   publish:
-    - publish_module_to_gallery
     - Publish_Release_To_GitHub
+    #- Publish_GitHub_Wiki_Content
+    - publish_module_to_gallery
 
 ####################################################
 #       PESTER  Configuration                      #
 ####################################################
-
 Pester:
   OutputFormat: NUnitXML
   ExcludeFromCodeCoverage:
@@ -98,7 +78,7 @@ Pester:
   Script:
     - tests/QA
     - tests/Unit/
-  CodeCoverageThreshold: 50
+  CodeCoverageThreshold: 60
   CodeCoverageOutputFile: JaCoCo_Merge.xml # the file that is created for each pipeline test job
   CodeCoverageOutputFileEncoding: ascii
   ExcludeTag:
@@ -117,6 +97,8 @@ ModuleBuildTasks:
     - '*.build.Sampler.ib.tasks'
   Sampler.GitHubTasks:
     - '*.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
 
 # Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
@@ -136,3 +118,31 @@ GitHubConfig:
   GitHubConfigUserName: dscbot
   GitHubConfigUserEmail: dsccommunity@outlook.com
   UpdateChangelogOnPrerelease: false
+
+####################################################
+#      DscResource.DocGenerator Configuration      #
+####################################################
+DscResource.DocGenerator:
+  Generate_Conceptual_Help:
+    MarkdownCodeRegularExpression:
+      - '\`(.+?)\`' # Match inline code-block
+      - '\\(\\)' # Match escaped backslash
+      - '\[[^\[]+\]\((.+?)\)' # Match markdown URL
+      - '_(.+?)_' # Match Italic (underscore)
+      - '\*\*(.+?)\*\*' # Match bold
+      - '\*(.+?)\*' # Match Italic (asterisk)
+  Publish_GitHub_Wiki_Content:
+    Debug: true
+  Generate_Wiki_Content:
+    MofResourceMetadata:
+      Type: MofResource
+      Category: Resources
+    ClassResourceMetadata:
+      Type: ClassResource
+      Category: Resources
+    CompositeResourceMetadata:
+      Type: CompositeResource
+      Category: Resources
+  Generate_Wiki_Sidebar:
+    Debug: false
+    AlwaysOverwrite: true
