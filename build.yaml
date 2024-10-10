@@ -8,7 +8,6 @@ CopyPaths:
   - Config
   - tasks
 Encoding: UTF8
-Suffix: suffix.ps1
 VersionedOutputDirectory: true
 BuiltModuleSubdirectory: builtModule
 
