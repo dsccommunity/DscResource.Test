@@ -23,11 +23,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add `BuiltModuleSubdirectory` and update task to suit.
 - `Get-InvalidResultRecord.Tests`
   - Remove test that referenced previous alias
+- Project files to latest community versions.
+  - `Resolve-Dependency.ps1`
+  - `Required-Modules.psd1`
+  - `GitVersion.yml`
+  - `build.yml`
 
 ### Added
 
 - `Get-InvalidArgumentRecord`
   - Add function and test
+
+### Removed
+
+- `build.psd1` as not required.
+- `cspell.json`
 
 ## [0.16.3] - 2024-08-29
 
