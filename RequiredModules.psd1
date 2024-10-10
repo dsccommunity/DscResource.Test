@@ -18,4 +18,8 @@
     MarkdownLinkCheck           = 'latest'
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
+
+    # Prerequisite modules for documentation.
+    'DscResource.DocGenerator' = 'latest'
+    PlatyPS                    = 'latest'
 }
