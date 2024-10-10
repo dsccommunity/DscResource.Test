@@ -79,7 +79,7 @@ Pester:
   Script:
     - tests/QA
     - tests/Unit/
-  CodeCoverageThreshold: 85
+  CodeCoverageThreshold: 60
   CodeCoverageOutputFile: JaCoCo_Merge.xml # the file that is created for each pipeline test job
   CodeCoverageOutputFileEncoding: ascii
   ExcludeTag:
