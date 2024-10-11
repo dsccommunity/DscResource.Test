@@ -47,7 +47,7 @@ AfterAll {
 }
 
 Describe 'ConvertTo-OrderedDictionary' -Tag 'Private' {
-    It 'should convert simple PSCustomObject' {
+    It 'Should convert simple PSCustomObject' {
         InModuleScope -ScriptBlock {
             Set-StrictMode -Version 1.0
 
