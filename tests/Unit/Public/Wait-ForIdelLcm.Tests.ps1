@@ -1,19 +1,52 @@
-$ProjectPath = "$PSScriptRoot\..\..\.." | Convert-Path
-$ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
-        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-        $(try
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
+
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
-                Test-ModuleManifest $_.FullName -ErrorAction Stop
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
-            catch
-            {
-                $false
-            } )
-    }).BaseName
 
-Import-Module -Name $ProjectName -Force
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
+BeforeAll {
+    $script:moduleName = 'DscResource.Test'
+
+    # Make sure there are not other modules imported that will conflict with mocks.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+
+    # Re-import the module using force to get any code changes between runs.
+    Import-Module -Name $script:moduleName -Force -ErrorAction 'Stop'
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:moduleName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+}
+
+Describe 'Wait-ForIdleLcm' -Tag 'Public' {
     BeforeAll {
         <#
             Stub for Get-DscLocalConfigurationManager since it is not available
@@ -34,19 +67,19 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
 
     Context 'When the LCM is idle' {
         BeforeAll {
-            Mock -CommandName Start-Sleep -ModuleName $ProjectName
+            Mock -CommandName Start-Sleep
             Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
                 return @{
                     LCMState = 'Idle'
                 }
-            } -ModuleName $ProjectName
+            }
         }
 
         It 'Should not throw and call the expected mocks' {
             { Wait-ForIdleLcm } | Should -Not -Throw
 
-            Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Exactly -Times 1 -Scope It -ModuleName $ProjectName
-            Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 0 -Scope It -ModuleName $ProjectName
+            Should -Invoke -CommandName Get-DscLocalConfigurationManager -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 0 -Scope It
         }
     }
 
@@ -54,7 +87,7 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
         BeforeAll {
             Mock -CommandName Start-Sleep -MockWith {
                 $script:mockStartSleepWasCalled = $true
-            } -ModuleName $ProjectName
+            }
 
             Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
                 $mockLcmState = if ($script:mockStartSleepWasCalled)
@@ -71,7 +104,7 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
                 }
 
                 return $mockLcmState
-            } -ModuleName $ProjectName
+            }
         }
 
         BeforeEach {
@@ -81,8 +114,8 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
         It 'Should not throw and call the expected mocks' {
             { Wait-ForIdleLcm } | Should -Not -Throw
 
-            Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Exactly -Times 2 -Scope It -ModuleName $ProjectName
-            Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 1 -Scope It -ModuleName $ProjectName
+            Should -Invoke -CommandName Get-DscLocalConfigurationManager -Exactly -Times 2 -Scope It
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 1 -Scope It
         }
     }
 
@@ -97,33 +130,33 @@ Describe 'Wait-ForIdleLcm' -Tag 'WaitForIdleLcm' {
                 return @{
                     LCMState = 'Busy'
                 }
-            } -ModuleName $ProjectName
+            }
         }
 
         It 'Should not throw and call the expected mocks' {
             { Wait-ForIdleLcm -Timeout '00:00:08' } | Should -Not -Throw
 
-            Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Times 3 -Scope It -ModuleName $ProjectName
+            Should -Invoke -CommandName Get-DscLocalConfigurationManager -Times 3 -Scope It
         }
     }
 
     Context 'When the LCM is idle an the LCM should be cleared after' {
         BeforeAll {
-            Mock -CommandName Start-Sleep -ModuleName $ProjectName
-            Mock -CommandName Clear-DscLcmConfiguration -ModuleName $ProjectName
+            Mock -CommandName Start-Sleep
+            Mock -CommandName Clear-DscLcmConfiguration
             Mock -CommandName Get-DscLocalConfigurationManager -MockWith {
                 return @{
                     LCMState = 'Idle'
                 }
-            } -ModuleName $ProjectName
+            }
         }
 
         It 'Should not throw and call the expected mocks' {
             { Wait-ForIdleLcm -Clear } | Should -Not -Throw
 
-            Assert-MockCalled -CommandName Get-DscLocalConfigurationManager -Exactly -Times 1 -Scope It -ModuleName $ProjectName
-            Assert-MockCalled -CommandName Start-Sleep -Exactly -Times 0 -Scope It -ModuleName $ProjectName
-            Assert-MockCalled -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It -ModuleName $ProjectName
+            Should -Invoke -CommandName Get-DscLocalConfigurationManager -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Start-Sleep -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
         }
     }
 }

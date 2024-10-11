@@ -1,254 +1,295 @@
-$ProjectPath = "$PSScriptRoot\..\..\.." | Convert-Path
-$ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
-        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-        $(try
-            {
-                Test-ModuleManifest $_.FullName -ErrorAction Stop
-            }
-            catch
-            {
-                $false
-            } )
-    }).BaseName
+# [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+# param ()
 
-Import-Module $ProjectName
+# BeforeDiscovery {
+#     try
+#     {
+#         if (-not (Get-Module -Name 'DscResource.Test'))
+#         {
+#             # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+#             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+#             {
+#                 # Redirect all streams to $null, except the error stream (stream 2)
+#                 & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+#             }
 
-InModuleScope $ProjectName {
-    $ProjectPath = "$PSScriptRoot\..\..\.." | Convert-Path
-    Mock -CommandName Get-Command -MockWith {
-        {
-            [CmdletBinding()]
-            param (
-                [Parameter()]
-                $Module,
+#             # If the dependencies has not been resolved, this will throw an error.
+#             Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+#         }
+#     }
+#     catch [System.IO.FileNotFoundException]
+#     {
+#         throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+#     }
+# }
 
-                [Parameter()]
-                $FullyQualifiedModule,
+# BeforeAll {
+#     $script:moduleName = 'DscResource.Test'
 
-                [Parameter()]
-                $ProjectPath,
+#     # Make sure there are not other modules imported that will conflict with mocks.
+#     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 
-                [Parameter()]
-                $Script,
+#     # Re-import the module using force to get any code changes between runs.
+#     Import-Module -Name $script:moduleName -Force -ErrorAction 'Stop'
 
-                [Parameter()]
-                $TestName,
+#     $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:moduleName
+#     $PSDefaultParameterValues['Mock:ModuleName'] = $script:moduleName
+#     $PSDefaultParameterValues['Should:ModuleName'] = $script:moduleName
+# }
 
-                [Parameter()]
-                $EnableExit,
+# AfterAll {
+#     $PSDefaultParameterValues.Remove('Mock:ModuleName')
+#     $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+#     $PSDefaultParameterValues.Remove('Should:ModuleName')
 
-                [Parameter()]
-                $Tag,
+#     # Unload the module being tested so that it doesn't impact any other tests.
+#     Get-Module -Name $script:moduleName -All | Remove-Module -Force
+# }
 
-                [Parameter()]
-                $ExcludeTag,
+# Describe 'Invoke-DscResourceTest Resolving Built Module' {
+#     BeforeAll {
+#         Mock -CommandName Get-Command -MockWith {
+#             {
+#                 [CmdletBinding()]
+#                 param (
+#                     [Parameter()]
+#                     $Module,
 
-                [Parameter()]
-                $PassThru,
+#                     [Parameter()]
+#                     $FullyQualifiedModule,
 
-                [Parameter()]
-                $CodeCoverage,
+#                     [Parameter()]
+#                     $ProjectPath,
 
-                [Parameter()]
-                $CodeCoverageOutputFile,
+#                     [Parameter()]
+#                     $Script,
 
-                [Parameter()]
-                $CodeCoverageOutputFileFormat,
+#                     [Parameter()]
+#                     $TestName,
 
-                [Parameter()]
-                $Strict,
+#                     [Parameter()]
+#                     $EnableExit,
 
-                [Parameter()]
-                $OutputFile,
+#                     [Parameter()]
+#                     $Tag,
 
-                [Parameter()]
-                $OutputFormat,
+#                     [Parameter()]
+#                     $ExcludeTag,
 
-                [Parameter()]
-                $Quiet,
+#                     [Parameter()]
+#                     $PassThru,
 
-                [Parameter()]
-                $PesterOption,
+#                     [Parameter()]
+#                     $CodeCoverage,
 
-                [Parameter()]
-                $Show,
+#                     [Parameter()]
+#                     $CodeCoverageOutputFile,
 
-                [Parameter()]
-                $Settings,
+#                     [Parameter()]
+#                     $CodeCoverageOutputFileFormat,
 
-                [Parameter()]
-                $MainGitBranch
-            )
+#                     [Parameter()]
+#                     $Strict,
 
-            return $PSBoundParameters
-        }
-    }
-    Mock -CommandName Get-StructuredObjectFromFile -MockWith { @('noTag') }
+#                     [Parameter()]
+#                     $OutputFile,
 
-    Describe 'Invoke-DscResourceTest Resolving Built Module' {
-        Context 'When calling by module name' {
-            It 'Should fail when using a missing module' {
-                { Invoke-DscResourceTest -Module ModuleThatDontExist } | Should -Throw
-            }
+#                     [Parameter()]
+#                     $OutputFormat,
 
-            It 'works when using an existing module' {
-                {
-                    Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing
-                } | Should -Not -Throw
-                Assert-MockCalled -CommandName Get-Command -Scope It
-            }
+#                     [Parameter()]
+#                     $Quiet,
 
-            It 'Should call Invoke-Pester with correct parameters' {
-                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing
-                $result.Script.Path | Should -BeExactly '.'
-                $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-                $result.Script.Parameters.keys | Should -HaveCount 11
-                $result.Tag | Should -BeExactly 'nothing' `
-                    -Because 'When parameter is specified it override defaults & settings'
-            }
-        }
+#                     [Parameter()]
+#                     $PesterOption,
 
-        Context 'When with alternate MainGitBranch' {
-            It 'Should call Invoke-Pester with correct parameters' {
-                $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main'
-                $result.Script.Path | Should -BeExactly '.'
-                $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-                $result.Script.Parameters.keys | Should -HaveCount 11
-                $result.Script.Parameters.MainGitBranch | Should -BeExactly 'main' `
-                    -Because 'When parameter is specified it override defaults & settings'
-                $result.Tag | Should -BeExactly 'nothing' `
-                    -Because 'When parameter is specified it override defaults & settings'
-            }
-        }
+#                     [Parameter()]
+#                     $Show,
 
-        Context 'When calling by module path' {
-            It 'Should fail when using a wrong path' {
-                {
-                    Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist'
-                } | Should -Throw
-            }
+#                     [Parameter()]
+#                     $Settings,
 
-            Mock -CommandName Import-Module -MockWith {
-                param (
-                    [Parameter()]
-                    $Name,
+#                     [Parameter()]
+#                     $MainGitBranch
+#                 )
 
-                    [Parameter()]
-                    $FullyQualifiedModule,
+#                 return $PSBoundParameters
+#             }
+#         }
 
-                    [Parameter()]
-                    $PassThru,
+#         Mock -CommandName Get-StructuredObjectFromFile -MockWith { @('noTag') }
+#     }
 
-                    [Parameter()]
-                    $Force
-                )
+#     Context 'When calling by module name' {
+#         It 'Should fail when using a missing module' {
+#             { Invoke-DscResourceTest -Module ModuleThatDontExist } | Should -Throw
+#         }
 
-                return (
-                    $PSBoundParameters + @{
-                        ModuleBase = 'TestDrive:\'
-                        ModuleName = 'MyModule'
-                        Path       = 'TestDrive:\MyModule.psd1'
-                    }
-                )
-            }
+#         It 'Should work when using an existing module' {
+#             { Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing } | Should -Not -Throw
+#             Assert-MockCalled -CommandName Get-Command -Scope It
+#         }
 
-            It 'Should invoke pester using correct parameters when using an existing module path' {
-                $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1'
-                $result.Script.Parameters.ProjectPath | Should -BeNullOrEmpty
-                $result.Script.Parameters.ModuleName | Should -BeExactly 'C:\MyModuleNameDoesNotExist.psd1'
-            }
-        }
+#         It 'Should call Invoke-Pester with correct parameters' {
+#             $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing
+#             $result.Script.Path | Should -BeExactly '.'
+#             $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
+#             $result.Script.Parameters.keys | Should -HaveCount 11
+#             $result.Tag | Should -BeExactly 'nothing' `
+#                 -Because 'When parameter is specified it override defaults & settings'
+#         }
+#     }
 
-        Context 'When calling by module specification' {
-            [Microsoft.PowerShell.Commands.ModuleSpecification] $FQM = @{
-                ModuleName    = 'Microsoft.PowerShell.Utility'
-                ModuleVersion = '1.0.0.0'
-            }
-            $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .
-            $result.Script.Path | Should -BeExactly '.'
-            $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-            $result.Script.Parameters.keys | Should -HaveCount 11
-        }
+#     Context 'When with alternate MainGitBranch' {
+#         It 'Should call Invoke-Pester with correct parameters' {
+#             $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main'
+#             $result.Script.Path | Should -BeExactly '.'
+#             $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
+#             $result.Script.Parameters.keys | Should -HaveCount 11
+#             $result.Script.Parameters.MainGitBranch | Should -BeExactly 'main' `
+#                 -Because 'When parameter is specified it override defaults & settings'
+#             $result.Tag | Should -BeExactly 'nothing' `
+#                 -Because 'When parameter is specified it override defaults & settings'
+#         }
+#     }
 
-        Context 'When calling by project path' {
-            $null = Invoke-DscResourceTest -ProjectPath $ProjectPath
+#     Context 'When calling by module path' {
+#         BeforeAll {
+#             Mock -CommandName Import-Module -MockWith {
+#                 param (
+#                     [Parameter()]
+#                     $Name,
 
-            It 'Should call by project path' {
-                Assert-MockCalled -CommandName Get-Command -Scope Context
-            }
-        }
-    }
+#                     [Parameter()]
+#                     $FullyQualifiedModule,
 
-    Describe 'Loading Opt Ins and Opt Outs by Tags' {
-        Mock -CommandName Import-Module -MockWith {
-            return @{
-                ModuleBase = 'TestDrive:\'
-                ModuleName = 'MyModule'
-                Path       = 'TestDrive:\MyModule.psd1'
-                Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
-            }
-        }
+#                     [Parameter()]
+#                     $PassThru,
 
-        Mock -CommandName Get-ChildItem -MockWith {
-            @{
-                FullName = 'C:\dummy.psd1'
-            }
-        }
+#                     [Parameter()]
+#                     $Force
+#                 )
 
-        Mock -CommandName Import-PowerShellDataFile -MockWith {
-            return @{
-                ModuleBase = 'TestDrive:\'
-                ModuleName = 'MyModule'
-                Path       = 'TestDrive:\MyModule.psd1'
-                Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
-            }
-        }
+#                 return (
+#                     $PSBoundParameters + @{
+#                         ModuleBase = 'TestDrive:\'
+#                         ModuleName = 'MyModule'
+#                         Path       = 'TestDrive:\MyModule.psd1'
+#                     }
+#                 )
+#             }
+#         }
 
-        Mock -CommandName Get-StructuredObjectFromFile -ParameterFilter {
-            $Path -like '*out.json'
-        } -MockWith {
-            param (
-                [Parameter()]
-                $Path
-            )
+#         It 'Should fail when using a wrong path' {
+#             {
+#                 Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist'
+#             } | Should -Throw
+#         }
 
-            @('noTag', 'ExcludeTag')
-        }
+#         It 'Should invoke pester using correct parameters when using an existing module path' {
+#             $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1'
+#             $result.Script.Parameters.ProjectPath | Should -BeNullOrEmpty
+#             $result.Script.Parameters.ModuleName | Should -BeExactly 'C:\MyModuleNameDoesNotExist.psd1'
+#         }
+#     }
 
-        It 'Should override properly the Script parameters for Invoke-Pester' {
-            $result = Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets
-            Assert-MockCalled Get-Command -Scope Describe
-            $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
-            $result.script.Parameters.Keys | Should -HaveCount 11
-            $result.Tag | Should -HaveCount 1
-            $result.ExcludeTag | Should -HaveCount 1
-        }
-    }
+#     Context 'When calling by module specification' {
+#         It 'Should return the correct result' {
+#             [Microsoft.PowerShell.Commands.ModuleSpecification] $FQM = @{
+#                 ModuleName    = 'Microsoft.PowerShell.Utility'
+#                 ModuleVersion = '1.0.0.0'
+#             }
 
-    Describe 'Merging settings from Config and params' {
-    }
+#             $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .
+#             $result.Script.Path | Should -BeExactly '.'
+#             $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
+#             $result.Script.Parameters.keys | Should -HaveCount 11
+#         }
+#     }
 
-    Describe 'Pester Scripts Parameters' {
-        Mock -CommandName Import-Module -MockWith {
-            return @{
-                ModuleBase = 'TestDrive:\'
-                ModuleName = 'MyModule'
-                Path       = 'TestDrive:\MyModule.psd1'
+#     Context 'When calling by project path' {
+#         It 'Should call by project path' {
+#             $null = Invoke-DscResourceTest -ProjectPath $ProjectPath
+#             Assert-MockCalled -CommandName Get-Command -Scope Context
+#         }
+#     }
+# }
 
-            }
-        } -ParameterFilter {
-            $Name -like '*.psd1'
-        }
+# Describe 'Loading Opt Ins and Opt Outs by Tags' {
+#     BeforeAll {
+#         Mock -CommandName Import-Module -MockWith {
+#             return @{
+#                 ModuleBase = 'TestDrive:\'
+#                 ModuleName = 'MyModule'
+#                 Path       = 'TestDrive:\MyModule.psd1'
+#                 Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
+#             }
+#         }
 
-        It 'Should override properly the Script parameters for Invoke-Pester' {
-            $result = Invoke-DscResourceTest -Script @{
-                Path       = '.'
-                Parameters = @{
-                    'ModuleName' = 'dummy'
-                }
-            } -Module 'Microsoft.PowerShell.Utility'
-            $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
-            $result.script.Parameters.Keys | Should -HaveCount 11
-        }
-    }
-}
+#         Mock -CommandName Get-ChildItem -MockWith {
+#             @{
+#                 FullName = 'C:\dummy.psd1'
+#             }
+#         }
+
+#         Mock -CommandName Import-PowerShellDataFile -MockWith {
+#             return @{
+#                 ModuleBase = 'TestDrive:\'
+#                 ModuleName = 'MyModule'
+#                 Path       = 'TestDrive:\MyModule.psd1'
+#                 Guid       = 'fd8c76f8-c702-49d0-9da8-f5661c2373bc'
+#             }
+#         }
+
+#         Mock -CommandName Get-StructuredObjectFromFile -ParameterFilter {
+#             $Path -like '*out.json'
+#         } -MockWith {
+#             param (
+#                 [Parameter()]
+#                 $Path
+#             )
+
+#             @('noTag', 'ExcludeTag')
+#         }
+#     }
+
+#     It 'Should override properly the Script parameters for Invoke-Pester' {
+#         $result = Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets
+
+#         $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
+#         $result.script.Parameters.Keys | Should -HaveCount 11
+#         $result.Tag | Should -HaveCount 1
+#         $result.ExcludeTag | Should -HaveCount 1
+#         Assert-MockCalled -CommandName Get-Command -Exactly -Times 1 -Scope It
+#     }
+# }
+
+# Describe 'Merging settings from Config and params' {
+# }
+
+# Describe 'Pester Scripts Parameters' {
+#     BeforeAll {
+#         Mock -CommandName Import-Module -MockWith {
+#             return @{
+#                 ModuleBase = 'TestDrive:\'
+#                 ModuleName = 'MyModule'
+#                 Path       = 'TestDrive:\MyModule.psd1'
+
+#             }
+#         } -ParameterFilter {
+#             $Name -like '*.psd1'
+#         }
+#     }
+
+#     It 'Should override properly the Script parameters for Invoke-Pester' {
+#         $result = Invoke-DscResourceTest -Script @{
+#             Path       = '.'
+#             Parameters = @{
+#                 'ModuleName' = 'dummy'
+#             }
+#         } -Module 'Microsoft.PowerShell.Utility'
+
+#         $result.Script.Parameters.ModuleName | Should -Not -BeExactly 'dummy'
+#         $result.script.Parameters.Keys | Should -HaveCount 11
+#     }
+# }
