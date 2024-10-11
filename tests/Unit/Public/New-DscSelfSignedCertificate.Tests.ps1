@@ -74,26 +74,19 @@ Describe 'New-DscSelfSignedCertificate' -Tag WindowsOnly -Skip:($PSVersionTable.
             NotAfter          = (Get-Date).AddDays(31) # Expires after
         }
 
-        <#
-            This stub is needed because the real Export-Certificate's $cert
-            parameter requires an actual [X509Certificate2] object.
-        #>
-        function Export-Certificate
-        {
+        InModuleScope -ScriptBlock {
+            function script:New-SelfSignedCertificateEx
+            {
+            }
+
+            function script:Export-Certificate
+            {
+            }
         }
     }
 
     Context 'When creating a self-signed certificate for Windows Server 2012 R2' {
         BeforeAll {
-            <#
-                Stub to have something to mock on since we can't wait for
-                the Expand-Archive to create the stub that is dot-sourced
-                on runtime.
-            #>
-            function New-SelfSignedCertificateEx
-            {
-            }
-
             Mock -CommandName Get-ChildItem
             Mock -CommandName Get-Command
             Mock -CommandName Import-Module
@@ -128,14 +121,6 @@ Describe 'New-DscSelfSignedCertificate' -Tag WindowsOnly -Skip:($PSVersionTable.
 
     Context 'When creating a self-signed certificate for Windows Server 2016' {
         BeforeAll {
-            <#
-                Stub is needed if tests is run on operating system older
-                than Windows 10 and Windows Server 2016.
-            #>
-            function New-SelfSignedCertificate
-            {
-            }
-
             Mock -CommandName Get-ChildItem
             Mock -CommandName Get-Command -MockWith {
                 return @{
@@ -176,15 +161,6 @@ Describe 'New-DscSelfSignedCertificate' -Tag WindowsOnly -Skip:($PSVersionTable.
         BeforeAll {
             Mock -CommandName Get-ChildItem -MockWith {
                 return $validCertificate
-            }
-
-            # <#
-            #         Stub to have something to mock on since we can't wait for
-            #         the Expand-Archive to create the stub that is dot-sourced
-            #         on runtime.
-            #     #>
-            function New-SelfSignedCertificateEx
-            {
             }
 
             Mock -CommandName New-SelfSignedCertificateEx
