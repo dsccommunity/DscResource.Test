@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,20 +48,20 @@ AfterAll {
 
 Describe 'Get-TextFilesList' -Tag 'Private' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $script:mofFileType = 'test.schema.mof'
-            $script:psm1FileType = 'test.psm1'
+            $mofFileType = 'test.schema.mof'
+            $psm1FileType = 'test.psm1'
 
             'resource_schema1' | Out-File -FilePath (Join-Path -Path $TestDrive -ChildPath $mofFileType) -Encoding ascii
             'resource_schema2' | Out-File -FilePath (Join-Path -Path $TestDrive -ChildPath $psm1FileType) -Encoding ascii
-        }
     }
 
     Context 'When a module contains text files' {
         It 'Should return all the file names of all the text files' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                TestDrive = $TestDrive
+                mofFileType = $mofFileType
+                psm1FileType = $psm1FileType
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $result = Get-TextFilesList -Root $TestDrive

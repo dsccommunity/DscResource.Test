@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,18 +48,17 @@ AfterAll {
 
 Describe 'Get-Psm1FileList' -Tag 'Private' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $script:psm1FileType = 'test.psm1'
+            $psm1FileType = 'test.psm1'
             $filePath = Join-Path -Path $TestDrive -ChildPath $psm1FileType
             'testfile' | Out-File -FilePath $filePath -Encoding ascii
-        }
     }
 
     Context 'When a module contains module files' {
         It 'Should return all the file names of all the module files' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                TestDrive = $TestDrive
+                psm1FileType = $psm1FileType
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $result = Get-Psm1FileList -FilePath $TestDrive

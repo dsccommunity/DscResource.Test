@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,11 +48,8 @@ AfterAll {
 
 Describe 'Get-ModuleScriptResourceName' -Tag 'Private' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $script:resourceName1 = 'TestResource1'
-            $script:resourceName2 = 'TestResource2'
+            $resourceName1 = 'TestResource1'
+            $resourceName2 = 'TestResource2'
             $resourcesPath = Join-Path -Path $TestDrive -ChildPath 'DscResources'
             $testResourcePath1 = (Join-Path -Path $resourcesPath -ChildPath $resourceName1)
             $testResourcePath2 = (Join-Path -Path $resourcesPath -ChildPath $resourceName2)
@@ -63,12 +60,15 @@ Describe 'Get-ModuleScriptResourceName' -Tag 'Private' {
 
             'resource_schema1' | Out-File -FilePath ('{0}.schema.mof' -f $testResourcePath1) -Encoding ascii
             'resource_schema2' | Out-File -FilePath ('{0}.schema.mof' -f $testResourcePath2) -Encoding ascii
-        }
     }
 
     Context 'When a module contains resources' {
         It 'Should return all the resource names' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                TestDrive = $TestDrive
+                resourceName1 = $resourceName1
+                resourceName2 = $resourceName2
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $result = Get-ModuleScriptResourceName -ModulePath $TestDrive

@@ -46,40 +46,31 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-FileParseErrors' -Tag 'Private' {
-    BeforeAll {
-        $filePath = (Join-Path -Path $TestDrive -ChildPath 'test.psm1')
-    }
-
-    Context 'When a module does not contain parse errors' {
-        BeforeEach {
-            'function MockTestFunction {}' | Out-File -FilePath $filePath -Encoding ascii
-        }
-
-        It 'Should return $null' {
-            InModuleScope -Parameters @{
-                filePath = $filePath
-            } -ScriptBlock {
+Describe 'Join-PSModulePath' -Tag 'Private' {
+    Context 'When the ''NewPath'' does not exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                Get-FileParseError -FilePath $filePath | Should -BeNullOrEmpty
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string4'
+                $expectedResult = $mockPath + ';' + $mockNewPath
+
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
             }
         }
     }
 
-    Context 'When a module do contain parse errors' {
-        BeforeEach {
-            # The param() is deliberately spelled wrong to get a parse error.
-            'function MockTestFunction { parm() }' | Out-File -FilePath $filePath -Encoding ascii
-        }
-
-        It 'Should return the correct error string' {
-            InModuleScope -Parameters @{
-                filePath = $filePath
-            } -ScriptBlock {
+    Context 'When the ''NewPath'' does exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
-                Get-FileParseError -FilePath $filePath | Should -Match 'An expression was expected after ''\('''
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string2'
+                $expectedResult = $mockPath + ';string3'
+
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
             }
         }
     }

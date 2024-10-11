@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,19 +48,19 @@ AfterAll {
 
 Describe 'Get-ClassResourceNameFromFile' -Tag 'Private' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
+            $mockResourceName1 = 'TestResourceName1'
+            $mockResourceName2 = 'TestResourceName2'
 
-            $script:mockResourceName1 = 'TestResourceName1'
-            $script:mockResourceName2 = 'TestResourceName2'
-
-            $script:scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
-        }
+            $mockScriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
     }
 
     Context 'When querying for the name of a class-based resource' {
         It 'Should return the correct name of the resource' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                mockScriptPath = $mockScriptPath
+                mockResourceName1 = $mockResourceName1
+                mockResourceName2 = $mockResourceName2
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 "
@@ -73,9 +73,9 @@ Describe 'Get-ClassResourceNameFromFile' -Tag 'Private' {
                 class $mockResourceName2
                 {
                 }
-                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+                " | Out-File -FilePath $mockScriptPath -Encoding ascii -Force
 
-                $result = Get-ClassResourceNameFromFile -FilePath $scriptPath
+                $result = Get-ClassResourceNameFromFile -FilePath $mockScriptPath
                 $result.Count | Should -Be 2
                 $result[0] | Should -Be $mockResourceName1
                 $result[1] | Should -Be $mockResourceName2

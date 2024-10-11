@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -108,7 +108,7 @@ Describe 'Test-ModuleContainsClassResource' -Tag 'Private' {
                 $result = Test-ModuleContainsClassResource -ModulePath $TestDrive
                 $result | Should -BeFalse
             }
-            
+
             Should -Invoke -CommandName 'Get-Psm1FileList' -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName 'Test-FileContainsClassResource' -Exactly -Times 0 -Scope It
         }

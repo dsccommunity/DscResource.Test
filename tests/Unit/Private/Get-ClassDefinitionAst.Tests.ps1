@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,40 +48,34 @@ AfterAll {
 
 Describe 'DscResource.Test\Get-ClassDefinitionAst' -Tag 'Private' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $script:mockScriptPath = Join-Path -Path $TestDrive -ChildPath 'TestFunctions.ps1'
-        }
+        $mockScriptPath = Join-Path -Path $TestDrive -ChildPath 'TestFunctions.ps1'
     }
 
     Context 'When a script file has function definitions' {
         BeforeAll {
-            InModuleScope -ScriptBlock {
-                Set-StrictMode -Version 1.0
+            $definition = '
+                class MyClass
+                {
+                    MyClass() {}
+                }
 
-                $definition = '
-                    class MyClass
-                    {
-                        MyClass() {}
-                    }
+                class MyClass2
+                {
+                    [DscProperty(Key)]
+                    [System.String]
+                    $Name
 
-                    class MyClass2
-                    {
-                        [DscProperty(Key)]
-                        [System.String]
-                        $Name
+                    MyClass2() {}
+                }
+            '
 
-                        MyClass2() {}
-                    }
-                '
-
-                $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
-            }
+            $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
         }
 
         It 'Should return the correct number of class definitions' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                mockScriptPath = $mockScriptPath
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $result = Get-FunctionDefinitionAst -FullName $mockScriptPath
@@ -92,20 +86,18 @@ Describe 'DscResource.Test\Get-ClassDefinitionAst' -Tag 'Private' {
 
     Context 'When a script file has no class definitions' {
         BeforeAll {
-            InModuleScope -ScriptBlock {
-                Set-StrictMode -Version 1.0
+            $definition = '
+                $script:variable = 1
+                return $script:variable
+            '
 
-                $definition = '
-                    $script:variable = 1
-                    return $script:variable
-                '
-
-                $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
-            }
+            $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
         }
 
         It 'Should return $null' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                mockScriptPath = $mockScriptPath
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $result = Get-ClassDefinitionAst -FullName $mockScriptPath
@@ -116,19 +108,17 @@ Describe 'DscResource.Test\Get-ClassDefinitionAst' -Tag 'Private' {
 
     Context 'When a script file has a parse error' {
         BeforeAll {
-            InModuleScope -ScriptBlock {
-                Set-StrictMode -Version 1.0
+            $definition = '
+                class Mycla {
+            '
 
-                $definition = '
-                    class Mycla {
-                '
-
-                $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
-            }
+            $definition | Out-File -FilePath $mockScriptPath -Encoding 'ascii' -Force
         }
 
         It 'Should throw and exception' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                mockScriptPath = $mockScriptPath
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 { Get-ClassDefinitionAst -FullName $mockScriptPath } | Should -Throw

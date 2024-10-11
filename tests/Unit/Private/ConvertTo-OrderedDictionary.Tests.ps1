@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -68,7 +68,7 @@ Describe 'ConvertTo-OrderedDictionary' -Tag 'Private' {
         }
     }
 
-    It 'should convert nested PSCustomObject' {
+    It 'Should convert nested PSCustomObject' {
         InModuleScope -ScriptBlock {
             Set-StrictMode -Version 1.0
 
@@ -119,7 +119,7 @@ Describe 'ConvertTo-OrderedDictionary' -Tag 'Private' {
             Set-StrictMode -Version 1.0
 
             ($null | ConvertTo-OrderedDictionary) | Should -BeNullOrEmpty
-            (ConvertTo-OrderedDictionary -InputObject $null) | Should -BeNullOrEmpty
+            ConvertTo-OrderedDictionary -InputObject $null | Should -BeNullOrEmpty
         }
     }
 

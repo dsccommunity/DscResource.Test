@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -48,19 +48,19 @@ AfterAll {
 
 Describe 'Get-SuppressedPSSARuleNameList' {
     BeforeAll {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
+        $rule1 = "'PSAvoidUsingConvertToSecureStringWithPlainText'"
+        $rule2 = "'PSAvoidGlobalVars'"
 
-            $script:rule1 = "'PSAvoidUsingConvertToSecureStringWithPlainText'"
-            $script:rule2 = "'PSAvoidGlobalVars'"
-
-            $script:scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
-        }
+        $scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
     }
 
     Context 'When a module files contains suppressed rules' {
         It 'Should return the all the suppressed rules' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                rule1 = $rule1
+                rule2 = $rule2
+                scriptPath = $scriptPath
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 "

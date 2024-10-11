@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -46,49 +46,46 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-StructuredObjectFromFiles' -Tag 'Private' {
-    BeforeAll {
-        Mock -CommandName Import-PowerShellDataFile
-        Mock -CommandName Get-Content
-        Mock -CommandName Import-Module
-        Import-Module powershell-yaml -Force -ErrorAction Stop
-        Mock -CommandName ConvertFrom-Yaml
-        # Mock -CommandName ConvertFrom-Json fails on 6.x
-    }
+Describe 'Get-PublishFileName' -Tag 'Private' {
+    Context 'When the filename is in the correct format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = 'mockFile.ps1'
 
-    It 'Should Import a PowerShell DataFile when path extension is PSD1' {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.psd1'
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
+            }
         }
 
-        Should -Invoke -CommandName Import-PowerShellDataFile -Exactly -Times 1 -Scope It
+        It 'Should return the BaseName unchanged' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                Get-PublishFileName -Path $mockFileName | Should -Be $mockFileName.BaseName
+            }
+        }
     }
 
+    Context 'When the filename is in the incorrect format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = '05435-mockFile.ps1'
+            [System.IO.FileInfo] $correctMockFileName = 'mockFile.ps1'
 
-    # It 'Should ConvertFrom-Json when path extension is JSON' {
-    #     $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.json'
-    #     Should -Invoke -CommandName ConvertFrom-Json -Scope it
-    # }
-
-    It 'Should Import module & ConvertFrom-Yaml when path extension is Yaml' {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.yaml'
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
+            }
         }
 
-        Should -Invoke -CommandName Import-Module -Exactly -Times 1 -Scope It
-        Should -Invoke -CommandName ConvertFrom-Yaml -Exactly -Times 1 -Scope It
-    }
+        It 'Should return the correct BaseName' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+                correctMockFileName = $correctMockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-
-    It 'Should throw when extension not one of the above' {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
-
-            { Get-StructuredObjectFromFile -Path 'TestDrive:\tests.txt' } | Should -Throw
+                Get-PublishFileName -Path $mockFileName | Should -Be $correctMockFileName.BaseName
+            }
         }
     }
 }

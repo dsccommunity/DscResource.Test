@@ -10,7 +10,7 @@ BeforeDiscovery {
             if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
             {
                 # Redirect all streams to $null, except the error stream (stream 2)
-                & "$PSScriptRoot/../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 2>&1 4>&1 5>&1 6>&1 > $null
             }
 
             # If the dependencies has not been resolved, this will throw an error.
@@ -49,30 +49,30 @@ AfterAll {
 Describe 'Get-RelativePathFromModuleRoot' -Tag 'Private' {
     Context 'When to get the relative path from module root' {
         BeforeAll {
-            InModuleScope -ScriptBlock {
-                Set-StrictMode -Version 1.0
-
-                $script:relativePath = 'Modules'
-                $script:filePath = Join-Path $TestDrive -ChildPath $relativePath
-                $script:moduleRootPath = $TestDrive
+                $relativePath = 'Modules'
+                $filePath = Join-Path $TestDrive -ChildPath $relativePath
+                $moduleRootPath = $TestDrive
 
                 # Adds a backslash to make sure it gets trimmed.
-                $script:filePath += [io.path]::DirectorySeparatorChar
+                $filePath += [io.path]::DirectorySeparatorChar
             }
-        }
 
         It 'Should return the correct relative path' {
-            InModuleScope -ScriptBlock {
+            InModuleScope -Parameters @{
+                filePath = $filePath
+                moduleRootPath = $moduleRootPath
+                relativePath = $relativePath
+            } -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
                 $mockGetParameters = @{
-                    FilePath           = $script:filePath
-                    ModuleRootFilePath = $script:moduleRootPath
+                    FilePath           = $filePath
+                    ModuleRootFilePath = $moduleRootPath
                 }
 
                 $result = Get-RelativePathFromModuleRoot @mockGetParameters
 
-                $result | Should -Be $script:relativePath
+                $result | Should -Be $relativePath
             }
         }
     }

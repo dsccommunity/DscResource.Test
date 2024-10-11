@@ -46,41 +46,54 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-FileParseErrors' -Tag 'Private' {
+Describe 'Get-StructuredObjectFromFile' -Tag 'Private' {
     BeforeAll {
-        $filePath = (Join-Path -Path $TestDrive -ChildPath 'test.psm1')
+        Mock -CommandName Import-PowerShellDataFile
+        Mock -CommandName Get-Content
+        Mock -CommandName Import-Module
+        Import-Module powershell-yaml -Force -ErrorAction Stop
+        Mock -CommandName ConvertFrom-Yaml
+        Mock -CommandName ConvertFrom-Json
     }
 
-    Context 'When a module does not contain parse errors' {
-        BeforeEach {
-            'function MockTestFunction {}' | Out-File -FilePath $filePath -Encoding ascii
+    It 'Should Import a PowerShell DataFile when path extension is PSD1' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.psd1'
         }
 
-        It 'Should return $null' {
-            InModuleScope -Parameters @{
-                filePath = $filePath
-            } -ScriptBlock {
-                Set-StrictMode -Version 1.0
-
-                Get-FileParseError -FilePath $filePath | Should -BeNullOrEmpty
-            }
-        }
+        Should -Invoke -CommandName Import-PowerShellDataFile -Exactly -Times 1 -Scope It
     }
 
-    Context 'When a module do contain parse errors' {
-        BeforeEach {
-            # The param() is deliberately spelled wrong to get a parse error.
-            'function MockTestFunction { parm() }' | Out-File -FilePath $filePath -Encoding ascii
+
+    It 'Should ConvertFrom-Json when path extension is JSON' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.json'
         }
 
-        It 'Should return the correct error string' {
-            InModuleScope -Parameters @{
-                filePath = $filePath
-            } -ScriptBlock {
-                Set-StrictMode -Version 1.0
+        Should -Invoke -CommandName ConvertFrom-Json -Exactly -Times 1 -Scope It
+    }
 
-                Get-FileParseError -FilePath $filePath | Should -Match 'An expression was expected after ''\('''
-            }
+    It 'Should Import module & ConvertFrom-Yaml when path extension is Yaml' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.yaml'
+        }
+
+        Should -Invoke -CommandName Import-Module -Exactly -Times 1 -Scope It
+        Should -Invoke -CommandName ConvertFrom-Yaml -Exactly -Times 1 -Scope It
+    }
+
+
+    It 'Should throw when extension not one of the above' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            { Get-StructuredObjectFromFile -Path 'TestDrive:\tests.txt' } | Should -Throw
         }
     }
 }
