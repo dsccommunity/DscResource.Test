@@ -56,6 +56,7 @@ BuildWorkflow:
 
   test:
     - Pester_Tests_Stop_On_Fail
+    - Convert_Pester_Coverage
     - Pester_if_Code_Coverage_Under_Threshold
 
   merge:
@@ -70,17 +71,27 @@ BuildWorkflow:
 #       PESTER  Configuration                      #
 ####################################################
 Pester:
-  OutputFormat: NUnitXML
+  Configuration:
+    Run:
+      Path:
+      - tests/QA
+      - tests/Unit
+    Output:
+      Verbosity: Detailed
+      StackTraceVisibility: Full
+      CIFormat: Auto
+    CodeCoverage:
+      CoveragePercentTarget: 60
+      OutputPath: JaCoCo_coverage.xml
+      OutputEncoding: ascii
+      UseBreakpoints: false
+    TestResult:
+      OutputFormat: NUnitXML
+      OutputEncoding: ascii
   ExcludeFromCodeCoverage:
     - tasks
     - Template
     - Tests
-  Script:
-    - tests/QA
-    - tests/Unit/
-  CodeCoverageThreshold: 60
-  CodeCoverageOutputFile: JaCoCo_Merge.xml # the file that is created for each pipeline test job
-  CodeCoverageOutputFileEncoding: ascii
   ExcludeTag:
     - helpQuality
     - testQuality
@@ -89,8 +100,8 @@ Pester:
     - source/potential
 
 CodeCoverage:
-  CodeCoverageFilePattern: JaCoCo_Merge.xml # the pattern used to search all pipeline test job artifacts
   CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
+  CodeCoverageFilePattern: Codecov*.xml # the pattern used to search all pipeline test job artifacts
 
 ModuleBuildTasks:
   Sampler:
@@ -112,6 +123,9 @@ TaskHeader: |
   Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
   ""
 
+####################################################
+#               GitHub Configuration               #
+####################################################
 GitHubConfig:
   GitHubFilesToAdd:
     - 'CHANGELOG.md'
