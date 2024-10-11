@@ -151,8 +151,8 @@ Describe 'DscResource.GalleryDeploy\Test-ConfigurationName' -Tag 'WindowsOnly' -
                 Set-StrictMode -Version 1.0
 
                 $errorMessage = 'The configuration name ''1WrongConfig'' is not valid.'
-                
-                { Test-ConfigurationName -Path $mockScriptPath } | Should -Throw -ExpectedMessage ($errorMessage + '*')
+
+                { Test-ConfigurationName -Path $mockScriptPath } | Should -Throw -ExpectedMessage ('*' + $errorMessage + '*')
             }
         }
     }
