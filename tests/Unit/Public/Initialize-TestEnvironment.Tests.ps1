@@ -46,22 +46,23 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Initialize-TestEnvironment' -Tag 'Public' {
+Describe 'Initialize-TestEnvironment' {
     BeforeAll {
-        if ($script:machineOldPSModulePath)
-        {
-            throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
+        InModuleScope -ScriptBlock {
+            if ($script:machineOldPSModulePath)
+            {
+                throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
+            }
         }
-
-        $mockDscModuleName = 'TestModule'
-        $mockDscResourceName = 'TestResource'
     }
 
     AfterEach {
-        <#
+        InModuleScope -ScriptBlock {
+            <#
                 Make sure to set this to $null so that the unit tests won't fail.
             #>
-        $script:machineOldPSModulePath = $null
+            $script:machineOldPSModulePath = $null
+        }
     }
 
     Context 'When initializing the test environment' {
@@ -85,6 +86,9 @@ Describe 'Initialize-TestEnvironment' -Tag 'Public' {
         }
 
         BeforeAll {
+            $mockDscModuleName = 'TestModule'
+            $mockDscResourceName = 'TestResource'
+
             Mock -CommandName 'Set-PSModulePath'
             Mock -CommandName 'Clear-DscLcmConfiguration'
             Mock -CommandName 'Set-ExecutionPolicy'
@@ -132,28 +136,40 @@ Describe 'Initialize-TestEnvironment' -Tag 'Public' {
             'test mof resource module file' | Out-File -FilePath $filePath -Encoding ascii
             $filePath = Join-Path -Path $mockClassResourcePath -ChildPath ('{0}.psm1' -f $mockDscResourceName)
             'test class resource module file' | Out-File -FilePath $filePath -Encoding ascii
+
+            InModuleScope -Parameters @{
+                mockDscModuleName   = $mockDscModuleName
+                mockDscResourceName = $mockDscResourceName
+            } -ScriptBlock {
+                $script:mockDscModuleName = $mockDscModuleName
+                $script:mockDscResourceName = $mockDscResourceName
+            }
         }
 
         It 'Should initialize without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
-            $initializeTestEnvironmentParameters = @{
-                Module          = $mockDscModuleName
-                DSCResourceName = $mockDscResourceName
-                TestType        = $TestType
-                ResourceType    = $ResourceType
+            InModuleScope -Parameters $_ -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $initializeTestEnvironmentParameters = @{
+                    Module          = $mockDscModuleName
+                    DSCResourceName = $mockDscResourceName
+                    TestType        = $TestType
+                    ResourceType    = $ResourceType
+                }
+
+                { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
             }
 
-            { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
-
-            Assert-MockCalled -CommandName 'Split-Path' -Exactly -Times 2 -Scope It
-            Assert-MockCalled -CommandName 'Import-Module' -Exactly -Times 2 -Scope It
-            Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
+            Should -Invoke -CommandName 'Split-Path' -Exactly -Times 2 -Scope It
+            Should -Invoke -CommandName 'Import-Module' -Exactly -Times 2 -Scope It
+            Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
                 $PSBoundParameters.ContainsKey('Machine') -eq $false
             } -Exactly -Times 1 -Scope It
 
             if ($TestEnvironment.TestType -eq 'Integration')
             {
-                Assert-MockCalled -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
-                Assert-MockCalled -CommandName 'Set-PSModulePath' -ParameterFilter {
+                Should -Invoke -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
                     $PSBoundParameters.ContainsKey('Machine') -eq $true
                 } -Exactly -Times 1 -Scope It
 
@@ -162,30 +178,34 @@ Describe 'Initialize-TestEnvironment' -Tag 'Public' {
                     $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
                 )
                 {
-                    Assert-MockCalled -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
-                    Assert-MockCalled -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
                 }
             }
 
-            Assert-MockCalled -CommandName 'Get-ExecutionPolicy'
-            Assert-MockCalled -CommandName 'Set-ExecutionPolicy' -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName 'Get-ExecutionPolicy'
+            Should -Invoke -CommandName 'Set-ExecutionPolicy' -Exactly -Times 0 -Scope It
         }
 
         Context 'When setting specific execution policy' {
             It 'Should initialize without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
-                $initializeTestEnvironmentParameters = @{
-                    Module                 = $mockDscModuleName
-                    DSCResourceName        = $mockDscResourceName
-                    TestType               = $TestType
-                    ResourceType           = $ResourceType
-                    ProcessExecutionPolicy = 'Unrestricted'
-                    MachineExecutionPolicy = 'Unrestricted'
+                InModuleScope -Parameters $_ -ScriptBlock {
+                    Set-StrictMode -Version 1.0
+
+                    $initializeTestEnvironmentParameters = @{
+                        Module                 = $mockDscModuleName
+                        DSCResourceName        = $mockDscResourceName
+                        TestType               = $TestType
+                        ResourceType           = $ResourceType
+                        ProcessExecutionPolicy = 'Unrestricted'
+                        MachineExecutionPolicy = 'Unrestricted'
+                    }
+
+                    { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
                 }
 
-                { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
-
-                Assert-MockCalled -CommandName 'Get-ExecutionPolicy'
-                Assert-MockCalled -CommandName 'Set-ExecutionPolicy'
+                Should -Invoke -CommandName 'Get-ExecutionPolicy'
+                Should -Invoke -CommandName 'Set-ExecutionPolicy'
             }
         }
     }
@@ -199,15 +219,19 @@ Describe 'Initialize-TestEnvironment' -Tag 'Public' {
         }
 
         It 'Should throw the correct error' {
-            $initializeTestEnvironmentParameters = @{
-                DSCModuleName   = $mockDscModuleName
-                DSCResourceName = $mockDscResourceName
-                TestType        = 'Unit'
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $initializeTestEnvironmentParameters = @{
+                    DSCModuleName   = $mockDscModuleName
+                    DSCResourceName = $mockDscResourceName
+                    TestType        = 'Unit'
+                }
+
+                { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Throw
             }
 
-            { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Throw
-
-            Assert-MockCalled -CommandName 'Import-Module' -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName 'Import-Module' -Exactly -Times 1 -Scope It
         }
     }
 }
