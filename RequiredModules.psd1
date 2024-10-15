@@ -19,6 +19,9 @@
     'DscResource.AnalyzerRules' = 'latest'
     xDscResourceDesigner        = 'latest'
 
+    # Build dependencies needed for using the module
+    'DscResource.Common'        = 'latest'
+
     # Prerequisite modules for documentation.
     'DscResource.DocGenerator' = 'latest'
     PlatyPS                    = 'latest'

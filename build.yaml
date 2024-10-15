@@ -1,22 +1,5 @@
 ---
 ####################################################
-#          ModuleBuilder Configuration             #
-####################################################
-CopyPaths:
-  - en-US
-  - Tests
-  - Config
-  - tasks
-Encoding: UTF8
-VersionedOutputDirectory: true
-BuiltModuleSubdirectory: builtModule
-
-AliasesToExport:
-  - 'Task.Invoke_HQRM_Tests'
-  - 'Task.Fail_Build_If_HQRM_Tests_Failed'
-  - 'Task.Invoke_HQRM_Tests_Stop_On_Fail'
-
-####################################################
 #       Sampler Pipeline Configuration             #
 ####################################################
 BuildWorkflow:
@@ -68,6 +51,53 @@ BuildWorkflow:
     - publish_module_to_gallery
 
 ####################################################
+#          ModuleBuilder Configuration             #
+####################################################
+CopyPaths:
+  - en-US
+  - Tests
+  - Config
+  - tasks
+Prefix: prefix.ps1
+Encoding: UTF8
+VersionedOutputDirectory: true
+BuiltModuleSubdirectory: builtModule
+
+AliasesToExport:
+  - 'Task.Invoke_HQRM_Tests'
+  - 'Task.Fail_Build_If_HQRM_Tests_Failed'
+  - 'Task.Invoke_HQRM_Tests_Stop_On_Fail'
+
+ModuleBuildTasks:
+  Sampler:
+    - '*.build.Sampler.ib.tasks'
+  Sampler.GitHubTasks:
+    - '*.ib.tasks'
+  DscResource.DocGenerator:
+    - 'Task.*'
+
+TaskHeader: |
+  param($Path)
+  ""
+  "=" * 79
+  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
+  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
+  "-" * 79
+  Write-Build DarkGray "  $Path"
+  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
+  ""
+
+####################################################
+#     Dependent Modules Configuration (Sampler)    #
+####################################################
+NestedModule:
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
+
+####################################################
 #       PESTER  Configuration                      #
 ####################################################
 Pester:
@@ -92,6 +122,7 @@ Pester:
     - tasks
     - Template
     - Tests
+    - Modules/DscResource.Common
   ExcludeTag:
     - helpQuality
     - testQuality
@@ -102,26 +133,6 @@ Pester:
 CodeCoverage:
   CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
   CodeCoverageFilePattern: Codecov*.xml # the pattern used to search all pipeline test job artifacts
-
-ModuleBuildTasks:
-  Sampler:
-    - '*.build.Sampler.ib.tasks'
-  Sampler.GitHubTasks:
-    - '*.ib.tasks'
-  DscResource.DocGenerator:
-    - 'Task.*'
-
-# Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
-TaskHeader: |
-  param($Path)
-  ""
-  "=" * 79
-  Write-Build Cyan "`t`t`t$($Task.Name.replace("_"," ").ToUpper())"
-  Write-Build DarkGray  "$(Get-BuildSynopsis $Task)"
-  "-" * 79
-  Write-Build DarkGray "  $Path"
-  Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
-  ""
 
 ####################################################
 #               GitHub Configuration               #
