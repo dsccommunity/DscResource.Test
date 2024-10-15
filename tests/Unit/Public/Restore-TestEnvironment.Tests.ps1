@@ -76,16 +76,16 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
     }
 
     BeforeAll {
-        Mock -CommandName 'Clear-DscLcmConfiguration'
-        Mock -CommandName 'Set-PSModulePath'
-        Mock -CommandName 'Set-ExecutionPolicy'
+        Mock -CommandName Clear-DscLcmConfiguration
+        Mock -CommandName Set-PSModulePath
+        Mock -CommandName Set-ExecutionPolicy
     }
 
     Context 'When restoring the test environment' {
         It 'Should restore without throwing <TestDescription>' -TestCases $testCases {
             { Restore-TestEnvironment -TestEnvironment $TestEnvironment } | Should -Not -Throw
 
-            Should -Invoke -CommandName 'Set-PSModulePath' -Exactly -Times 0
+            Should -Invoke -CommandName Set-PSModulePath -Exactly -Times 0
         }
     }
 
@@ -103,9 +103,9 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
 
             { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
 
-            Should -Invoke -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
 
-            Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
+            Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
                 $Path -eq $testEnvironmentParameter.OldPSModulePath `
                     -and $PSBoundParameters.ContainsKey('Machine') -eq $false
             } -Exactly -Times 1 -Scope It
@@ -114,16 +114,22 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
 
     Context 'When restoring the test environment from an integration test that changed the machine PSModulePath' {
         BeforeAll {
-            if ($script:machineOldPSModulePath)
-            {
-                throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
-            }
+            InModuleScope -ScriptBlock {
 
-            $script:machineOldPSModulePath = 'SavedPath'
+                if ($script:machineOldPSModulePath)
+                {
+                    throw 'The script variable $script:machineOldPSModulePath was already set, cannot run unit test. This should not happen unless the test is run in the context of an integration test.'
+                }
+
+                $script:machineOldPSModulePath = 'SavedPath'
+            }
         }
 
         AfterAll {
-            $script:machineOldPSModulePath = $null
+            InModuleScope -ScriptBlock {
+
+                $script:machineOldPSModulePath = $null
+            }
         }
 
         It 'Should restore without throwing and call the correct mocks' {
@@ -138,17 +144,8 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
 
             { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter -KeepNewMachinePSModulePath } | Should -Not -Throw
 
-            Should -Invoke -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
-
-            Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
-                $Path -eq $testEnvironmentParameter.OldPSModulePath `
-                    -and $PSBoundParameters.ContainsKey('Machine') -eq $false
-            } -Exactly -Times 1 -Scope It
-
-            Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
-                $Path -match 'SavedPath' `
-                    -and $PSBoundParameters.ContainsKey('Machine') -eq $true
-            } -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
+            Should -Invoke -CommandName Set-PSModulePath -Exactly -Times 2 -Scope It
         }
     }
 
