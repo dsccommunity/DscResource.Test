@@ -35,6 +35,13 @@ BeforeAll {
     $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:moduleName
     $PSDefaultParameterValues['Mock:ModuleName'] = $script:moduleName
     $PSDefaultParameterValues['Should:ModuleName'] = $script:moduleName
+
+    InModuleScope -ScriptBlock {
+        # Stub of the generated configuration so it can be mocked.
+        function script:LocalConfigurationManagerConfiguration
+        {
+        }
+    }
 }
 
 AfterAll {
@@ -46,17 +53,12 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Initialize-DscTestLcm' -Skip:(!$IsWindows -or $IsCoreCLR) {
+Describe 'Initialize-DscTestLcm' -Skip:(($PSVersionTable.PSEdition -eq 'Core') -or ($IsMacOS -or $IsLinux)) {
     BeforeAll {
         Mock -CommandName New-Item
         Mock -CommandName Remove-Item
         Mock -CommandName Invoke-Command
         Mock -CommandName Set-DscLocalConfigurationManager
-
-        # Stub of the generated configuration so it can be mocked.
-        function LocalConfigurationManagerConfiguration
-        {
-        }
 
         Mock -CommandName LocalConfigurationManagerConfiguration
     }
