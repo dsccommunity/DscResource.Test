@@ -46,7 +46,7 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Invoke-DscResourceTest Resolving Built Module' {
+Describe 'Invoke-DscResourceTest' -Tag 'Public' {
     BeforeAll {
         Mock -CommandName Get-Command
         Mock -CommandName Get-StructuredObjectFromFile -MockWith { @('noTag') }
@@ -72,41 +72,42 @@ Describe 'Invoke-DscResourceTest Resolving Built Module' {
         # }
     }
 
-    # Context 'When with alternate MainGitBranch' {
-    #     It 'Should call Invoke-Pester with correct parameters' {
-    #         $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main'
-    #         $result.Script.Path | Should -BeExactly '.'
-    #         $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-    #         $result.Script.Parameters.keys | Should -HaveCount 11
-    #         $result.Script.Parameters.MainGitBranch | Should -BeExactly 'main' -Because 'When parameter is specified it override defaults & settings'
-    #         $result.Tag | Should -BeExactly 'nothing' -Because 'When parameter is specified it override defaults & settings'
+    Context 'When with alternate MainGitBranch' {
+        # It 'Should call Invoke-Pester with correct parameters' {
+        #     $result = Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main'
+
+        #     $result.Script.Path | Should -BeExactly '.'
+        #     $result.Script.Parameters.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
+        #     $result.Script.Parameters.keys | Should -HaveCount 11
+        #     $result.Script.Parameters.MainGitBranch | Should -BeExactly 'main' -Because 'When parameter is specified it override defaults & settings'
+        #     $result.Tag | Should -BeExactly 'nothing' -Because 'When parameter is specified it override defaults & settings'
+        # }
+    }
+
+    # Context 'When calling by module path' {
+    #     BeforeAll {
+    #         Mock -CommandName Import-Module -MockWith {
+    #             return (
+    #                 $PSBoundParameters + @{
+    #                     ModuleBase = 'TestDrive:\'
+    #                     ModuleName = 'MyModule'
+    #                     Path       = 'TestDrive:\MyModule.psd1'
+    #                 }
+    #             )
+    #         }
+    #     }
+
+    #     It 'Should fail when using a wrong path' {
+    #         { Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist' } | Should -Throw
+    #     }
+
+    #     It 'Should invoke pester using correct parameters when using an existing module path' {
+    #         $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1'
+
+    #         $result.Script.Parameters.ProjectPath | Should -BeNullOrEmpty
+    #         $result.Script.Parameters.ModuleName | Should -BeExactly 'C:\MyModuleNameDoesNotExist.psd1'
     #     }
     # }
-
-    Context 'When calling by module path' {
-        BeforeAll {
-            Mock -CommandName Import-Module -MockWith {
-                return (
-                    $PSBoundParameters + @{
-                        ModuleBase = 'TestDrive:\'
-                        ModuleName = 'MyModule'
-                        Path       = 'TestDrive:\MyModule.psd1'
-                    }
-                )
-            }
-        }
-
-        It 'Should fail when using a wrong path' {
-            { Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist' } | Should -Throw
-        }
-
-        It 'Should invoke pester using correct parameters when using an existing module path' {
-            $result = Invoke-DscResourceTest -Module 'C:\MyModuleNameDoesNotExist.psd1'
-            
-            $result.Script.Parameters.ProjectPath | Should -BeNullOrEmpty
-            $result.Script.Parameters.ModuleName | Should -BeExactly 'C:\MyModuleNameDoesNotExist.psd1'
-        }
-    }
 
     # Context 'When calling by module specification' {
     #     It 'Should return the correct result' {
