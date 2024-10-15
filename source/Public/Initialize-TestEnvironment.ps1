@@ -173,7 +173,6 @@ function Initialize-TestEnvironment
         $moduleParentFilePath = Split-Path -Path $moduleRootFilePath -Parent
     }
 
-
     $oldPSModulePath = $env:PSModulePath
 
     if ($null -ne $oldPSModulePath)
@@ -184,6 +183,8 @@ function Initialize-TestEnvironment
     {
         $oldPSModulePathSplit = $null
     }
+
+    $newPSModulePathSplit = $null
 
     if ($oldPSModulePathSplit -ccontains $moduleParentFilePath)
     {
@@ -214,7 +215,7 @@ function Initialize-TestEnvironment
             $PSEdition does not exist prior to PS5.1 so we need to evaluate the
             version in $PSVersionTable too.
         #>
-        if (($IsWindows -or $PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [System.Version] '5.1') -and
+        if (($PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [System.Version] '5.1' -or $IsWindows) -and
             ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
             $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         )

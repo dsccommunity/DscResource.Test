@@ -46,36 +46,46 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-ObjectNotFoundRecord' -Tag 'Public' {
-    Context 'When calling with the parameter Message' {
-        It 'Should have the correct values in the error record' {
-            $result = Get-ObjectNotFoundRecord -Message 'mocked error message.'
+Describe 'Get-PublishFileName' -Tag 'Private' {
+    Context 'When the filename is in the correct format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = 'mockFile.ps1'
 
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message | Should -Be 'System.Exception: mocked error message.'
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
+            }
+        }
+
+        It 'Should return the BaseName unchanged' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                Get-PublishFileName -Path $mockFileName | Should -Be $mockFileName.BaseName
+            }
         }
     }
 
-    Context 'When calling with the parameters Message and ErrorRecord' {
-        It 'Should have the correct values in the error record' {
-            $result = $null
+    Context 'When the filename is in the incorrect format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = '05435-mockFile.ps1'
+            [System.IO.FileInfo] $correctMockFileName = 'mockFile.ps1'
 
-            try
-            {
-                # Force divide by zero exception.
-                1/0
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
             }
-            catch
-            {
-                $result = Get-ObjectNotFoundRecord -Message 'mocked error message.' -ErrorRecord $_
-            }
+        }
 
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message -match 'System.Exception: mocked error message.' | Should -BeTrue
-            $result.Exception.Message -match 'System.Management.Automation.RuntimeException: Attempted to divide by zero.' | Should -BeTrue
-            $result.Exception.Message -match 'System.DivideByZeroException: Attempted to divide by zero.' | Should -BeTrue
+        It 'Should return the correct BaseName' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+                correctMockFileName = $correctMockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                Get-PublishFileName -Path $mockFileName | Should -Be $correctMockFileName.BaseName
+            }
         }
     }
 }

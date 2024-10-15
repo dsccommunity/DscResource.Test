@@ -46,36 +46,54 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-ObjectNotFoundRecord' -Tag 'Public' {
-    Context 'When calling with the parameter Message' {
-        It 'Should have the correct values in the error record' {
-            $result = Get-ObjectNotFoundRecord -Message 'mocked error message.'
-
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message | Should -Be 'System.Exception: mocked error message.'
-        }
+Describe 'Get-StructuredObjectFromFile' -Tag 'Private' {
+    BeforeAll {
+        Mock -CommandName Import-PowerShellDataFile
+        Mock -CommandName Get-Content
+        Mock -CommandName Import-Module
+        Import-Module powershell-yaml -Force -ErrorAction Stop
+        Mock -CommandName ConvertFrom-Yaml
+        Mock -CommandName ConvertFrom-Json
     }
 
-    Context 'When calling with the parameters Message and ErrorRecord' {
-        It 'Should have the correct values in the error record' {
-            $result = $null
+    It 'Should Import a PowerShell DataFile when path extension is PSD1' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
 
-            try
-            {
-                # Force divide by zero exception.
-                1/0
-            }
-            catch
-            {
-                $result = Get-ObjectNotFoundRecord -Message 'mocked error message.' -ErrorRecord $_
-            }
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.psd1'
+        }
 
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message -match 'System.Exception: mocked error message.' | Should -BeTrue
-            $result.Exception.Message -match 'System.Management.Automation.RuntimeException: Attempted to divide by zero.' | Should -BeTrue
-            $result.Exception.Message -match 'System.DivideByZeroException: Attempted to divide by zero.' | Should -BeTrue
+        Should -Invoke -CommandName Import-PowerShellDataFile -Exactly -Times 1 -Scope It
+    }
+
+
+    It 'Should ConvertFrom-Json when path extension is JSON' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.json'
+        }
+
+        Should -Invoke -CommandName ConvertFrom-Json -Exactly -Times 1 -Scope It
+    }
+
+    It 'Should Import module & ConvertFrom-Yaml when path extension is Yaml' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.yaml'
+        }
+
+        Should -Invoke -CommandName Import-Module -Exactly -Times 1 -Scope It
+        Should -Invoke -CommandName ConvertFrom-Yaml -Exactly -Times 1 -Scope It
+    }
+
+
+    It 'Should throw when extension not one of the above' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            { Get-StructuredObjectFromFile -Path 'TestDrive:\tests.txt' } | Should -Throw
         }
     }
 }

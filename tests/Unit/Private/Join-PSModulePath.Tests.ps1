@@ -46,36 +46,32 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-ObjectNotFoundRecord' -Tag 'Public' {
-    Context 'When calling with the parameter Message' {
-        It 'Should have the correct values in the error record' {
-            $result = Get-ObjectNotFoundRecord -Message 'mocked error message.'
+Describe 'Join-PSModulePath' -Tag 'Private' {
+    Context 'When the ''NewPath'' does not exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message | Should -Be 'System.Exception: mocked error message.'
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string4'
+                $expectedResult = $mockPath + ';' + $mockNewPath
+
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
+            }
         }
     }
 
-    Context 'When calling with the parameters Message and ErrorRecord' {
-        It 'Should have the correct values in the error record' {
-            $result = $null
+    Context 'When the ''NewPath'' does exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-            try
-            {
-                # Force divide by zero exception.
-                1/0
-            }
-            catch
-            {
-                $result = Get-ObjectNotFoundRecord -Message 'mocked error message.' -ErrorRecord $_
-            }
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string2'
+                $expectedResult = $mockPath + ';string3'
 
-            $result | Should -BeOfType 'System.Management.Automation.ErrorRecord'
-            $result.Exception | Should -BeOfType 'System.Exception'
-            $result.Exception.Message -match 'System.Exception: mocked error message.' | Should -BeTrue
-            $result.Exception.Message -match 'System.Management.Automation.RuntimeException: Attempted to divide by zero.' | Should -BeTrue
-            $result.Exception.Message -match 'System.DivideByZeroException: Attempted to divide by zero.' | Should -BeTrue
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
+            }
         }
     }
 }

@@ -48,7 +48,7 @@ function Initialize-DscTestLcm
 
     if ($DisableConsistency.IsPresent)
     {
-        Write-Verbose -Message 'Setting Local Configuration Manager property ConfigurationMode to ''ApplyOnly'', disabling consistency check.'
+        Write-Verbose -Message $script:localizedData.InitializeDscTestLcm_SettingLCMConfigToApplyOnly
         # Have LCM Apply only once.
         $configurationMetadata += '
             ConfigurationMode = ''ApplyOnly''
@@ -57,7 +57,7 @@ function Initialize-DscTestLcm
 
     if ($Encrypt.IsPresent)
     {
-        Write-Verbose -Message ('Setting Local Configuration Manager property CertificateId to ''{0}'', enabling decryption of credentials.' -f $env:DscCertificateThumbprint)
+        Write-Verbose -Message ($script:localizedData.InitializeDscTestLcm_SettingLCMCertificateId -f $env:DscCertificateThumbprint)
         # Should use encryption.
         $configurationMetadata += ('
             CertificateId = ''{0}''
