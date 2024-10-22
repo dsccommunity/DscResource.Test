@@ -165,14 +165,14 @@ Describe 'Initialize-TestEnvironment' {
             Should -Invoke -CommandName Split-Path -Exactly -Times 2 -Scope It
             Should -Invoke -CommandName Import-Module -Exactly -Times 2 -Scope It
             Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
-                $PSBoundParameters.ContainsKey('Machine') -eq $false
+                $PesterBoundParameters.ContainsKey('Machine') -eq $false
             } -Exactly -Times 1 -Scope It
 
             if ($TestEnvironment.TestType -eq 'Integration')
             {
                 Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
-                    $Machine -eq $true
+                    $PesterBoundParameters.ContainsKey('Machine') -eq $true
                 } -Exactly -Times 1 -Scope It
 
                 if (($PSEdition -eq 'Desktop' -or $IsWindows) -and
