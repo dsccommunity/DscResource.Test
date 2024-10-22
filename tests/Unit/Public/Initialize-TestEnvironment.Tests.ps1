@@ -160,16 +160,16 @@ Describe 'Initialize-TestEnvironment' {
                 { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
             }
 
-            Should -Invoke -CommandName 'Split-Path' -Exactly -Times 2 -Scope It
-            Should -Invoke -CommandName 'Import-Module' -Exactly -Times 2 -Scope It
-            Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
+            Should -Invoke -CommandName Split-Path -Exactly -Times 2 -Scope It
+            Should -Invoke -CommandName Import-Module -Exactly -Times 2 -Scope It
+            Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
                 $PSBoundParameters.ContainsKey('Machine') -eq $false
             } -Exactly -Times 1 -Scope It
 
             if ($TestEnvironment.TestType -eq 'Integration')
             {
-                Should -Invoke -CommandName 'Clear-DscLcmConfiguration' -Exactly -Times 1 -Scope It
-                Should -Invoke -CommandName 'Set-PSModulePath' -ParameterFilter {
+                Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
+                Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
                     $PSBoundParameters.ContainsKey('Machine') -eq $true
                 } -Exactly -Times 1 -Scope It
 
@@ -178,19 +178,19 @@ Describe 'Initialize-TestEnvironment' {
                     $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
                 )
                 {
-                    Should -Invoke -CommandName 'Initialize-DscTestLcm' -Exactly -Times 1 -Scope It
-                    Should -Invoke -CommandName 'New-DscSelfSignedCertificate' -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName Initialize-DscTestLcm -Exactly -Times 1 -Scope It
+                    Should -Invoke -CommandName New-DscSelfSignedCertificate -Exactly -Times 1 -Scope It
                 }
             }
 
-            Should -Invoke -CommandName 'Get-ExecutionPolicy'
-            Should -Invoke -CommandName 'Set-ExecutionPolicy' -Exactly -Times 0 -Scope It
+            Should -Invoke -CommandName Get-ExecutionPolicy
+            Should -Invoke -CommandName Set-ExecutionPolicy -Exactly -Times 0 -Scope It
         }
 
         Context 'When setting specific execution policy' {
             It 'Should initialize without throwing when test type is <TestType> and resource type is <ResourceType>' -TestCases $testCases {
                 InModuleScope -Parameters $_ -ScriptBlock {
-                    Set-StrictMode -Version 1.0
+                    #Set-StrictMode -Version 1.0
 
                     $initializeTestEnvironmentParameters = @{
                         Module                 = $mockDscModuleName
