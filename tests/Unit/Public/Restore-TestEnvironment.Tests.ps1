@@ -55,7 +55,7 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
                     DSCModuleName      = 'TestModule'
                     DSCResourceName    = 'TestResource'
                     TestType           = 'Unit'
-                    ImportedModulePath = $moduleToImportFilePath
+                    ImportedModulePath = 'somepath'
                     OldPSModulePath    = $env:PSModulePath
                     OldExecutionPolicy = Get-ExecutionPolicy
                 }
@@ -67,7 +67,7 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
                     DSCModuleName      = 'TestModule'
                     DSCResourceName    = 'TestResource'
                     TestType           = 'Integration'
-                    ImportedModulePath = $moduleToImportFilePath
+                    ImportedModulePath = 'somepath'
                     OldPSModulePath    = $env:PSModulePath
                     OldExecutionPolicy = Get-ExecutionPolicy
                 }
@@ -83,31 +83,39 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
 
     Context 'When restoring the test environment' {
         It 'Should restore without throwing <TestDescription>' -TestCases $testCases {
-            { Restore-TestEnvironment -TestEnvironment $TestEnvironment } | Should -Not -Throw
+            InModuleScope -Parameters $_ -ScriptBlock {
+                #Set-StrictMode -Version 1.0 # Strict mode breaks tests needs a module fix
 
-            Should -Invoke -CommandName Set-PSModulePath -Exactly -Times 0
+                { Restore-TestEnvironment -TestEnvironment $TestEnvironment } | Should -Not -Throw
+            }
+
+            Should -Invoke -CommandName Set-PSModulePath -Exactly -Times 0 -Scope It
         }
     }
 
     # Regression test for issue #70.
     Context 'When restoring the test environment from an integration test that changed the PSModulePath' {
         It 'Should restore without throwing and call the correct mocks' {
-            $testEnvironmentParameter = @{
-                DSCModuleName      = 'TestModule'
-                DSCResourceName    = 'TestResource'
-                TestType           = 'Integration'
-                ImportedModulePath = $moduleToImportFilePath
-                OldPSModulePath    = 'Wrong paths'
-                OldExecutionPolicy = Get-ExecutionPolicy
-            }
+            InModuleScope -ScriptBlock {
+                #Set-StrictMode -Version 1.0
 
-            { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
+                $testEnvironmentParameter = @{
+                    DSCModuleName      = 'TestModule'
+                    DSCResourceName    = 'TestResource'
+                    TestType           = 'Integration'
+                    ImportedModulePath = 'somepath'
+                    OldPSModulePath    = 'Wrong paths'
+                    OldExecutionPolicy = Get-ExecutionPolicy
+                }
+
+                { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
+            }
 
             Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
 
             Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
-                $Path -eq $testEnvironmentParameter.OldPSModulePath `
-                    -and $PSBoundParameters.ContainsKey('Machine') -eq $false
+                $Path -eq 'Wrong paths' -and
+                $PSBoundParameters.ContainsKey('Machine') -eq $false
             } -Exactly -Times 1 -Scope It
         }
     }
@@ -133,16 +141,20 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
         }
 
         It 'Should restore without throwing and call the correct mocks' {
-            $testEnvironmentParameter = @{
-                DSCModuleName      = 'TestModule'
-                DSCResourceName    = 'TestResource'
-                TestType           = 'Integration'
-                ImportedModulePath = $moduleToImportFilePath
-                OldPSModulePath    = 'Wrong paths'
-                OldExecutionPolicy = Get-ExecutionPolicy
-            }
+            InModuleScope -ScriptBlock {
+                #Set-StrictMode -Version 1.0
 
-            { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter -KeepNewMachinePSModulePath } | Should -Not -Throw
+                $testEnvironmentParameter = @{
+                    DSCModuleName      = 'TestModule'
+                    DSCResourceName    = 'TestResource'
+                    TestType           = 'Integration'
+                    ImportedModulePath = 'somepath'
+                    OldPSModulePath    = 'Wrong paths'
+                    OldExecutionPolicy = Get-ExecutionPolicy
+                }
+
+                { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter -KeepNewMachinePSModulePath } | Should -Not -Throw
+            }
 
             Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
             Should -Invoke -CommandName Set-PSModulePath -Exactly -Times 2 -Scope It
@@ -151,31 +163,39 @@ Describe 'Restore-TestEnvironment' -Tag 'Public' -Skip:($PSVersionTable.PSVersio
 
     Context 'When restoring the test environment from an integration test that has the wrong execution policy' {
         BeforeAll {
-            <#
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                <#
                     Find out which execution policy should be used when mocking
                     the test parameters.
                 #>
-            if ((Get-ExecutionPolicy) -ne [Microsoft.PowerShell.ExecutionPolicy]::AllSigned )
-            {
-                $mockExecutionPolicy = [Microsoft.PowerShell.ExecutionPolicy]::AllSigned
-            }
-            else
-            {
-                $mockExecutionPolicy = [Microsoft.PowerShell.ExecutionPolicy]::Unrestricted
+                if ((Get-ExecutionPolicy) -ne [Microsoft.PowerShell.ExecutionPolicy]::AllSigned )
+                {
+                    $script:mockExecutionPolicy = [Microsoft.PowerShell.ExecutionPolicy]::AllSigned
+                }
+                else
+                {
+                    $script:mockExecutionPolicy = [Microsoft.PowerShell.ExecutionPolicy]::Unrestricted
+                }
             }
         }
 
         It 'Should restore without throwing' {
-            $testEnvironmentParameter = @{
-                DSCModuleName      = 'TestModule'
-                DSCResourceName    = 'TestResource'
-                TestType           = 'Integration'
-                ImportedModulePath = $moduleToImportFilePath
-                OldPSModulePath    = $env:PSModulePath
-                OldExecutionPolicy = $mockExecutionPolicy
-            }
+            InModuleScope -ScriptBlock {
+                #Set-StrictMode -Version 1.0
 
-            { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
+                $testEnvironmentParameter = @{
+                    DSCModuleName      = 'TestModule'
+                    DSCResourceName    = 'TestResource'
+                    TestType           = 'Integration'
+                    ImportedModulePath = 'somepath'
+                    OldPSModulePath    = $env:PSModulePath
+                    OldExecutionPolicy = $mockExecutionPolicy
+                }
+
+                { Restore-TestEnvironment -TestEnvironment $testEnvironmentParameter } | Should -Not -Throw
+            }
 
             Should -Invoke -CommandName 'Set-ExecutionPolicy' -Exactly -Times 1 -Scope It
         }
