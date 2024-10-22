@@ -157,7 +157,9 @@ Describe 'Initialize-TestEnvironment' {
                     ResourceType    = $ResourceType
                 }
 
-                { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
+                $test = Initialize-TestEnvironment @initializeTestEnvironmentParameters
+
+                { $test } | Should -Not -Throw
             }
 
             Should -Invoke -CommandName Split-Path -Exactly -Times 2 -Scope It
@@ -170,10 +172,10 @@ Describe 'Initialize-TestEnvironment' {
             {
                 Should -Invoke -CommandName Clear-DscLcmConfiguration -Exactly -Times 1 -Scope It
                 Should -Invoke -CommandName Set-PSModulePath -ParameterFilter {
-                    $PSBoundParameters.ContainsKey('Machine') -eq $true
+                    $Machine -eq $true
                 } -Exactly -Times 1 -Scope It
 
-                if (($PSEdition -eq 'Desktop' -or $PSVersionTable.PSVersion -lt [System.Version] '5.1' -or $IsWindows) -and
+                if (($PSEdition -eq 'Desktop' -or $IsWindows) -and
                         ($Principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())) -and
                     $Principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
                 )
