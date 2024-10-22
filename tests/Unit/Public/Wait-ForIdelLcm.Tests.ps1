@@ -48,21 +48,19 @@ AfterAll {
 
 Describe 'Wait-ForIdleLcm' -Tag 'Public' {
     BeforeAll {
-        <#
-            Stub for Get-DscLocalConfigurationManager since it is not available
-            cross-platform.
-        #>
-        function Get-DscLocalConfigurationManager
-        {
-            [CmdletBinding()]
-            param ()
+        InModuleScope -ScriptBlock {
+            <#
+                Stub for Get-DscLocalConfigurationManager since it is not available
+                cross-platform.
+            #>
+            function script:Get-DscLocalConfigurationManager
+            {
+                [CmdletBinding()]
+                param ()
 
-            throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
+                throw '{0}: StubNotImplemented' -f $MyInvocation.MyCommand
+            }
         }
-    }
-
-    AfterAll {
-        Remove-Item -Path 'function:Get-DscLocalConfigurationManager'
     }
 
     Context 'When the LCM is idle' {
