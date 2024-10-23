@@ -157,9 +157,7 @@ Describe 'Initialize-TestEnvironment' {
                     ResourceType    = $ResourceType
                 }
 
-                $test = Initialize-TestEnvironment @initializeTestEnvironmentParameters
-
-                { $test } | Should -Not -Throw
+                { Initialize-TestEnvironment @initializeTestEnvironmentParameters } | Should -Not -Throw
             }
 
             Should -Invoke -CommandName Split-Path -Exactly -Times 2 -Scope It
