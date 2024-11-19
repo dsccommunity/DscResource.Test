@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Required-Modules.psd1`
   - `GitVersion.yml`
   - `build.yml`
+- `WhereSourceFileNotExcluded`
+  - Fixed exclusion logic. Fixes [#142](https://github.com/dsccommunity/DscResource.Test/issues/142)
+- `WhereModuleFileNotExcluded`
+  - Fixed exclusion logic. Fixes [#142](https://github.com/dsccommunity/DscResource.Test/issues/142)
 
 ### Added
 
