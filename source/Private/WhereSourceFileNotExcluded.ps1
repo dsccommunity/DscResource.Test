@@ -12,7 +12,7 @@ filter WhereSourceFileNotExcluded
         $excludePath = $excludePath -replace '\/', [IO.Path]::DirectorySeparatorChar
         $excludePath = $excludePath -replace '\\', [IO.Path]::DirectorySeparatorChar
 
-        if ((($filename = $_.FullName) -or ($fileName = $_)) -and $filename -match ([regex]::Escape($excludePath)))
+        if ((($excludePath -eq $_.FullName) -or ($excludePath -eq $_.Name)) -and $excludePath -match ([regex]::Escape($excludePath)))
         {
             Write-Debug "Skipping $($_.FullName) because it matches $excludePath"
 
