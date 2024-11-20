@@ -1,3 +1,6 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
+
 BeforeDiscovery {
     $projectPath = "$($PSScriptRoot)\..\.." | Convert-Path
 
@@ -203,7 +206,6 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $functionHelp.Examples.Count | Should -BeGreaterThan 0
         $functionHelp.Examples[0] | Should -Match ([regex]::Escape($function.Name))
         $functionHelp.Examples[0].Length | Should -BeGreaterThan ($function.Name.Length + 10)
-
     }
 
     It 'Should have described all parameters for <Name>' -ForEach $testCases {
