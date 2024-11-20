@@ -24,13 +24,11 @@ BuildWorkflow:
     - Create_changelog_release_output
 
   docs:
-    - Generate_Wiki_Content
     - Generate_Conceptual_Help
-    - Generate_Markdown_For_Public_Commands
-    - Generate_External_Help_File_For_Public_Commands
-    - Clean_Markdown_Of_Public_Commands
+    - Generate_Wiki_Content
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
+    - Package_Wiki_Content
 
   pack:
     - build
