@@ -88,7 +88,7 @@ Describe 'Invoke-DscResourceTest' -Tag 'Public' {
                     $result = (Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing)[-1]
 
                     $result.Path | Should -BeExactly '.'
-                    $result.Container.Count | Should -Be 11
+                    $result.Container | Should -HaveCount 11
                     $result.Container[0].Data.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
                     #$result.Tag | Should -BeExactly 'nothing' -Because 'When parameter is specified it override defaults & settings'
                 }
@@ -107,7 +107,7 @@ Describe 'Invoke-DscResourceTest' -Tag 'Public' {
                     $result = (Invoke-DscResourceTest -Module Microsoft.PowerShell.Utility -Script '.' -Tag nothing -MainGitBranch 'main')[-1]
 
                     $result.Path | Should -BeExactly '.'
-                    $result.Container.Count | Should -Be 11
+                    $result.Container | Should -HaveCount 11
                     $result.Container[0].Data.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
                     $result.Container[0].Data.MainGitBranch | Should -BeExactly 'main' `
                         -Because 'When parameter is specified it override defaults & settings'
@@ -229,7 +229,7 @@ Describe 'Invoke-DscResourceTest' -Tag 'Public' {
                 $result = (Invoke-DscResourceTest -ProjectPath $PSScriptRoot\..\assets)[-1]
 
                 $result.Container[0].Data.ModuleName | Should -Not -BeExactly 'dummy'
-                $result.Container.Count | Should -Be 11
+                $result.Container | Should -HaveCount 11
                 #$result.Tag | Should -HaveCount 1
                 #$result.ExcludeTag | Should -HaveCount 1
             }
@@ -268,7 +268,7 @@ Describe 'Invoke-DscResourceTest' -Tag 'Public' {
                 } -Module 'Microsoft.PowerShell.Utility'
 
                 $result.Container[0].Data.ModuleName | Should -Not -BeExactly 'dummy'
-                $result.Container.Count | Should -Be 11
+                $result.Container | Should -HaveCount 11
             }
         }
     }
