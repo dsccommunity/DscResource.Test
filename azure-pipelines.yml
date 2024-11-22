@@ -85,9 +85,8 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Test Artifact'
             inputs:
-              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsWPS'
               artifactName: 'CodeCoverageWindowsWPS'
-              parallel: true
 
       - job: test_windows_ps
         displayName: 'Test Windows (PS)'
@@ -118,9 +117,8 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Test Artifact'
             inputs:
-              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsPS'
               artifactName: 'CodeCoverageWindowsPS'
-              parallel: true
 
       - job: test_linux
         displayName: 'Test Linux'
@@ -151,9 +149,8 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Test Artifact'
             inputs:
-              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/CodeCoverageLinux'
               artifactName: 'CodeCoverageLinux'
-              parallel: true
 
       - job: test_macos
         displayName: 'Test macOS'
@@ -184,9 +181,8 @@ stages:
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Test Artifact'
             inputs:
-              targetPath: '$(buildFolderName)/$(testResultFolderName)/'
+              targetPath: '$(buildFolderName)/$(testResultFolderName)/CodeCoverageMacOS'
               artifactName: 'CodeCoverageMacOS'
-              parallel: true
 
       - job: Test_Integration
         displayName: 'Integration'
