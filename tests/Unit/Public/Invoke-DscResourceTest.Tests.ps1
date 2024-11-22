@@ -153,24 +153,24 @@ Describe 'Invoke-DscResourceTest' -Tag 'Public' {
             }
         }
 
-        # Context 'When calling by module specification' {
-        #     It 'Should invoke pester using the correct parameters' {
-        #         InModuleScope -ScriptBlock {
-        #             Set-StrictMode -Version 1.0
+        Context 'When calling by module specification' {
+            It 'Should invoke pester using the correct parameters' {
+                InModuleScope -ScriptBlock {
+                    Set-StrictMode -Version 1.0
 
-        #             [Microsoft.PowerShell.Commands.ModuleSpecification] $FQM = @{
-        #                 ModuleName    = 'Microsoft.PowerShell.Utility'
-        #                 ModuleVersion = '1.0.0.0'
-        #             }
+                    [Microsoft.PowerShell.Commands.ModuleSpecification] $FQM = @{
+                        ModuleName    = 'Microsoft.PowerShell.Utility'
+                        ModuleVersion = '1.0.0.0'
+                    }
 
-        #             $result = (Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .)[-1]
+                    $result = Invoke-DscResourceTest -FullyQualifiedModule $FQM -Script .
 
-        #             $result.Path | Should -BeExactly '.'
-        #             $result.Container[0].Data.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
-        #             $result.Container | Should -HaveCount 11
-        #         }
-        #     }
-        # }
+                    $result.Path | Should -BeExactly '.'
+                    $result.Container[0].Data.ModuleName | Should -BeExactly 'Microsoft.PowerShell.Utility'
+                    $result.Container | Should -HaveCount 11
+                }
+            }
+        }
 
         Context 'When calling by project path' {
             It 'Should call by project path' {
