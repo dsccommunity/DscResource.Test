@@ -241,25 +241,25 @@ stages:
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverageLinux_$(System.JobAttempt)'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageLinux_$(System.JobAttempt)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact Windows (WPS)'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverageWindowsWPS_$(System.JobAttempt)'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsWPS_$(System.JobAttempt)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact Windows (PS)'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverageWindowsPS_$(System.JobAttempt)'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsPS_$(System.JobAttempt)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact macOS'
             inputs:
               buildType: 'current'
               artifactName: 'CodeCoverageMacOS_$(System.JobAttempt)'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageMacOS_$(System.JobAttempt)'
           - task: PowerShell@2 # Merges the code coverage files.
             name: merge
             displayName: 'Merge Code Coverage files'
