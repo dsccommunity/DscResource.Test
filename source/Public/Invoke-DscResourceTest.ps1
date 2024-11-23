@@ -134,7 +134,7 @@ function Invoke-DscResourceTest
         [Parameter(ParameterSetName = 'ByModuleSpecification')]
         [Parameter(ParameterSetName = 'ByProjectPath')]
         [System.String]
-        $MainGitBranch = 'main',
+        $MainGitBranch = 'master',
 
         [Parameter(ParameterSetName = 'ByModuleNameOrPath', DontShow = $true)]
         [Parameter(ParameterSetName = 'ByModuleSpecification', DontShow = $true)]
