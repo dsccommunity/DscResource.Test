@@ -1,15 +1,55 @@
-$ProjectPath = "$PSScriptRoot\..\..\.." | Convert-Path
-$ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
-        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-        $(try { Test-ModuleManifest $_.FullName -ErrorAction Stop } catch { $false } )
-    }).BaseName
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-Import-Module $ProjectName -Force
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
+        }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-InModuleScope $ProjectName {
-    Describe 'ConvertTo-OrderedDictionary' {
-        It 'should convert simple PSCustomObject' {
+BeforeAll {
+    $script:moduleName = 'DscResource.Test'
+
+    # Make sure there are not other modules imported that will conflict with mocks.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+
+    # Re-import the module using force to get any code changes between runs.
+    Import-Module -Name $script:moduleName -Force -ErrorAction 'Stop'
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:moduleName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+}
+
+Describe 'ConvertTo-OrderedDictionary' -Tag 'Private' {
+    It 'Should convert simple PSCustomObject' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
 
             $InputObject = [PSCustomObject]@{
                 key1 = 'value1'
@@ -26,8 +66,12 @@ InModuleScope $ProjectName {
             $outputPipeline.keys | Should -HaveCount 3
             $outputPipeline | Should -BeOfType [System.Collections.Specialized.OrderedDictionary]
         }
+    }
 
-        It 'should convert nested PSCustomObject' {
+    It 'Should convert nested PSCustomObject' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
             $InputObject = [PSCustomObject]@{
                 key1 = 'value1'
                 key2 = 'value2'
@@ -50,28 +94,39 @@ InModuleScope $ProjectName {
             $outputPipeline | Should -BeOfType System.Collections.Specialized.IOrderedDictionary
             $outputPipeline.key4 | Should -BeOfType System.Collections.Specialized.IOrderedDictionary
             $outputPipeline.key4.keys | Should -HaveCount 3
-
         }
+    }
 
-        It 'Should convert Hashtable to Case Insensitive OrderedDictionary' {
+    It 'Should convert Hashtable to Case Insensitive OrderedDictionary' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
             $InputObject = @{
                 key1 = 'my object'
             }
             $output = ConvertTo-OrderedDictionary -InputObject $InputObject
             $output | Should -BeOfType System.Collections.Specialized.IOrderedDictionary
-            { $output.Add('KEY1', 'key already exist') } | Should -Throw -Because "The key already exist in different case"
+            { $output.Add('KEY1', 'key already exist') } | Should -Throw -Because 'The key already exist in different case'
 
             $outputPipeline = $InputObject | ConvertTo-OrderedDictionary
             $outputPipeline | Should -BeOfType System.Collections.Specialized.IOrderedDictionary
-            {$outputPipeline.Add('KEY1','key already exist')} | Should -Throw -Because "The key already exist in different case"
+            { $outputPipeline.Add('KEY1', 'key already exist') } | Should -Throw -Because 'The key already exist in different case'
         }
+    }
 
-        It 'Should return $Null when $null is passed' {
+    It 'Should return $Null when $null is passed' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
             ($null | ConvertTo-OrderedDictionary) | Should -BeNullOrEmpty
-            (ConvertTo-OrderedDictionary -InputObject $null) | Should -BeNullOrEmpty
+            ConvertTo-OrderedDictionary -InputObject $null | Should -BeNullOrEmpty
         }
+    }
 
-        It 'Should not alter strings or Int' {
+    It 'Should not alter strings or Int' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
             $InputObject = @{
                 Key1 = 'this is a string'
                 Key2 = 2
@@ -85,8 +140,12 @@ InModuleScope $ProjectName {
             $outputPipeline.Key1 | Should -BeExactly $InputObject.key1
             $outputPipeline.Key2 | Should -BeExactly $InputObject.key2
         }
+    }
 
-        It 'Should convert Arrays of nested objects' {
+    It 'Should convert Arrays of nested objects' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
             $InputObject = @(
                 ([PSCustomObject]@{
                     Key11 = 'Value1'
@@ -101,7 +160,7 @@ InModuleScope $ProjectName {
                     )
                 }),
                 (@(
-                    @{ key31 = 311; key32 = @(@{ key331 = 'val331'; key332 = 'val332' })  }
+                    @{ key31 = 311; key32 = @(@{ key331 = 'val331'; key332 = 'val332' }) }
                 ))
             )
 

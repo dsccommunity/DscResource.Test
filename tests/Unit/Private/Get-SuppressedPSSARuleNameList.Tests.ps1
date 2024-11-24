@@ -1,23 +1,68 @@
-$ProjectPath = "$PSScriptRoot\..\..\.." | Convert-Path
-$ProjectName = ((Get-ChildItem -Path $ProjectPath\*\*.psd1).Where{
-        ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) -and
-        $(try { Test-ModuleManifest $_.FullName -ErrorAction Stop } catch { $false } )
-    }).BaseName
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+param ()
 
+BeforeDiscovery {
+    try
+    {
+        if (-not (Get-Module -Name 'DscResource.Test'))
+        {
+            # Assumes dependencies has been resolved, so if this module is not available, run 'noop' task.
+            if (-not (Get-Module -Name 'DscResource.Test' -ListAvailable))
+            {
+                # Redirect all streams to $null, except the error stream (stream 2)
+                & "$PSScriptRoot/../../../build.ps1" -Tasks 'noop' 3>&1 4>&1 5>&1 6>&1 > $null
+            }
 
-Import-Module $ProjectName -Force
-
-InModuleScope $ProjectName {
-    Describe 'Get-SuppressedPSSARuleNameList' {
-        BeforeAll {
-            $rule1 = "'PSAvoidUsingConvertToSecureStringWithPlainText'"
-            $rule2 = "'PSAvoidGlobalVars'"
-
-            $scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
+            # If the dependencies has not been resolved, this will throw an error.
+            Import-Module -Name 'DscResource.Test' -Force -ErrorAction 'Stop'
         }
+    }
+    catch [System.IO.FileNotFoundException]
+    {
+        throw 'DscResource.Test module dependency not found. Please run ".\build.ps1 -ResolveDependency -Tasks build" first.'
+    }
+}
 
-        Context 'When a module files contains suppressed rules' {
-            It 'Should return the all the suppressed rules' {
+BeforeAll {
+    $script:moduleName = 'DscResource.Test'
+
+    # Make sure there are not other modules imported that will conflict with mocks.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+
+    # Re-import the module using force to get any code changes between runs.
+    Import-Module -Name $script:moduleName -Force -ErrorAction 'Stop'
+
+    $PSDefaultParameterValues['InModuleScope:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Mock:ModuleName'] = $script:moduleName
+    $PSDefaultParameterValues['Should:ModuleName'] = $script:moduleName
+}
+
+AfterAll {
+    $PSDefaultParameterValues.Remove('Mock:ModuleName')
+    $PSDefaultParameterValues.Remove('InModuleScope:ModuleName')
+    $PSDefaultParameterValues.Remove('Should:ModuleName')
+
+    # Unload the module being tested so that it doesn't impact any other tests.
+    Get-Module -Name $script:moduleName -All | Remove-Module -Force
+}
+
+Describe 'Get-SuppressedPSSARuleNameList' {
+    BeforeAll {
+        $rule1 = "'PSAvoidUsingConvertToSecureStringWithPlainText'"
+        $rule2 = "'PSAvoidGlobalVars'"
+
+        $scriptPath = Join-Path -Path $TestDrive -ChildPath 'TestModule.psm1'
+    }
+
+    Context 'When a module files contains suppressed rules' {
+        It 'Should return the all the suppressed rules' {
+            InModuleScope -Parameters @{
+                rule1 = $rule1
+                rule2 = $rule2
+                scriptPath = $scriptPath
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
                 "
             # Testing suppressing this rule
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute($rule1, '')]

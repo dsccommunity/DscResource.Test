@@ -46,13 +46,54 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-CurrentModuleBase' -Tag 'Private' {
-    It 'Should return the path of the loaded module' {
+Describe 'Get-StructuredObjectFromFile' -Tag 'Private' {
+    BeforeAll {
+        Mock -CommandName Import-PowerShellDataFile
+        Mock -CommandName Get-Content
+        Mock -CommandName Import-Module
+        Import-Module powershell-yaml -Force -ErrorAction Stop
+        Mock -CommandName ConvertFrom-Yaml
+        Mock -CommandName ConvertFrom-Json
+    }
+
+    It 'Should Import a PowerShell DataFile when path extension is PSD1' {
         InModuleScope -ScriptBlock {
             Set-StrictMode -Version 1.0
 
-            $ModuleLoaded = Import-Module 'DscResource.Test' -PassThru
-            Get-CurrentModuleBase | Should -Be $ModuleLoaded.ModuleBase
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.psd1'
+        }
+
+        Should -Invoke -CommandName Import-PowerShellDataFile -Exactly -Times 1 -Scope It
+    }
+
+
+    It 'Should ConvertFrom-Json when path extension is JSON' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.json'
+        }
+
+        Should -Invoke -CommandName ConvertFrom-Json -Exactly -Times 1 -Scope It
+    }
+
+    It 'Should Import module & ConvertFrom-Yaml when path extension is Yaml' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            $null = Get-StructuredObjectFromFile -Path 'TestDrive:\tests.yaml'
+        }
+
+        Should -Invoke -CommandName Import-Module -Exactly -Times 1 -Scope It
+        Should -Invoke -CommandName ConvertFrom-Yaml -Exactly -Times 1 -Scope It
+    }
+
+
+    It 'Should throw when extension not one of the above' {
+        InModuleScope -ScriptBlock {
+            Set-StrictMode -Version 1.0
+
+            { Get-StructuredObjectFromFile -Path 'TestDrive:\tests.txt' } | Should -Throw
         }
     }
 }

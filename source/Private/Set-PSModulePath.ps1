@@ -21,16 +21,16 @@
 function Set-PSModulePath
 {
     [CmdletBinding()]
-    [OutputType([void])]
+    [OutputType([System.Void])]
     param
     (
         [Parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
-        [String]
+        [System.String]
         $Path,
 
         [Parameter()]
-        [Switch]
+        [System.Management.Automation.SwitchParameter]
         $Machine
     )
 

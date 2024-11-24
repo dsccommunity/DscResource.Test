@@ -15,7 +15,6 @@ variables:
   buildFolderName: output
   buildArtifactName: output
   testResultFolderName: testResults
-  testArtifactName: testResults
   sourceFolderName: source
   defaultBranch: main
 
@@ -60,7 +59,7 @@ stages:
         displayName: 'Test Windows (WPS)'
         pool:
           vmImage: 'windows-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -86,14 +85,13 @@ stages:
             displayName: 'Publish Test Artifact'
             inputs:
               targetPath: '$(buildFolderName)/$(testResultFolderName)/'
-              artifactName: 'CodeCoverageWindowsWPS'
-              parallel: true
+              artifactName: 'CodeCoverageWindowsWPS_$(System.JobAttempt)'
 
       - job: test_windows_ps
         displayName: 'Test Windows (PS)'
         pool:
           vmImage: 'windows-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -119,14 +117,13 @@ stages:
             displayName: 'Publish Test Artifact'
             inputs:
               targetPath: '$(buildFolderName)/$(testResultFolderName)/'
-              artifactName: 'CodeCoverageWindowsPS'
-              parallel: true
+              artifactName: 'CodeCoverageWindowsPS_$(System.JobAttempt)'
 
       - job: test_linux
         displayName: 'Test Linux'
         pool:
           vmImage: 'ubuntu-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -152,14 +149,13 @@ stages:
             displayName: 'Publish Test Artifact'
             inputs:
               targetPath: '$(buildFolderName)/$(testResultFolderName)/'
-              artifactName: 'CodeCoverageLinux'
-              parallel: true
+              artifactName: 'CodeCoverageLinux_$(System.JobAttempt)'
 
       - job: test_macos
         displayName: 'Test macOS'
         pool:
           vmImage: 'macos-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -185,14 +181,13 @@ stages:
             displayName: 'Publish Test Artifact'
             inputs:
               targetPath: '$(buildFolderName)/$(testResultFolderName)/'
-              artifactName: 'CodeCoverageMacOS'
-              parallel: true
+              artifactName: 'CodeCoverageMacOS_$(System.JobAttempt)'
 
       - job: Test_Integration
         displayName: 'Integration'
         pool:
           vmImage: 'windows-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -229,9 +224,10 @@ stages:
         - test_windows_ps
         - test_linux
         - test_macos
+        condition: succeededOrFailed()
         pool:
           vmImage: 'ubuntu-latest'
-        timeoutInMinutes: 0
+        timeoutInMinutes: '0'
         steps:
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Build Artifact'
@@ -243,26 +239,26 @@ stages:
             displayName: 'Download Test Artifact Linux'
             inputs:
               buildType: 'current'
-              artifactName: 'CodeCoverageLinux'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageLinux'
+              artifactName: 'CodeCoverageLinux_$(System.JobAttempt)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact Windows (WPS)'
             inputs:
               buildType: 'current'
-              artifactName: 'CodeCoverageWindowsWPS'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsWPS'
+              artifactName: 'CodeCoverageWindowsWPS_$(System.JobAttempt)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact Windows (PS)'
             inputs:
               buildType: 'current'
-              artifactName: 'CodeCoverageWindowsPS'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageWindowsPS'
+              artifactName: 'CodeCoverageWindowsPS_$(System.JobAttempt)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
           - task: DownloadPipelineArtifact@2
             displayName: 'Download Test Artifact macOS'
             inputs:
               buildType: 'current'
-              artifactName: 'CodeCoverageMacOS'
-              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/CodeCoverageMacOS'
+              artifactName: 'CodeCoverageMacOS_$(System.JobAttempt)'
+              targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)'
           - task: PowerShell@2 # Merges the code coverage files.
             name: merge
             displayName: 'Merge Code Coverage files'
@@ -274,7 +270,7 @@ stages:
             displayName: 'Publish Code Coverage to Azure DevOps'
             inputs:
               codeCoverageTool: 'JaCoCo'
-              summaryFileLocation: '$(Build.SourcesDirectory)/$(buildFolderName)/$(testResultFolderName)/JaCoCo_coverage.xml'
+              summaryFileLocation: '$(buildFolderName)/$(testResultFolderName)/JaCoCo_coverage.xml'
               pathToSources: '$(Build.SourcesDirectory)/$(sourceFolderName)/'
           - script: |
               bash <(curl -s https://codecov.io/bash) -f "./$(buildFolderName)/$(testResultFolderName)/JaCoCo_coverage.xml"

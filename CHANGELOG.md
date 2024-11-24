@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Required-Modules.psd1`
   - `GitVersion.yml`
   - `build.yml`
+- Migrated Unit/Integration tests to Pester 5.
 
 ### Added
 

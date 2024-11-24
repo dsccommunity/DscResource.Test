@@ -171,6 +171,8 @@ function Invoke-DscResourceTest
 
     begin
     {
+        # Please StrictMode
+        $SourcePath = $null
 
         switch ($PSCmdlet.ParameterSetName)
         {
@@ -320,6 +322,9 @@ function Invoke-DscResourceTest
             $null = $PSBoundParameters.Remove('ExcludeModuleFile')
         }
 
+        # Please StrictMode
+        $optIns = $null
+        $optOuts = $null
 
         <#
             In case of ByProjectPath Opt-ins will be done by tags:

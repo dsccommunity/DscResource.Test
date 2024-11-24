@@ -46,13 +46,46 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-CurrentModuleBase' -Tag 'Private' {
-    It 'Should return the path of the loaded module' {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
+Describe 'Get-PublishFileName' -Tag 'Private' {
+    Context 'When the filename is in the correct format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = 'mockFile.ps1'
 
-            $ModuleLoaded = Import-Module 'DscResource.Test' -PassThru
-            Get-CurrentModuleBase | Should -Be $ModuleLoaded.ModuleBase
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
+            }
+        }
+
+        It 'Should return the BaseName unchanged' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                Get-PublishFileName -Path $mockFileName | Should -Be $mockFileName.BaseName
+            }
+        }
+    }
+
+    Context 'When the filename is in the incorrect format' {
+        BeforeAll {
+            [System.IO.FileInfo] $mockFileName = '05435-mockFile.ps1'
+            [System.IO.FileInfo] $correctMockFileName = 'mockFile.ps1'
+
+            Mock -CommandName Get-Item -MockWith {
+                return $mockFileName
+            }
+        }
+
+        It 'Should return the correct BaseName' {
+            InModuleScope -Parameters @{
+                mockFileName = $mockFileName
+                correctMockFileName = $correctMockFileName
+            } -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                Get-PublishFileName -Path $mockFileName | Should -Be $correctMockFileName.BaseName
+            }
         }
     }
 }

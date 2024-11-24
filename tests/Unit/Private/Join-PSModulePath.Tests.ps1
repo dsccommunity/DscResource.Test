@@ -46,13 +46,32 @@ AfterAll {
     Get-Module -Name $script:moduleName -All | Remove-Module -Force
 }
 
-Describe 'Get-CurrentModuleBase' -Tag 'Private' {
-    It 'Should return the path of the loaded module' {
-        InModuleScope -ScriptBlock {
-            Set-StrictMode -Version 1.0
+Describe 'Join-PSModulePath' -Tag 'Private' {
+    Context 'When the ''NewPath'' does not exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
 
-            $ModuleLoaded = Import-Module 'DscResource.Test' -PassThru
-            Get-CurrentModuleBase | Should -Be $ModuleLoaded.ModuleBase
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string4'
+                $expectedResult = $mockPath + ';' + $mockNewPath
+
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
+            }
+        }
+    }
+
+    Context 'When the ''NewPath'' does exist in the ''Path''' {
+        It 'Should add the path' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                $mockPath = 'string1;string2'
+                $mockNewPath = 'string3;string2'
+                $expectedResult = $mockPath + ';string3'
+
+                Join-PSModulePath -Path $mockPath -NewPath $mockNewPath | Should -Be $expectedResult
+            }
         }
     }
 }

@@ -1,22 +1,5 @@
 ---
 ####################################################
-#          ModuleBuilder Configuration             #
-####################################################
-CopyPaths:
-  - en-US
-  - Tests
-  - Config
-  - tasks
-Encoding: UTF8
-VersionedOutputDirectory: true
-BuiltModuleSubdirectory: builtModule
-
-AliasesToExport:
-  - 'Task.Invoke_HQRM_Tests'
-  - 'Task.Fail_Build_If_HQRM_Tests_Failed'
-  - 'Task.Invoke_HQRM_Tests_Stop_On_Fail'
-
-####################################################
 #       Sampler Pipeline Configuration             #
 ####################################################
 BuildWorkflow:
@@ -41,13 +24,11 @@ BuildWorkflow:
     - Create_changelog_release_output
 
   docs:
-    - Generate_Wiki_Content
     - Generate_Conceptual_Help
-    - Generate_Markdown_For_Public_Commands
-    - Generate_External_Help_File_For_Public_Commands
-    - Clean_Markdown_Of_Public_Commands
+    - Generate_Wiki_Content
     - Generate_Wiki_Sidebar
     - Clean_Markdown_Metadata
+    - Package_Wiki_Content
 
   pack:
     - build
@@ -56,6 +37,7 @@ BuildWorkflow:
 
   test:
     - Pester_Tests_Stop_On_Fail
+    - Convert_Pester_Coverage
     - Pester_if_Code_Coverage_Under_Threshold
 
   merge:
@@ -67,30 +49,21 @@ BuildWorkflow:
     - publish_module_to_gallery
 
 ####################################################
-#       PESTER  Configuration                      #
+#          ModuleBuilder Configuration             #
 ####################################################
-Pester:
-  OutputFormat: NUnitXML
-  ExcludeFromCodeCoverage:
-    - tasks
-    - Template
-    - Tests
-  Script:
-    - tests/QA
-    - tests/Unit/
-  CodeCoverageThreshold: 60
-  CodeCoverageOutputFile: JaCoCo_Merge.xml # the file that is created for each pipeline test job
-  CodeCoverageOutputFileEncoding: ascii
-  ExcludeTag:
-    - helpQuality
-    - testQuality
-  Tag:
-  ExcludeSourceFile:
-    - source/potential
+CopyPaths:
+  - en-US
+  - Tests
+  - Config
+  - tasks
+Prefix: prefix.ps1
+Encoding: UTF8
+BuiltModuleSubdirectory: builtModule
 
-CodeCoverage:
-  CodeCoverageFilePattern: JaCoCo_Merge.xml # the pattern used to search all pipeline test job artifacts
-  CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
+AliasesToExport:
+  - 'Task.Invoke_HQRM_Tests'
+  - 'Task.Fail_Build_If_HQRM_Tests_Failed'
+  - 'Task.Invoke_HQRM_Tests_Stop_On_Fail'
 
 ModuleBuildTasks:
   Sampler:
@@ -100,7 +73,6 @@ ModuleBuildTasks:
   DscResource.DocGenerator:
     - 'Task.*'
 
-# Invoke-Build Header to be used to 'decorate' the terminal output of the tasks.
 TaskHeader: |
   param($Path)
   ""
@@ -112,6 +84,55 @@ TaskHeader: |
   Write-Build DarkGray "  $($Task.InvocationInfo.ScriptName):$($Task.InvocationInfo.ScriptLineNumber)"
   ""
 
+####################################################
+#     Dependent Modules Configuration (Sampler)    #
+####################################################
+NestedModule:
+  DscResource.Common:
+    CopyOnly: true
+    Path: ./output/RequiredModules/DscResource.Common
+    AddToManifest: false
+    Exclude: PSGetModuleInfo.xml
+
+####################################################
+#       PESTER  Configuration                      #
+####################################################
+Pester:
+  Configuration:
+    Run:
+      Path:
+      - tests/QA
+      - tests/Unit
+    Output:
+      Verbosity: Detailed
+      StackTraceVisibility: Full
+      CIFormat: Auto
+    CodeCoverage:
+      CoveragePercentTarget: 60
+      OutputEncoding: ascii
+      UseBreakpoints: false
+    TestResult:
+      OutputFormat: NUnitXML
+      OutputEncoding: ascii
+  ExcludeFromCodeCoverage:
+    - tasks
+    - Template
+    - Tests
+    - Modules/DscResource.Common
+  ExcludeTag:
+    - helpQuality
+    - testQuality
+  Tag:
+  ExcludeSourceFile:
+    - source/potential
+
+CodeCoverage:
+  CodeCoverageMergedOutputFile: JaCoCo_coverage.xml # the file that is created for the merged code coverage
+  CodeCoverageFilePattern: Codecov*.xml # the pattern used to search all pipeline test job artifacts
+
+####################################################
+#               GitHub Configuration               #
+####################################################
 GitHubConfig:
   GitHubFilesToAdd:
     - 'CHANGELOG.md'
@@ -133,7 +154,7 @@ DscResource.DocGenerator:
       - '\*(.+?)\*' # Match Italic (asterisk)
   Publish_GitHub_Wiki_Content:
     Debug: true
-  Generate_Wiki_Content:
+  Generate_Markdown_For_DSC_Resources:
     MofResourceMetadata:
       Type: MofResource
       Category: Resources
