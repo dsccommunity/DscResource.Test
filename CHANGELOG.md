@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `build.psd1` as not required.
 - `cspell.json`
+- `Set-PSModulePath`
+  - Not required as already in `DscResource.Common` fixes [#145](https://github.com/dsccommunity/DscResource.Test/issues/145).
 
 ## [0.16.3] - 2024-08-29
 
