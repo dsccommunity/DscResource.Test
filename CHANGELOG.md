@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Only target source files and moduleroot.
 - `MarkdownLinks.common.v5.Tests`
   - Only target source files and moduleroot.
+  - Remove duplicate call to the same command
 - `Resolve-Dependency.psd1`
   - Enable ModuleFast and PSResourceGet.
 - `build.yaml`
