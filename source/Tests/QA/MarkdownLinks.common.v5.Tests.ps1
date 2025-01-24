@@ -77,9 +77,7 @@ BeforeDiscovery {
     $markdownFiles = Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
 
     # This will recursively fetch all files in the source folder.
-    $markdownFiles = Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
-
-    $markdownFiles += Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
+    $markdownFiles += Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
 
     # Expand the project folder if it is a relative path.
     $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
