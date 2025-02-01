@@ -27,13 +27,26 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$pesterVersion = (Get-Module -Name Pester).Version
+$isPester5 = $pesterVersion -ge '5.1.0'
+$isPester6 = $pesterVersion -ge '6.0.0'
 
 # Only run if Pester 5.1.
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
     return
+}
+
+# This _must_ be outside any Pester-block so the script can be parsed correctly.
+$pesterForEachParameters = @{}
+
+if ($isPester6)
+{
+    # This is required for Pester 6 to allow empty ForEach.
+    $pesterForEachParameters = @{
+        AllowNullOrEmptyForEach = $true
+    }
 }
 
 BeforeDiscovery {
@@ -98,7 +111,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
     }
 
-    Context 'When class-based resources <Name> exist' -ForEach $classBasedResource {
+    Context 'When class-based resources <Name> exist' @pesterForEachParameters -ForEach $classBasedResource {
         It "Should explicitly export <Name> in DscResourcesToExport" {
             <#
                 NOTE: In PowerShell 7.1.0 the cmdlet Test-ModuleManifest returns

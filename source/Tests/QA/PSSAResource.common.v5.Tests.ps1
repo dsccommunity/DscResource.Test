@@ -41,13 +41,26 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$pesterVersion = (Get-Module -Name Pester).Version
+$isPester5 = $pesterVersion -ge '5.1.0'
+$isPester6 = $pesterVersion -ge '6.0.0'
 
 # Only run if Pester 5.1.
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
     return
+}
+
+# This _must_ be outside any Pester-block so the script can be parsed correctly.
+$pesterForEachParameters = @{}
+
+if ($isPester6)
+{
+    # This is required for Pester 6 to allow empty ForEach.
+    $pesterForEachParameters = @{
+        AllowNullOrEmptyForEach = $true
+    }
 }
 
 BeforeDiscovery {
@@ -134,7 +147,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
         }
     }
 
-    Context 'When module file ''<DescriptiveName>'' exist' -ForEach $moduleFileToTest {
+    Context 'When module file ''<DescriptiveName>'' exist'@pesterForEachParameters -ForEach $moduleFileToTest {
         BeforeAll {
             $invokeScriptAnalyzerParameters.Path = $File.FullName
 
@@ -162,7 +175,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
         }
 
 
-        It 'Should not suppress the required rule ''<_>''' -ForEach $requiredRuleToTest -Tag @('Common Tests - Required Script Analyzer Rules', 'RequiredPSSA') {
+        It 'Should not suppress the required rule ''<_>''' @pesterForEachParameters -ForEach $requiredRuleToTest -Tag @('Common Tests - Required Script Analyzer Rules', 'RequiredPSSA') {
             $_ | Should -Not -BeIn $suppressedRuleNames -Because 'no module script file should suppress a required Script Analyzer rule'
         }
 

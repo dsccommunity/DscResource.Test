@@ -26,13 +26,26 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$pesterVersion = (Get-Module -Name Pester).Version
+$isPester5 = $pesterVersion -ge '5.1.0'
+$isPester6 = $pesterVersion -ge '6.0.0'
 
 # Only run if Pester 5.1.
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
     return
+}
+
+# This _must_ be outside any Pester-block so the script can be parsed correctly.
+$pesterForEachParameters = @{}
+
+if ($isPester6)
+{
+    # This is required for Pester 6 to allow empty ForEach.
+    $pesterForEachParameters = @{
+        AllowNullOrEmptyForEach = $true
+    }
 }
 
 BeforeDiscovery {
@@ -76,7 +89,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
-    Context 'When the example ''<ExampleDescriptiveName>'' exist' -ForEach $exampleToTest {
+    Context 'When the example ''<ExampleDescriptiveName>'' exist' @pesterForEachParameters -ForEach $exampleToTest {
         It 'Should compile the MOF schema for the example correctly' {
             {
                 $mockPassword = ConvertTo-SecureString '&iPm%M5q3K$Hhq=wcEK' -AsPlainText -Force

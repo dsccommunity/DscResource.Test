@@ -32,13 +32,26 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$pesterVersion = (Get-Module -Name Pester).Version
+$isPester5 = $pesterVersion -ge '5.1.0'
+$isPester6 = $pesterVersion -ge '6.0.0'
 
 # Only run if Pester 5.1.
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
     return
+}
+
+# This _must_ be outside any Pester-block so the script can be parsed correctly.
+$pesterForEachParameters = @{}
+
+if ($isPester6)
+{
+    # This is required for Pester 6 to allow empty ForEach.
+    $pesterForEachParameters = @{
+        AllowNullOrEmptyForEach = $true
+    }
 }
 
 BeforeDiscovery {
@@ -224,7 +237,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
-    Context 'When resource or module ''<descriptiveName>'' exists' -ForEach $fileToTest {
+    Context 'When resource or module ''<descriptiveName>'' exists' @pesterForEachParameters -ForEach $fileToTest {
         It 'Should have en-US localization folder' {
             Test-Path -Path $LocalizationFolderPath | Should -BeTrue -Because "the en-US folder $LocalizationFolderPath must exist"
         }
@@ -260,7 +273,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
             }
         }
 
-        Context 'When a mof resource is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
+        Context 'When a mof resource is localized in the language <LocalizationFolderName>' @pesterForEachParameters -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
                 $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$($File.BaseName).strings.psd1"
 

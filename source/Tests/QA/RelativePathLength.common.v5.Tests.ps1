@@ -22,13 +22,26 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$pesterVersion = (Get-Module -Name Pester).Version
+$isPester5 = $pesterVersion -ge '5.1.0'
+$isPester6 = $pesterVersion -ge '6.0.0'
 
 # Only run if Pester 5.1.
 if (-not $isPester5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
     return
+}
+
+# This _must_ be outside any Pester-block so the script can be parsed correctly.
+$pesterForEachParameters = @{}
+
+if ($isPester6)
+{
+    # This is required for Pester 6 to allow empty ForEach.
+    $pesterForEachParameters = @{
+        AllowNullOrEmptyForEach = $true
+    }
 }
 
 BeforeDiscovery {
@@ -72,7 +85,7 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
             $relativePathHardLimit = 129
         }
 
-        It 'The length of the relative path <RelativePath> should not exceed the max hard limit' -ForEach $moduleFileToTest {
+        It 'The length of the relative path <RelativePath> should not exceed the max hard limit' @pesterForEachParameters -ForEach $moduleFileToTest {
             $RelativePath.Length | Should -Not -BeGreaterThan $relativePathHardLimit -Because ('for the module to be able to be downloaded and used in Azure Automation the max lengths of the relative paths of the modules files much not be greater than {0} characters including path separators' -f $fullPathHardLimit)
         }
     }
