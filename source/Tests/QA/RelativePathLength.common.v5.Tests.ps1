@@ -32,12 +32,13 @@ if (-not $isPesterMinimum5)
 }
 
 <#
-    This _must_ be outside any Pester blocks for correct script parsing.
-    Sets Context block's default parameter value to handle Pester v6's ForEach
-    change, to keep same behavior as with Pester v5. The default parameter is
-    removed at the end of the script to avoid affecting other tests.
+    This _must_ be outside any Pester blocks for correct script parsing. Sets It
+    and Context block's default parameter value to handle Pester v6's ForEach change,
+    to keep same behavior as with Pester v5. The default parameter is removed at
+    the end of the script to avoid affecting other tests.
 #>
 $PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
+$PSDefaultParameterValues['It:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -87,3 +88,4 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
 }
 
 $PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
+$PSDefaultParameterValues.Remove('It:AllowNullOrEmptyForEach')
