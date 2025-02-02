@@ -32,10 +32,10 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester4 = (Get-Module -Name Pester).Version -lt '5.1.0'
+$isPesterMinimum5 = (Get-Module -Name Pester).Version -ge '5.1.0'
 
 # Only run if Pester 5.1 or higher.
-if ($isPester4)
+if (-not $isPesterMinimum5)
 {
     Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
