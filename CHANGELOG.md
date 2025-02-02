@@ -39,6 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RelativePathLength.common.v5.Tests`
   - Updated to support that Pester 6 no longer allowing empty arrays in
     ForEach by default.
+- `ModuleScriptFiles.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
 
 ## [0.17.0] - 2025-01-25
 

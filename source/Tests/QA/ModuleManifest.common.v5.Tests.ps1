@@ -27,27 +27,22 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$pesterVersion = (Get-Module -Name Pester).Version
-$isPester5 = $pesterVersion -ge '5.1.0'
-$isPester6 = $pesterVersion -ge '6.0.0'
+$isPester4 = (Get-Module -Name Pester).Version -lt '5.1.0'
 
-# Only run if Pester 5.1.
-if (-not $isPester5)
+# Only run if Pester 5.1 or higher.
+if ($isPester4)
 {
-    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
 }
 
-# This _must_ be outside any Pester-block so the script can be parsed correctly.
-$pesterForEachParameters = @{}
-
-if ($isPester6)
-{
-    # This is required for Pester 6 to allow empty ForEach.
-    $pesterForEachParameters = @{
-        AllowNullOrEmptyForEach = $true
-    }
-}
+<#
+    This _must_ be outside any Pester blocks for correct script parsing.
+    Sets Context block's default parameter value to handle Pester v6's ForEach
+    change, to keep same behavior as with Pester v5. The default parameter is
+    removed at the end of the script to avoid affecting other tests.
+#>
+$PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -111,7 +106,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
     }
 
-    Context 'When class-based resources <Name> exist' @pesterForEachParameters -ForEach $classBasedResource {
+    Context 'When class-based resources <Name> exist' -ForEach $classBasedResource {
         It "Should explicitly export <Name> in DscResourcesToExport" {
             <#
                 NOTE: In PowerShell 7.1.0 the cmdlet Test-ModuleManifest returns
@@ -122,3 +117,5 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         }
     }
 }
+
+$PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')

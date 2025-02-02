@@ -32,27 +32,22 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$pesterVersion = (Get-Module -Name Pester).Version
-$isPester5 = $pesterVersion -ge '5.1.0'
-$isPester6 = $pesterVersion -ge '6.0.0'
+$isPester4 = (Get-Module -Name Pester).Version -lt '5.1.0'
 
-# Only run if Pester 5.1.
-if (-not $isPester5)
+# Only run if Pester 5.1 or higher.
+if ($isPester4)
 {
-    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
 }
 
-# This _must_ be outside any Pester-block so the script can be parsed correctly.
-$pesterForEachParameters = @{}
-
-if ($isPester6)
-{
-    # This is required for Pester 6 to allow empty ForEach.
-    $pesterForEachParameters = @{
-        AllowNullOrEmptyForEach = $true
-    }
-}
+<#
+    This _must_ be outside any Pester blocks for correct script parsing.
+    Sets Context block's default parameter value to handle Pester v6's ForEach
+    change, to keep same behavior as with Pester v5. The default parameter is
+    removed at the end of the script to avoid affecting other tests.
+#>
+$PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -237,7 +232,7 @@ AfterAll {
 }
 
 Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Localization' {
-    Context 'When resource or module ''<descriptiveName>'' exists' @pesterForEachParameters -ForEach $fileToTest {
+    Context 'When resource or module ''<descriptiveName>'' exists' -ForEach $fileToTest {
         It 'Should have en-US localization folder' {
             Test-Path -Path $LocalizationFolderPath | Should -BeTrue -Because "the en-US folder $LocalizationFolderPath must exist"
         }
@@ -273,7 +268,7 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
             }
         }
 
-        Context 'When a mof resource is localized in the language <LocalizationFolderName>' @pesterForEachParameters -ForEach $OtherLanguages {
+        Context 'When a mof resource is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
                 $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$($File.BaseName).strings.psd1"
 
@@ -305,3 +300,5 @@ Describe 'Common Tests - Validate Localization' -Tag 'Common Tests - Validate Lo
         }
     }
 }
+
+$PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')

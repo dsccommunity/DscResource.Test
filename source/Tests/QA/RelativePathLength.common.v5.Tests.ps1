@@ -22,27 +22,22 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$pesterVersion = (Get-Module -Name Pester).Version
-$isPester5 = $pesterVersion -ge '5.1.0'
-$isPester6 = $pesterVersion -ge '6.0.0'
+$isPester4 = (Get-Module -Name Pester).Version -lt '5.1.0'
 
-# Only run if Pester 5.1.
-if (-not $isPester5)
+# Only run if Pester 5.1 or higher.
+if ($isPester4)
 {
-    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
 }
 
-# This _must_ be outside any Pester-block so the script can be parsed correctly.
-$pesterForEachParameters = @{}
-
-if ($isPester6)
-{
-    # This is required for Pester 6 to allow empty ForEach.
-    $pesterForEachParameters = @{
-        AllowNullOrEmptyForEach = $true
-    }
-}
+<#
+    This _must_ be outside any Pester blocks for correct script parsing.
+    Sets Context block's default parameter value to handle Pester v6's ForEach
+    change, to keep same behavior as with Pester v5. The default parameter is
+    removed at the end of the script to avoid affecting other tests.
+#>
+$PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -85,8 +80,10 @@ Describe 'Common Tests - Relative Path Length' -Tag 'Common Tests - Relative Pat
             $relativePathHardLimit = 129
         }
 
-        It 'The length of the relative path <RelativePath> should not exceed the max hard limit' @pesterForEachParameters -ForEach $moduleFileToTest {
+        It 'The length of the relative path <RelativePath> should not exceed the max hard limit' -ForEach $moduleFileToTest {
             $RelativePath.Length | Should -Not -BeGreaterThan $relativePathHardLimit -Because ('for the module to be able to be downloaded and used in Azure Automation the max lengths of the relative paths of the modules files much not be greater than {0} characters including path separators' -f $fullPathHardLimit)
         }
     }
 }
+
+$PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')

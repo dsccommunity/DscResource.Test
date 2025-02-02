@@ -27,27 +27,22 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$pesterVersion = (Get-Module -Name Pester).Version
-$isPester5 = $pesterVersion -ge '5.1.0'
-$isPester6 = $pesterVersion -ge '6.0.0'
+$isPester4 = (Get-Module -Name Pester).Version -lt '5.1.0'
 
-# Only run if Pester 5.1.
-if (-not $isPester5)
+# Only run if Pester 5.1 or higher.
+if ($isPester4)
 {
-    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
 }
 
-# This _must_ be outside any Pester-block so the script can be parsed correctly.
-$pesterForEachParameters = @{}
-
-if ($isPester6)
-{
-    # This is required for Pester 6 to allow empty ForEach.
-    $pesterForEachParameters = @{
-        AllowNullOrEmptyForEach = $true
-    }
-}
+<#
+    This _must_ be outside any Pester blocks for correct script parsing.
+    Sets Context block's default parameter value to handle Pester v6's ForEach
+    change, to keep same behavior as with Pester v5. The default parameter is
+    removed at the end of the script to avoid affecting other tests.
+#>
+$PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -350,7 +345,7 @@ AfterAll {
 }
 
 Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - Validate Localization' {
-    Context 'When the module ''<DescriptiveName>'' exists' @pesterForEachParameters -ForEach $scriptLocalizationToTest {
+    Context 'When the module ''<DescriptiveName>'' exists' -ForEach $scriptLocalizationToTest {
         It 'Should have en-US localization folder' {
             Test-Path -Path $LocalizationFolderPath | Should -BeTrue -Because "the en-US folder $LocalizationFolderPath must exist"
         }
@@ -386,7 +381,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             }
         }
 
-        Context 'When a resource or module is localized in the language <LocalizationFolderName>' @pesterForEachParameters -ForEach $OtherLanguages {
+        Context 'When a resource or module is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
                 $localizationResourceFilePath = Join-Path -Path $LocalizationFolderPath -ChildPath "$($File.BaseName).strings.psd1"
 
@@ -418,7 +413,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
         }
     }
 
-    Context 'When the class ''<ClassName>'' exists' @pesterForEachParameters -ForEach $thisLocalizationToTest {
+    Context 'When the class ''<ClassName>'' exists' -ForEach $thisLocalizationToTest {
         It 'Should have en-US localization folder' {
             Test-Path -Path $LocalizationFolderPath | Should -BeTrue -Because "the en-US folder $LocalizationFolderPath must exist"
         }
@@ -441,7 +436,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
                 This ForEach is using the key EnUsLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
             #>
-            It 'Should use the localized string key ''<LocalizedKey>'' in the code' @pesterForEachParameters -ForEach $EnUsLocalizedKeys {
+            It 'Should use the localized string key ''<LocalizedKey>'' in the code' -ForEach $EnUsLocalizedKeys {
                 $UsedLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key exists in the localized string resource file so it should also exist in the resource/module script file'
             }
 
@@ -454,7 +449,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             }
         }
 
-        Context 'When a resource or module is localized in the language <LocalizationFolderName>' @pesterForEachParameters -ForEach $OtherLanguages {
+        Context 'When a resource or module is localized in the language <LocalizationFolderName>' -ForEach $OtherLanguages {
             It 'Should have a localization string file in the localization folder' {
                 Test-Path -Path $LocalizationFile | Should -BeTrue -Because ('there must exist a string resource file ''{0}.strings.psd1'' in the localization folder ''{1}''' -f $ClassName, $LocalizationFolderPath)
             }
@@ -484,3 +479,5 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
         }
     }
 }
+
+$PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
