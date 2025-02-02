@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `ResourceSchema.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `PublishExampleFiles.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `ModuleManifest.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `Localization.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `Localization.builtModule.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `ExampleFiles.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `FileFormatting.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `MarkdownLinks.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `PSSAResource.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `RelativePathLength.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+- `ModuleScriptFiles.common.v5.Tests`
+  - Updated to support that Pester 6 no longer allowing empty arrays in
+    ForEach by default.
+
 ## [0.17.0] - 2025-01-25
 
 ### Changed

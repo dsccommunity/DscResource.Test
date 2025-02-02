@@ -41,14 +41,23 @@ param
 )
 
 # This test _must_ be outside the BeforeDiscovery-block since Pester 4 does not recognizes it.
-$isPester5 = (Get-Module -Name Pester).Version -ge '5.1.0'
+$isPesterMinimum5 = (Get-Module -Name Pester).Version -ge '5.1.0'
 
-# Only run if Pester 5.1.
-if (-not $isPester5)
+# Only run if Pester 5.1 or higher.
+if (-not $isPesterMinimum5)
 {
-    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester 5 are skipped.' -Verbose
+    Write-Verbose -Message 'Repository is using old Pester version, new HQRM tests for Pester v5 and v6 are skipped.' -Verbose
     return
 }
+
+<#
+    This _must_ be outside any Pester blocks for correct script parsing. Sets It
+    and Context block's default parameter value to handle Pester v6's ForEach change,
+    to keep same behavior as with Pester v5. The default parameter is removed at
+    the end of the script to avoid affecting other tests.
+#>
+$PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
+$PSDefaultParameterValues['It:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     if ($PSVersionTable.PSVersion.Major -lt 5)
@@ -211,3 +220,6 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
         }
     }
 }
+
+$PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
+$PSDefaultParameterValues.Remove('It:AllowNullOrEmptyForEach')
