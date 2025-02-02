@@ -142,7 +142,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
         }
     }
 
-    Context 'When module file ''<DescriptiveName>'' exist'@pesterForEachParameters -ForEach $moduleFileToTest {
+    Context 'When module file ''<DescriptiveName>'' exist' -ForEach $moduleFileToTest {
         BeforeAll {
             $invokeScriptAnalyzerParameters.Path = $File.FullName
 
