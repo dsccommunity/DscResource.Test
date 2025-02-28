@@ -29,11 +29,10 @@ if (!(Get-Module -Name 'MarkdownLinkCheck' -ListAvailable))
 Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate Markdown Links' {
     $markdownFileFilter = '*.md'
 
-    $markdownFiles = Get-ChildItem -Path $ProjectPath -File -Filter $markdownFileFilter
-
-    $markdownFiles = Get-ChildItem -Path $SourcePath -File -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
-
-    $markdownFiles += Get-ChildItem -Path $SourcePath -File -Filter $markdownFileFilter
+    $markdownFiles = @(
+        (Get-ChildItem -Path $ProjectPath -File -Filter $markdownFileFilter)
+        (Get-ChildItem -Path $SourcePath -File -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded)
+    )
 
     foreach ($markdownFile in $markdownFiles)
     {
