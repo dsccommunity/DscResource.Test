@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.2] - 2025-02-28
+
 ### Fixed
 
 - Now the Markdown links test works with Pester 4.
