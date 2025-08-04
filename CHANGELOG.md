@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - Remove ModuleBuilder patch.
-- Remove module.psm1 from source.
 
 ## [0.17.2] - 2025-02-28
 
