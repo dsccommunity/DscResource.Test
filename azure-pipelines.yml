@@ -1,15 +1,15 @@
 trigger:
   branches:
     include:
-    - main
+      - main
   paths:
     include:
-    - source/*
+      - source/*
   tags:
     include:
-    - "v*"
+      - 'v*'
     exclude:
-    - "*-*"
+      - '*-*'
 
 variables:
   buildFolderName: output
@@ -67,23 +67,12 @@ stages:
               buildType: 'current'
               artifactName: $(buildArtifactName)
               targetPath: '$(Build.SourcesDirectory)/$(buildFolderName)'
-          # This is a workaround for the issue: https://github.com/PoshCode/ModuleBuilder/pull/136
-          - task: PowerShell@2
-            name: patch_module
-            displayName: 'Patch module ModuleBuilder'
-            inputs:
-              targetType: 'inline'
-              script: |
-                ./build.ps1 -Task noop
-                Install-PSResource -Name 'Viscalyx.Common' -Repository 'PSGallery' -TrustRepository -Quiet -Confirm:$false
-                Install-ModulePatch -Uri 'https://raw.githubusercontent.com/viscalyx/Viscalyx.Common/refs/heads/main/patches/ModuleBuilder_3.1.7_patch.json' -Force
-              pwsh: true
           - task: PowerShell@2
             name: test
             displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
-              arguments: "-Tasks test"
+              arguments: '-Tasks test'
               pwsh: false
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
@@ -115,7 +104,7 @@ stages:
             displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
-              arguments: "-Tasks test"
+              arguments: '-Tasks test'
               pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
@@ -147,7 +136,7 @@ stages:
             displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
-              arguments: "-Tasks test"
+              arguments: '-Tasks test'
               pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
@@ -179,7 +168,7 @@ stages:
             displayName: 'Run Unit Test'
             inputs:
               filePath: './build.ps1'
-              arguments: "-Tasks test"
+              arguments: '-Tasks test'
               pwsh: true
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
@@ -231,10 +220,10 @@ stages:
       - job: Code_Coverage
         displayName: 'Publish Code Coverage'
         dependsOn:
-        - test_windows_wps
-        - test_windows_ps
-        - test_linux
-        - test_macos
+          - test_windows_wps
+          - test_windows_ps
+          - test_linux
+          - test_macos
         condition: succeededOrFailed()
         pool:
           vmImage: 'ubuntu-latest'
