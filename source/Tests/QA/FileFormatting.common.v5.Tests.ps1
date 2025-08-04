@@ -15,6 +15,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
@@ -63,11 +64,13 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $textFiles = @(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
+    $textFiles = [System.Collections.Generic.List[System.Object]]::new()
+
+    $textFiles.AddRange(@(Get-TextFilesList -Root $ModuleBase | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile))
 
     if ($SourcePath)
     {
-        $textFiles += Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
+        $textFiles.AddRange(@(Get-TextFilesList -Root $SourcePath | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
     }
 
     if ($ProjectPath)
@@ -81,19 +84,13 @@ BeforeDiscovery {
     }
 
     #region Setup text file test cases.
-    $textFileToTest = @()
-
-    foreach ($file in $textFiles)
+    $textFileToTest = foreach ($file in $textFiles)
     {
-        # Use the project folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
-
-        $textFileToTest += @(
-            @{
-                File            = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
+        @{
+            File            = $file
+            # Use the project folder to extrapolate relative path.
+            DescriptiveName = (Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath)
+        }
     }
     #endregion
 }

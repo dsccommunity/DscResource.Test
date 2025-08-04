@@ -15,6 +15,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
@@ -82,28 +83,24 @@ BeforeDiscovery {
     $markdownFileFilter = '*.md'
 
     # This will fetch files in the root of the project (repository) folder.
-    $markdownFiles = Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter
+    $markdownFiles = [System.Collections.Generic.List[System.Object]]::new()
+    $markdownFiles.AddRange(@(Get-ChildItem -Path $ProjectPath -Filter $markdownFileFilter))
 
     # This will recursively fetch all files in the source folder.
-    $markdownFiles += Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded
+    $markdownFiles.AddRange(@(Get-ChildItem -Path $SourcePath -Recurse -Filter $markdownFileFilter | WhereSourceFileNotExcluded))
 
     # Expand the project folder if it is a relative path.
     $resolvedProjectPath = (Resolve-Path -Path $ProjectPath).Path
 
     #region Setup text file test cases.
-    $markdownFileToTest = @()
-
-    foreach ($file in $markdownFiles)
+    $markdownFileToTest = foreach ($file in $markdownFiles)
     {
-        # Use the root of the source folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
 
-        $markdownFileToTest += @(
-            @{
-                File            = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
+        @{
+            File            = $file
+            # Use the root of the source folder to extrapolate relative path.
+            DescriptiveName = (Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath)
+        }
     }
 }
 
@@ -127,8 +124,7 @@ Describe 'Common Tests - Validate Markdown Links' -Tag 'Common Tests - Validate 
             {
                 # Write out all the errors so the contributor can resolve.
                 $report = $brokenLinks |
-                    Select-Object Line, Text, Url |
-                    Format-Table -AutoSize -Wrap |
+                    Format-Table -AutoSize -Wrap -Property Line, Text, Url |
                     Out-String -Width 110
 
                 $brokenLinks.Count | Should -Be 0 -Because "broken markdown links:`r`n`r`n $report`r`n `r`n ,"
