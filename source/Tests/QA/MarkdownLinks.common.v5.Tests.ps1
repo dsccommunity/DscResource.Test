@@ -95,7 +95,6 @@ BeforeDiscovery {
     #region Setup text file test cases.
     $markdownFileToTest = foreach ($file in $markdownFiles)
     {
-
         @{
             File            = $file
             # Use the root of the source folder to extrapolate relative path.
