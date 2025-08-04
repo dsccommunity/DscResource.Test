@@ -28,7 +28,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
     if (Test-Path -Path $examplesPath)
     {
-        $examples = Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse
+        $examples = Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile
         foreach ($example in $examples)
         {
             $exampleDescriptiveName = Join-Path -Path (Split-Path $example.Directory -Leaf) -ChildPath (Split-Path $example -Leaf)
