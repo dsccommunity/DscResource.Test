@@ -118,7 +118,7 @@ AfterAll {
     Import-Module -Name 'DscResource.Test' -Force
 }
 
-Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA', 'Common Tests - PS Script Analyzer on Resource Files') {
+Describe 'Common Tests - PS Script Analyzer on Source Files' -Tag @('DscPSSA', 'Common Tests - PS Script Analyzer on Resource Files') {
     BeforeAll {
         $PSSA_rule_config = Get-StructuredObjectFromFile -Path (Join-Path -Path (Get-CurrentModuleBase) -ChildPath 'Config/PSSA_rules_config.json')
 
