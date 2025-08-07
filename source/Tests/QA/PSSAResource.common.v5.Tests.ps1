@@ -79,7 +79,7 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
+    $sourceFiles = @(Get-ChildItem -Path $SourcePath -Include '*.psm1', '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
     if ($ProjectPath)
     {
@@ -91,19 +91,15 @@ BeforeDiscovery {
         $resolvedProjectPath = $ModuleBase
     }
 
-    $moduleFileToTest = @()
-
-    foreach ($file in $moduleFiles)
+    $sourceFileToTest = foreach ($file in $sourceFiles)
     {
         # Use the project folder to extrapolate relative path.
         $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
 
-        $moduleFileToTest += @(
-            @{
-                File            = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
+        @{
+            File            = $file
+            DescriptiveName = $descriptiveName
+        }
     }
 
     # Get the required rules to build the test cases
@@ -143,7 +139,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
         }
     }
 
-    Context 'When module file ''<DescriptiveName>'' exist' -ForEach $moduleFileToTest {
+    Context 'When file ''<DescriptiveName>'' exists' -ForEach $sourceFileToTest {
         BeforeAll {
             $invokeScriptAnalyzerParameters.Path = $File.FullName
 
@@ -152,24 +148,22 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
             $errorPssaRulesOutput = $PSSAErrors.Where{ $_.Severity -eq 'Error' }
             $requiredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.required_rules }
             $flaggedPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.flagged_rules }
-            $DSCCustomRulesOutput = $PSSAErrors.Where{ $_.RuleName -like "DscResource.AnalyzerRules*" }
+            $DSCCustomRulesOutput = $PSSAErrors.Where{ $_.RuleName -like 'DscResource.AnalyzerRules*' }
             $ignoredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.ignore_rules }
             $NewErrorRulesOutput = @($ignoredPssaRulesOutput + $flaggedPssaRulesOutput + $requiredPssaRulesOutput)
 
-            $suppressedRuleNames = @(
-                Get-SuppressedPSSARuleNameList -FilePath $File.FullName | ForEach-Object -Process {
-                    # Remove any starting or trailing ' and ".
-                    $newItem = $_ -replace '^["'']|["'']$', ''
+            $suppressedRuleNames = foreach ($rule in (Get-SuppressedPSSARuleNameList -FilePath $File.FullName))
+            {
+                # Remove any starting or trailing ' and ".
+                $newItem = $rule -replace '^["'']|["'']$', ''
 
-                    # Only return non-empty strings.
-                    if ($newItem)
-                    {
-                        $newItem
-                    }
+                # Only return non-empty strings.
+                if ($newItem)
+                {
+                    $newItem
                 }
-            )
+            }
         }
-
 
         It 'Should not suppress the required rule ''<_>''' -ForEach $requiredRuleToTest -Tag @('Common Tests - Required Script Analyzer Rules', 'RequiredPSSA') {
             $_ | Should -Not -BeIn $suppressedRuleNames -Because 'no module script file should suppress a required Script Analyzer rule'
@@ -209,11 +203,10 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
 
         It 'Should pass all custom DSC Resource Kit PSSA rules' -Skip:$skipCustomRules -Tag @('Common Tests - Custom Script Analyzer Rules', 'CustomPSSA', 'DscResource.AnalyzerRules') {
             $report = $DSCCustomRulesOutput |
-                Select-Object @{
+                Format-Table -AutoSize -Wrap -Property @{
                     Name       = 'RuleName'
                     Expression = { $_.RuleName -replace 'DscResource.AnalyzerRules\\' }
                 }, Severity, ScriptName, Line, Message |
-                Format-Table -AutoSize -Wrap |
                 Out-String -Width 110
 
             $DSCCustomRulesOutput | Should -HaveCount 0 -Because "Custom Error-level Rule(s) triggered.`r`n`r`n $report`r`n"
