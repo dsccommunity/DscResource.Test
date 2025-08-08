@@ -79,7 +79,7 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $sourceFiles = @(Get-ChildItem -Path $SourcePath -Include '*.psm1', '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
+    $sourceFiles = @(Get-ChildItem -Path $SourcePath -Include '*.psm1', '*.ps1' -File -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
     if ($ProjectPath)
     {
