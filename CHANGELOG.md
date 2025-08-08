@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
+
+### Removed
+
+- Remove ModuleBuilder patch.
+
 ## [0.17.2] - 2025-02-28
 
 ### Fixed
