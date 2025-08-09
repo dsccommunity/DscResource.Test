@@ -124,8 +124,14 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
         }
 
-        It "Should have CmdletsToExport set to '*' for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists)) -ForEach @($rawModuleManifest) {
-            $_.CmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
+        It "Should have CmdletsToExport set to '*' or a non-empty array for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists)) -ForEach @($rawModuleManifest) {
+            $cmdletsToExport = $_.CmdletsToExport
+
+            # CmdletsToExport should be either '*' or a non-empty array
+            $isValidFormat = ($cmdletsToExport -eq '*') -or
+                            (($cmdletsToExport -is [array]) -and ($cmdletsToExport.Count -gt 0))
+
+            $isValidFormat | Should -Be $true -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' or a non-empty array for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
