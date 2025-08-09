@@ -65,7 +65,7 @@ jobs:
           Write-Host "Resolving project dependencies..." -ForegroundColor Green
 
           # Run dependency resolution
-          .\build.ps1 -ResolveDependency -Tasks 'noop' -ErrorAction Stop
+          ./build.ps1 -ResolveDependency -Tasks 'noop' -ErrorAction Stop
 
           Write-Host "Dependencies resolved successfully." -ForegroundColor Green
 
@@ -77,7 +77,7 @@ jobs:
           Write-Host "Building $moduleName module..." -ForegroundColor Green
 
           # Build the module
-          .\build.ps1 -Tasks 'build' -ErrorAction Stop
+          ./build.ps1 -Tasks 'build' -ErrorAction Stop
 
           # Verify build output
           if (Test-Path -Path "output\builtModule\$moduleName")
@@ -98,7 +98,7 @@ jobs:
 
           Write-Host "Importing built $moduleName module..." -ForegroundColor Green
 
-          .\build.ps1 -Tasks 'noop'
+          ./build.ps1 -Tasks 'noop'
           Import-Module -Name $moduleName -Force
 
           # Verify module is loaded
