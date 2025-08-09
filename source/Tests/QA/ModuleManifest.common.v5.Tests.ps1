@@ -118,12 +118,8 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     }
 
     Context 'When class-based resources exist in the module' {
-        BeforeAll {
-            $containsClassResource = Test-ModuleContainsClassResource -ModulePath $ModuleBase
+        It "Should have CmdletsToExport set to '*' or not be present for compatibility with DSCv2" -Skip:(-not (Test-ModuleContainsClassResource -ModulePath $ModuleBase)) {
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
-        }
-
-        It "Should have CmdletsToExport set to '*' or not be present for compatibility with DSCv2" -Skip:(-not $containsClassResource) {
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
             
             if ($cmdletsToExportExists) {
