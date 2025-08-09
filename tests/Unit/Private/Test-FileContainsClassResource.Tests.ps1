@@ -58,7 +58,7 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
         }
     }
 
-    Context 'When module file contain class-based resources' {
+    Context 'When module file contains class-based resources' {
         It 'Should return $true when DscResource attribute has no parameters' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
