@@ -67,11 +67,23 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
                 [DscResource()]
                 class $mockResourceName1
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName1] Get() { return `$this }
                 }
 
                 [DscResource()]
                 class $mockResourceName2
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName2] Get() { return `$this }
                 }
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
@@ -85,14 +97,26 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
                 Set-StrictMode -Version 1.0
 
                 "
-                [DscResource(RunAsCredential = 'Optional')]
+                [DscResource(RunAsCredential = 'NotSupported')]
                 class $mockResourceName1
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName1] Get() { return `$this }
                 }
 
                 [DscResource()]
                 class $mockResourceName2
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName2] Get() { return `$this }
                 }
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
