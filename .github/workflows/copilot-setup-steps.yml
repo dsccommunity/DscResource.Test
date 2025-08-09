@@ -33,29 +33,29 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/copilot/')
         shell: pwsh
         run: |
-          Write-Host "Ensuring full history for GitVersion..." -ForegroundColor Green
+          Write-Host 'Ensuring full history for GitVersion...' -ForegroundColor Green
 
           $isShallow = (& git rev-parse --is-shallow-repository) -eq 'true'
 
           if ($isShallow)
           {
-              Write-Host "Repository is shallow. Fetching full history and tags..." -ForegroundColor DarkGray
+              Write-Host 'Repository is shallow. Fetching full history and tags...' -ForegroundColor DarkGray
 
               git fetch --prune --unshallow --tags --no-recurse-submodules
           }
           else
           {
-              Write-Host "Repository is not shallow. Refreshing tags..." -ForegroundColor DarkGray
+              Write-Host 'Repository is not shallow. Refreshing tags...' -ForegroundColor DarkGray
 
               git fetch --prune --tags --no-recurse-submodules
           }
 
-          Write-Host "History ready for GitVersion." -ForegroundColor Green
+          Write-Host 'History ready for GitVersion.' -ForegroundColor Green
 
       - name: Install .NET Tools
         shell: pwsh
         run: |
-          Write-Host "Installing/Updating .NET tools..." -ForegroundColor Green
+          Write-Host 'Installing/Updating .NET tools...' -ForegroundColor Green
 
           # Install GitVersion for semantic versioning (idempotent)
           dotnet tool update --global GitVersion.Tool --version 5.* `
@@ -64,23 +64,23 @@ jobs:
           # Verify installation
           dotnet-gitversion /version
 
-          Write-Host ".NET tools ready." -ForegroundColor Green
+          Write-Host '.NET tools ready.' -ForegroundColor Green
 
       - name: Verify GitVersion
         shell: pwsh
         run: |
-          Write-Host "Running GitVersion to determine semantic version..." -ForegroundColor Green
+          Write-Host 'Running GitVersion to determine semantic version...' -ForegroundColor Green
           dotnet-gitversion | ConvertFrom-Json
 
       - name: Resolve Dependencies
         shell: pwsh
         run: |
-          Write-Host "Resolving project dependencies..." -ForegroundColor Green
+          Write-Host 'Resolving project dependencies...' -ForegroundColor Green
 
           # Run dependency resolution
           ./build.ps1 -ResolveDependency -Tasks 'noop' -ErrorAction Stop
 
-          Write-Host "Dependencies resolved successfully." -ForegroundColor Green
+          Write-Host 'Dependencies resolved successfully.' -ForegroundColor Green
 
       - name: Build Module
         shell: pwsh
@@ -100,7 +100,7 @@ jobs:
           }
           else
           {
-              Write-Error "Module build failed - output directory not found"
+              Write-Error 'Module build failed - output directory not found'
               exit 1
           }
 
@@ -115,11 +115,11 @@ jobs:
           Import-Module -Name $moduleName -Force
 
           # Verify module is loaded
-          $module = Get-Module -Name $moduleName
+          $module = Get-Module -Name $moduleName -ErrorAction SilentlyContinue
 
           if ($module)
           {
-              Write-Host "Module imported successfully:" -ForegroundColor Green
+              Write-Host 'Module imported successfully:' -ForegroundColor Green
               Write-Host "  Name: $($module.Name)" -ForegroundColor Cyan
               Write-Host "  Version: $($module.Version)" -ForegroundColor Cyan
               Write-Host "  Path: $($module.Path)" -ForegroundColor Cyan
@@ -129,18 +129,19 @@ jobs:
               if ($commands.Count -gt 0)
               {
                   Write-Host "  Exported Commands: $($commands.Count)" -ForegroundColor Cyan
-                  Write-Host "Available Commands:" -ForegroundColor Cyan
+                  Write-Host 'Available Commands:' -ForegroundColor Cyan
 
                   $commands |
                     Select-Object Name, ModuleName | Format-Table -AutoSize
               }
               else
               {
-                  Write-Host "No commands exported by the module." -ForegroundColor Yellow
+                  Write-Host 'No commands exported by the module.' -ForegroundColor Yellow
               }
           }
           else
           {
-              Write-Error "Failed to import module"
+              Write-Error 'Failed to import module'
+
               exit 1
           }
