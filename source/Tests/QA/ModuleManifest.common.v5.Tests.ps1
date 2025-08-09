@@ -122,15 +122,20 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
             $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
+            
+            # Determine which tests should run based on common conditions and type
+            $shouldRunTests = $hasClassBasedResources -and $cmdletsToExportExists
+            $runStringTest = $shouldRunTests -and ($rawModuleManifest.CmdletsToExport -is [string])
+            $runArrayTest = $shouldRunTests -and ($rawModuleManifest.CmdletsToExport -is [array])
         }
 
-        It "Should have CmdletsToExport set to '*' when it is a string for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists) -or (-not ($rawModuleManifest.CmdletsToExport -is [string]))) -ForEach @($rawModuleManifest) {
+        It "Should have CmdletsToExport set to '*' when it is a string for compatibility with DSCv2" -Skip:(-not $runStringTest) -ForEach @($rawModuleManifest) {
             $cmdletsToExport = $_.CmdletsToExport
             
             $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is a string in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
 
-        It "Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists) -or (-not ($rawModuleManifest.CmdletsToExport -is [array]))) -ForEach @($rawModuleManifest) {
+        It "Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2" -Skip:(-not $runArrayTest) -ForEach @($rawModuleManifest) {
             $cmdletsToExport = $_.CmdletsToExport
             
             $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7'
