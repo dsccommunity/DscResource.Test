@@ -119,6 +119,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
 
     Context 'When class-based resources exist in the module' {
         BeforeDiscovery {
+            $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
             $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
