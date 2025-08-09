@@ -12,6 +12,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
@@ -53,7 +54,7 @@ BeforeDiscovery {
 }
 
 AfterAll {
-    Write-Debug "Poping location on Stack ProjectTest"
+    Write-Debug 'Poping location on Stack ProjectTest'
 
     Pop-Location -StackName ProjectTest
 }

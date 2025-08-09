@@ -12,6 +12,7 @@
         Invoke-Pester -Container $container -Output Detailed
 #>
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingEmptyCatchBlock', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
@@ -64,11 +65,9 @@ BeforeDiscovery {
 
     $exampleScriptFilesToPublish = @(Get-ChildItem -Path $examplesPath -Filter '*Config.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
-    $exampleToTest = @()
-
-    foreach ($exampleFile in $exampleScriptFilesToPublish)
+    $exampleToTest = foreach ($exampleFile in $exampleScriptFilesToPublish)
     {
-        $exampleToTest += @{
+        @{
             ExampleFile            = $exampleFile
             ExampleDescriptiveName = Join-Path -Path (Split-Path $exampleFile.Directory -Leaf) -ChildPath (Split-Path $exampleFile -Leaf)
         }
@@ -91,15 +90,20 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
         $exampleScriptFilesToPublish = @(Get-ChildItem -Path $examplesPath -Filter '*Config.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
         # Get the GUID's for all the example files.
-        $exampleScriptMetadata = $exampleScriptFilesToPublish | ForEach-Object -Process {
+        $exampleScriptMetadata = foreach ($file in $exampleScriptFilesToPublish)
+        {
             <#
                 The cmdlet Test-ScriptFileInfo ignores the parameter ErrorAction and $ErrorActionPreference.
                 Instead a try-catch need to be used to ignore files that does not have the correct metadata.
             #>
             try
             {
-                Test-ScriptFileInfo -Path $_.FullName |
-                    Select-Object -Property Name, Guid
+                $info = Test-ScriptFileInfo -Path $file.FullName
+
+                @{
+                    Name = $info.Name
+                    Guid = $info.Guid
+                }
             }
             catch
             {
@@ -120,8 +124,7 @@ Describe 'Common Tests - Validate Example Files To Be Published' -Tag 'Common Te
         It 'Should not have the script file information metadata GUID duplicated in another example file' {
             try
             {
-                $metadataGuid = Test-ScriptFileInfo -Path $ExampleFile.FullName |
-                    Select-Object -Property Guid
+                $metadataGuid = Test-ScriptFileInfo -Path $ExampleFile.FullName
             }
             catch
             {

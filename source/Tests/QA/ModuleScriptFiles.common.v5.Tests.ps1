@@ -15,6 +15,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter()]
@@ -63,11 +64,13 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = @(Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile)
+    $moduleFiles = [System.Collections.Generic.List[System.Object]]::new()
+
+    $moduleFiles.AddRange(@(Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse | WhereModuleFileNotExcluded -ExcludeModuleFile $ExcludeModuleFile))
 
     if ($SourcePath)
     {
-        $moduleFiles += @(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
+        $moduleFiles.AddRange(@(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
     }
 
     if ($ProjectPath)
@@ -80,19 +83,13 @@ BeforeDiscovery {
         $resolvedProjectPath = $ModuleBase
     }
 
-    $moduleFileToTest = @()
-
-    foreach ($file in $moduleFiles)
+    $moduleFileToTest = foreach ($file in $moduleFiles)
     {
-        # Use the project folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
-
-        $moduleFileToTest += @(
-            @{
-                File            = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
+        @{
+            File            = $file
+            # Use the project folder to extrapolate relative path.
+            DescriptiveName = (Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath)
+        }
     }
 }
 
