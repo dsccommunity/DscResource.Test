@@ -29,16 +29,28 @@ jobs:
 
       # This step is needed for GitVersion because Copilot switches to its working branch
       # after checkout and fetches only depth 2.
-      - name: Unshallow repository for GitVersion
+      - name: Ensure full history for GitVersion
         if: startsWith(github.ref, 'refs/heads/copilot/')
         shell: pwsh
         run: |
-          Write-Host "Unshallow Copilot branch..." -ForegroundColor Green
+          Write-Host "Ensuring full history for GitVersion..." -ForegroundColor Green
 
-          Write-Host "Removing the depth limit, prune unused refs, and grab tags" -ForegroundColor DarkGray
-          git fetch --prune --unshallow --tags --no-recurse-submodules
+          $isShallow = (& git rev-parse --is-shallow-repository) -eq 'true'
 
-          Write-Host "Unshallow complete." -ForegroundColor Green
+          if ($isShallow)
+          {
+              Write-Host "Repository is shallow. Fetching full history and tags..." -ForegroundColor DarkGray
+
+              git fetch --prune --unshallow --tags --no-recurse-submodules
+          }
+          else
+          {
+              Write-Host "Repository is not shallow. Refreshing tags..." -ForegroundColor DarkGray
+
+              git fetch --prune --tags --no-recurse-submodules
+          }
+
+          Write-Host "History ready for GitVersion." -ForegroundColor Green
 
       - name: Install .NET Tools
         shell: pwsh
