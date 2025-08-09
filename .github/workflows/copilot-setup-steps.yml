@@ -41,12 +41,22 @@ jobs:
               Write-Host 'Repository is shallow. Fetching full history and tags...' -ForegroundColor DarkGray
 
               git fetch --prune --unshallow --tags --no-recurse-submodules
+
+              if ($LASTEXITCODE -ne 0)
+              {
+                  throw 'git fetch --unshallow failed'
+              }
           }
           else
           {
               Write-Host 'Repository is not shallow. Refreshing tags...' -ForegroundColor DarkGray
 
               git fetch --prune --tags --no-recurse-submodules
+
+              if ($LASTEXITCODE -ne 0)
+              {
+                  throw 'git fetch --tags failed'
+              }
           }
 
           Write-Host 'History ready for GitVersion.' -ForegroundColor Green
