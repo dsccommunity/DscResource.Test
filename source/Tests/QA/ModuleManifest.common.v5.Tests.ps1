@@ -85,16 +85,16 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     BeforeAll {
         $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
 
-        <#
-            ErrorAction specified as SilentlyContinue because this call will throw an error
-            on machines with an older PS version than the manifest requires. If a WMF 5.1
-            is not available modules that require 5.1 (e.g. PSDscResources) would always
-            crash this test.
-        #>
-        $moduleManifestProperties = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
+        $script:moduleManifestProperties = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
     }
 
-    It "Should contain a PowerShellVersion property with a minimum value based on resource types" {
+    It 'Should have valid module manifest' {
+        $moduleManifest = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
+
+        $moduleManifest.Name | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Should contain a PowerShellVersion property with a minimum value based on resource types' {
         $containsClassResource = Test-ModuleContainsClassResource -ModulePath $ModuleBase
 
         if ($containsClassResource)
@@ -106,41 +106,40 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $minimumPSVersion = [Version] '4.0'
         }
 
-        $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
+        $script:moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
     }
 
-    Context 'When class-based resources <Name> exist' -ForEach $classBasedResource {
-        It "Should explicitly export <Name> in DscResourcesToExport" {
-            <#
-                NOTE: In PowerShell 7.1.0 the cmdlet Test-ModuleManifest returns
-                $null for the property ExportedDscResources even if the property
-                have values in the module manifest.
-            #>
-            $moduleManifestProperties.ExportedDscResources | Should -Contain $Name
+    Context 'When class-based resources exist' {
+        It 'Should explicitly export <Name> in DscResourcesToExport'  -ForEach $classBasedResource {
+            $script:moduleManifestProperties.DscResourcesToExport | Should -Contain $Name
         }
     }
 
     Context 'When class-based resources exist in the module' -Skip:(-not $hasClassBasedResources) {
         BeforeDiscovery {
             $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
-            $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
+            $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
-            
+
             # Determine which tests should run based on CmdletsToExport existence and type
-            $runStringTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [string])
-            $runArrayTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [array])
+            $runStringTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [System.String])
+            $runArrayTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [System.Array])
         }
 
-        It "Should have CmdletsToExport set to '*' when it is a string for compatibility with DSCv2" -Skip:(-not $runStringTest) -ForEach @($rawModuleManifest) {
-            $cmdletsToExport = $_.CmdletsToExport
-            
-            $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is a string in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
+        Context 'When CmdletsToExport is a string' -Skip:(-not $runStringTest) {
+            It 'Should have CmdletsToExport set to ''*'' when it is a string for compatibility with DSCv2' -ForEach @($rawModuleManifest) {
+                $cmdletsToExport = $_.CmdletsToExport
+
+                $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is a string in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
+            }
         }
 
-        It "Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2" -Skip:(-not $runArrayTest) -ForEach @($rawModuleManifest) {
-            $cmdletsToExport = $_.CmdletsToExport
-            
-            $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7'
+        Context 'When CmdletsToExport is an array' -Skip:(-not $runArrayTest) {
+            It 'Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2' -ForEach @($rawModuleManifest) {
+                $cmdletsToExport = $_.CmdletsToExport
+
+                $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7'
+            }
         }
     }
 }

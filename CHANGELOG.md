@@ -12,10 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add workflow for GitHub Copilot Agent.
 - `ModuleManifest.common.v5.Tests`
   - Added compatibility test for CmdletsToExport property in modules with class-based DSC resources. The test validates that when a module contains class-based resources and has CmdletsToExport specified in the manifest, it must be set to '*' for compatibility with PSDesiredStateConfiguration 2.0.7 [#165](https://github.com/dsccommunity/DscResource.Test/issues/165).
+  - Updated the test that verifies so that resources are exported in the module manifest to work cross-plattform.
+  - Added a test to verify that the module manifest is valid.
+
 
 ### Fixed
 
 - Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
+- Private function `Test-FileContainsClassResource`
+  - Refactored to correctly find class-bases resources in a module script file.
 
 ### Removed
 
