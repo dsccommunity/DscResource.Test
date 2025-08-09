@@ -55,15 +55,16 @@ jobs:
       - name: Install .NET Tools
         shell: pwsh
         run: |
-          Write-Host "Installing .NET tools..." -ForegroundColor Green
+          Write-Host "Installing/Updating .NET tools..." -ForegroundColor Green
 
-          # Install GitVersion for semantic versioning
-          dotnet tool install --global GitVersion.Tool --version 5.*
+          # Install GitVersion for semantic versioning (idempotent)
+          dotnet tool update --global GitVersion.Tool --version 5.* `
+            || dotnet tool install --global GitVersion.Tool --version 5.*
 
           # Verify installation
-          dotnet-gitversion
+          dotnet-gitversion /version
 
-          Write-Host ".NET tools installation complete." -ForegroundColor Green
+          Write-Host ".NET tools ready." -ForegroundColor Green
 
       - name: Verify GitVersion
         shell: pwsh
