@@ -121,11 +121,11 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         BeforeDiscovery {
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
+            $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
         }
 
-        It "Should have CmdletsToExport set to '*' for compatibility with DSCv2" -Skip:((-not (Test-ModuleContainsClassResource -ModulePath $ModuleBase)) -or (-not $cmdletsToExportExists)) {
-            $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
-            $rawModuleManifest.CmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
+        It "Should have CmdletsToExport set to '*' for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists)) -ForEach @($rawModuleManifest) {
+            $_.CmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
