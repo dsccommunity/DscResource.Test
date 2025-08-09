@@ -90,7 +90,7 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
                 {
                 }
 
-                [DscResource(Description = 'Test Resource')]
+                [DscResource()]
                 class $mockResourceName2
                 {
                 }
@@ -115,6 +115,40 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
 
                 $result = Test-FileContainsClassResource -FilePath $scriptPath
                 $result | Should -BeFalse
+            }
+        }
+    }
+
+    Context 'When module file has parsing errors' {
+        It 'Should throw an exception for syntax errors' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                # Create a file with syntax error
+                "
+                [DscResource()]
+                class $mockResourceName1
+                {
+                    # Missing closing brace
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                { Test-FileContainsClassResource -FilePath $scriptPath } | Should -Throw -ExpectedMessage "Parse error in file*"
+            }
+        }
+
+        It 'Should throw an exception for DSC validation errors' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                # Create a file with DSC validation error (invalid attribute property)
+                "
+                [DscResource(InvalidProperty = 'Test')]
+                class $mockResourceName1
+                {
+                }
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                { Test-FileContainsClassResource -FilePath $scriptPath } | Should -Throw -ExpectedMessage "Parse error in file*"
             }
         }
     }
