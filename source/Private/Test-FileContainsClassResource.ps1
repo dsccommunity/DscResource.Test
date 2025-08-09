@@ -29,7 +29,20 @@ function Test-FileContainsClassResource
         $FilePath
     )
 
-    $fileAst = [System.Management.Automation.Language.Parser]::ParseFile($FilePath, [ref] $null, [ref] $null)
+    $tokens = $null
+    $parseErrors = $null
+    $fileAst = [System.Management.Automation.Language.Parser]::ParseFile($FilePath, [ref] $tokens, [ref] $parseErrors)
+    
+    # Check for parsing errors and throw exception for the first error that's not a DSC validation error
+    if ($parseErrors -and $parseErrors.Count -gt 0)
+    {
+        $syntaxErrors = $parseErrors | Where-Object { $_.ErrorId -notlike 'DscResource*' }
+        if ($syntaxErrors -and $syntaxErrors.Count -gt 0)
+        {
+            $firstError = $syntaxErrors[0]
+            throw "Parse error in file '$FilePath': $($firstError.Message) at line $($firstError.Extent.StartLineNumber), column $($firstError.Extent.StartColumnNumber)"
+        }
+    }
 
     # Look for class/type definitions that have a [DscResource(...)] attribute
     $typeDefinitionAsts = $fileAst.FindAll({

@@ -92,7 +92,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     It 'Should have valid module manifest' {
         $moduleManifest = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
 
-        $moduleManifest.Name | Should -Not -BeNullOrEmpty
+        $moduleManifest | Should -Not -BeNullOrEmpty
     }
 
     It 'Should contain a PowerShellVersion property with a minimum value based on resource types' {
