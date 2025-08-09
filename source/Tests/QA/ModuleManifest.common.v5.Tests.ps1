@@ -43,6 +43,7 @@ if (-not $isPesterMinimum5)
     removed at the end of the script to avoid affecting other tests.
 #>
 $PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
+$PSDefaultParameterValues['It:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
@@ -145,3 +146,4 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
 }
 
 $PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
+$PSDefaultParameterValues.Remove('It:AllowNullOrEmptyForEach')
