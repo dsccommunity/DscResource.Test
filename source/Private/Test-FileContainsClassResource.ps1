@@ -51,13 +51,7 @@ function Test-FileContainsClassResource
     {
         foreach ($attributeAst in $typeDefinitionAst.Attributes)
         {
-            # Prefer the simple name, fall back to FullName if needed
             $attributeName = $attributeAst.TypeName.Name
-
-            if ([string]::IsNullOrEmpty($attributeName))
-            {
-                $attributeName = $attributeAst.TypeName.FullName
-            }
 
             if ($attributeName -eq 'DscResource')
             {
