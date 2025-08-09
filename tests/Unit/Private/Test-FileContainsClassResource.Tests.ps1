@@ -59,7 +59,7 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
     }
 
     Context 'When module file contain class-based resources' {
-        It 'Should return $true' {
+        It 'Should return $true when DscResource attribute has no parameters' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
@@ -70,6 +70,27 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
                 }
 
                 [DscResource()]
+                class $mockResourceName2
+                {
+                }
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                $result = Test-FileContainsClassResource -FilePath $scriptPath
+                $result | Should -BeTrue
+            }
+        }
+
+        It 'Should return $true when DscResource attribute has parameters' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                "
+                [DscResource(RunAsCredential = 'Optional')]
+                class $mockResourceName1
+                {
+                }
+
+                [DscResource(Description = 'Test Resource')]
                 class $mockResourceName2
                 {
                 }
