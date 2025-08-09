@@ -118,16 +118,14 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     }
 
     Context 'When class-based resources exist in the module' {
-        It "Should have CmdletsToExport set to '*' or not be present for compatibility with DSCv2" -Skip:(-not (Test-ModuleContainsClassResource -ModulePath $ModuleBase)) {
+        BeforeDiscovery {
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
-            
-            if ($cmdletsToExportExists) {
-                $rawModuleManifest.CmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
-            } else {
-                # If CmdletsToExport doesn't exist, that's acceptable
-                $cmdletsToExportExists | Should -BeFalse -Because 'CmdletsToExport property does not exist, which is acceptable for class-based resources'
-            }
+        }
+
+        It "Should have CmdletsToExport set to '*' for compatibility with DSCv2" -Skip:((-not (Test-ModuleContainsClassResource -ModulePath $ModuleBase)) -or (-not $cmdletsToExportExists)) {
+            $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
+            $rawModuleManifest.CmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
