@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
 - Private function `Test-FileContainsClassResource`
-  - Refactored to correctly find class-bases resources in a module script file.
+  - Refactored to correctly find class-based resources in a module script file.
 
 ### Removed
 
