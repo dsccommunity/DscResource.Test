@@ -124,14 +124,16 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
         }
 
-        It "Should have CmdletsToExport set to '*' or a non-empty array for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists)) -ForEach @($rawModuleManifest) {
+        It "Should have CmdletsToExport set to '*' when it is a string for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists) -or (-not ($rawModuleManifest.CmdletsToExport -is [string]))) -ForEach @($rawModuleManifest) {
             $cmdletsToExport = $_.CmdletsToExport
+            
+            $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is a string in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
+        }
 
-            # CmdletsToExport should be either '*' or a non-empty array
-            $isValidFormat = ($cmdletsToExport -eq '*') -or
-                            (($cmdletsToExport -is [array]) -and ($cmdletsToExport.Count -gt 0))
-
-            $isValidFormat | Should -Be $true -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' or a non-empty array for compatibility with PSDesiredStateConfiguration 2.0.7'
+        It "Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2" -Skip:((-not $hasClassBasedResources) -or (-not $cmdletsToExportExists) -or (-not ($rawModuleManifest.CmdletsToExport -is [array]))) -ForEach @($rawModuleManifest) {
+            $cmdletsToExport = $_.CmdletsToExport
+            
+            $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
