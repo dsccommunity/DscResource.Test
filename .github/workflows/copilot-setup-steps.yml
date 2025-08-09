@@ -30,7 +30,6 @@ jobs:
       # This step is needed for GitVersion because Copilot switches to its working branch
       # after checkout and fetches only depth 2.
       - name: Ensure full history for GitVersion
-        if: startsWith(github.ref, 'refs/heads/copilot/')
         shell: pwsh
         run: |
           Write-Host 'Ensuring full history for GitVersion...' -ForegroundColor Green
