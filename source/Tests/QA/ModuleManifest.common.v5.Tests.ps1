@@ -66,6 +66,9 @@ BeforeDiscovery {
             }
         )
     }
+
+    # Check if module contains class-based resources for DSCv2 compatibility tests
+    $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
 }
 
 BeforeAll {
@@ -117,17 +120,15 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         }
     }
 
-    Context 'When class-based resources exist in the module' {
+    Context 'When class-based resources exist in the module' -Skip:(-not $hasClassBasedResources) {
         BeforeDiscovery {
             $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
-            $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
             
-            # Determine which tests should run based on common conditions and type
-            $shouldRunTests = $hasClassBasedResources -and $cmdletsToExportExists
-            $runStringTest = $shouldRunTests -and ($rawModuleManifest.CmdletsToExport -is [string])
-            $runArrayTest = $shouldRunTests -and ($rawModuleManifest.CmdletsToExport -is [array])
+            # Determine which tests should run based on CmdletsToExport existence and type
+            $runStringTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [string])
+            $runArrayTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [array])
         }
 
         It "Should have CmdletsToExport set to '*' when it is a string for compatibility with DSCv2" -Skip:(-not $runStringTest) -ForEach @($rawModuleManifest) {
