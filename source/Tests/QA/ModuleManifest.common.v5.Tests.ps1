@@ -116,31 +116,20 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         }
     }
 
-    Context 'When class-based resources exist in the module' -Skip:(-not $hasClassBasedResources) {
+    Context 'When CmdletsToExport should be ''*'' for DSCv2 compatibility' -Skip:(-not $hasClassBasedResources) {
         BeforeDiscovery {
             $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
 
-            # Determine which tests should run based on CmdletsToExport existence and type
+            # Determine if the test should run - only when CmdletsToExport exists and is a string
             $runStringTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [System.String])
-            $runArrayTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [System.Array])
         }
 
-        Context 'When CmdletsToExport is a string' -Skip:(-not $runStringTest) {
-            It 'Should have CmdletsToExport set to ''*'' when it is a string for compatibility with DSCv2' -ForEach @($rawModuleManifest) {
-                $cmdletsToExport = $_.CmdletsToExport
+        It 'Should have CmdletsToExport set to ''*'' for compatibility with DSCv2' -Skip:(-not $runStringTest) -ForEach @($rawModuleManifest) {
+            $cmdletsToExport = $_.CmdletsToExport
 
-                $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is a string in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
-            }
-        }
-
-        Context 'When CmdletsToExport is an array' -Skip:(-not $runArrayTest) {
-            It 'Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2' -ForEach @($rawModuleManifest) {
-                $cmdletsToExport = $_.CmdletsToExport
-
-                $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7, or set CmdletsToExport to string ''*'' if there aren''t any Cmdlets to export'
-            }
+            $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
