@@ -113,10 +113,6 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $moduleManifestProperties.ExportedDscResources | Should -Contain $Name
         }
     }
-
-    #TODO: Add checks for public functions and aliases.
-
-    #TODO: Should cmdlets be exported be set to '*'?
 }
 
 $PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
