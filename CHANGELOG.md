@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add workflow for GitHub Copilot Agent.
+
 ### Fixed
 
 - Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
