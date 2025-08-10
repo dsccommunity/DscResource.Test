@@ -139,7 +139,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             It 'Should have CmdletsToExport as a non-empty array when it is an array for compatibility with DSCv2' -ForEach @($rawModuleManifest) {
                 $cmdletsToExport = $_.CmdletsToExport
 
-                $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7'
+                $cmdletsToExport.Count | Should -BeGreaterOrEqual 1 -Because 'when CmdletsToExport is an array in a module with class-based resources, it must contain at least one element for compatibility with PSDesiredStateConfiguration 2.0.7, or set CmdletsToExport to string ''*'' if there aren''t any Cmdlets to export'
             }
         }
     }
