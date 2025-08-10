@@ -99,7 +99,7 @@ BeforeDiscovery {
         # Use the project folder to extrapolate relative path.
         $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
 
-        @{
+        [PSCustomObject]@{
             File            = $file
             DescriptiveName = $descriptiveName
         }
