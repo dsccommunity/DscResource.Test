@@ -49,27 +49,30 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse
-
-    $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
-    {
-        Get-ClassResourceNameFromFile -FilePath $moduleFile.FullName
-    }
-
-    #region Setup text file test cases.
-    $classBasedResource = @()
-
-    foreach ($resourceName in $classResourcesInModule)
-    {
-        $classBasedResource += @(
-            @{
-                Name = $resourceName
-            }
-        )
-    }
-
     # Check if module contains class-based resources for DSCv2 compatibility tests
     $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
+
+    if ($hasClassBasedResources)
+    {
+        $moduleFiles = Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse
+
+        $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
+        {
+            Get-ClassResourceNameFromFile -FilePath $moduleFile.FullName
+        }
+
+        #region Setup text file test cases.
+        $classBasedResource = @()
+
+        foreach ($resourceName in $classResourcesInModule)
+        {
+            $classBasedResource += @(
+                @{
+                    Name = $resourceName
+                }
+            )
+        }
+    }
 }
 
 BeforeAll {
@@ -110,23 +113,19 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         $script:moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
     }
 
-    Context 'When class-based resources exist' {
-        It 'Should explicitly export <Name> in DscResourcesToExport'  -ForEach $classBasedResource {
-            $script:moduleManifestProperties.DscResourcesToExport | Should -Contain $Name
-        }
-    }
-
-    Context 'When CmdletsToExport should be ''*'' for DSCv2 compatibility' -Skip:(-not $hasClassBasedResources) {
+    Context 'When class-based resources exist' -Skip:(-not $hasClassBasedResources) {
         BeforeDiscovery {
             $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
             $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
             $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
-
-            # Determine if the test should run - only when CmdletsToExport exists and is a string
-            $runStringTest = $cmdletsToExportExists -and ($rawModuleManifest.CmdletsToExport -is [System.String])
         }
 
-        It 'Should have CmdletsToExport set to ''*'' for compatibility with DSCv2' -Skip:(-not $runStringTest) -ForEach @($rawModuleManifest) {
+        It 'Should explicitly export <Name> in DscResourcesToExport'  -ForEach $classBasedResource {
+            $script:moduleManifestProperties.DscResourcesToExport | Should -Contain $Name
+        }
+
+        # Using -ForEach to bring in the value from Discovery-phase to avoid reading Module Manifest a second time.
+        It 'Should have CmdletsToExport set to ''*'' for compatibility with DSCv2' -Skip:(-not $cmdletsToExportExists) -ForEach @($rawModuleManifest) {
             $cmdletsToExport = $_.CmdletsToExport
 
             $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
