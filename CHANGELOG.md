@@ -21,8 +21,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Changelog.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+- `ExampleFiles.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Suppress 'PSAvoidUsingConvertToSecureStringWithPlainText' ScriptAnalyzer rule.
+  - Remove array addition.
+- `FileFormatting.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
+- `MarkdownLinks.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
+- `ModuleScriptFiles.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
 - `PSSAResource.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
   - Target all source files [#163](https://github.com/dsccommunity/DscResource.Test/issues/163).
+- `PublishExampleFiles.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
+- `RelativePathLength.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+  - Remove array addition.
+  - Remove single use variable.
+- `ResourceSchema.common.v5.Tests`
+  - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
 
 ## [0.17.2] - 2025-02-28
 

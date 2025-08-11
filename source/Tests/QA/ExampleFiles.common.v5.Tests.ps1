@@ -11,6 +11,8 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
 param
 (
     [Parameter()]
@@ -62,11 +64,9 @@ BeforeDiscovery {
 
     $exampleFiles = @(Get-ChildItem -Path $examplesPath -Filter '*.ps1' -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile)
 
-    $exampleToTest = @()
-
-    foreach ($exampleFile in $exampleFiles)
+    $exampleToTest = foreach ($exampleFile in $exampleFiles)
     {
-        $exampleToTest += @{
+        @{
             ExampleFile            = $exampleFile
             ExampleDescriptiveName = Join-Path -Path (Split-Path $exampleFile.Directory -Leaf) -ChildPath (Split-Path $exampleFile -Leaf)
         }
@@ -192,7 +192,6 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
                     {
                         throw ('The example ''{0}'' does not contain a configuration named ''{1}''.' -f $exampleDescriptiveName, ($commandName -join "', or '"))
                     }
-
                 }
                 finally
                 {

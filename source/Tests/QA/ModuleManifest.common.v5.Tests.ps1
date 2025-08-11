@@ -12,6 +12,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter(Mandatory = $true)]
@@ -56,15 +57,11 @@ BeforeDiscovery {
     }
 
     #region Setup text file test cases.
-    $classBasedResource = @()
-
-    foreach ($resourceName in $classResourcesInModule)
+    $classBasedResource = foreach ($resourceName in $classResourcesInModule)
     {
-        $classBasedResource += @(
-            @{
-                Name = $resourceName
-            }
-        )
+        @{
+            Name = $resourceName
+        }
     }
 }
 
@@ -91,7 +88,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
         $moduleManifestProperties = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
     }
 
-    It "Should contain a PowerShellVersion property with a minimum value based on resource types" {
+    It 'Should contain a PowerShellVersion property with a minimum value based on resource types' {
         $containsClassResource = Test-ModuleContainsClassResource -ModulePath $ModuleBase
 
         if ($containsClassResource)
@@ -107,7 +104,7 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     }
 
     Context 'When class-based resources <Name> exist' -ForEach $classBasedResource {
-        It "Should explicitly export <Name> in DscResourcesToExport" {
+        It 'Should explicitly export <Name> in DscResourcesToExport' {
             <#
                 NOTE: In PowerShell 7.1.0 the cmdlet Test-ModuleManifest returns
                 $null for the property ExportedDscResources even if the property
