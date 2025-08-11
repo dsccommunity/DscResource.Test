@@ -7,7 +7,7 @@
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/ModuleManifest.common.*.Tests.ps1" -Data @{
             ModuleName = $dscResourceModuleName
-            ModuleBase = "./output/$dscResourceModuleName/*"
+            ModuleBase = "./output/builtModule/$dscResourceModuleName/*"
         }
 
         Invoke-Pester -Container $container -Output Detailed
@@ -50,12 +50,18 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
+    <#
+        Make sure relative path with wildcard are resolved to version folder,
+        e.g. ./output/builtModule/ModuleName/* -> ./output/builtModule/ModuleName/1.0.0
+    #>
+    $resolvedModuleBase = Resolve-Path -Path $ModuleBase -ErrorAction 'Stop'
+
     # Check if module contains class-based resources for DSCv2 compatibility tests
-    $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $ModuleBase
+    $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $resolvedModuleBase
 
     if ($hasClassBasedResources)
     {
-        $moduleFiles = Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse
+        $moduleFiles = Get-ChildItem -Path $resolvedModuleBase -Filter '*.psm1' -Recurse
 
         $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
         {
