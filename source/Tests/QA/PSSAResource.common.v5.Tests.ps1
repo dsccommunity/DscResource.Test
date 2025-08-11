@@ -91,19 +91,13 @@ BeforeDiscovery {
         $resolvedProjectPath = $ModuleBase
     }
 
-    $moduleFileToTest = @()
-
-    foreach ($file in $moduleFiles)
+    $moduleFileToTest = foreach ($file in $moduleFiles)
     {
-        # Use the project folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
-
-        $moduleFileToTest += @(
-            @{
-                File            = $file
-                DescriptiveName = $descriptiveName
-            }
-        )
+        @{
+            File            = $file
+            # Use the project folder to extrapolate relative path.
+            DescriptiveName = (Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath)
+        }
     }
 
     # Get the required rules to build the test cases
@@ -152,7 +146,7 @@ Describe 'Common Tests - PS Script Analyzer on Resource Files' -Tag @('DscPSSA',
             $errorPssaRulesOutput = $PSSAErrors.Where{ $_.Severity -eq 'Error' }
             $requiredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.required_rules }
             $flaggedPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.flagged_rules }
-            $DSCCustomRulesOutput = $PSSAErrors.Where{ $_.RuleName -like "DscResource.AnalyzerRules*" }
+            $DSCCustomRulesOutput = $PSSAErrors.Where{ $_.RuleName -like 'DscResource.AnalyzerRules*' }
             $ignoredPssaRulesOutput = $PSSAErrors.Where{ $_.RuleName -in $PSSA_rule_config.ignore_rules }
             $NewErrorRulesOutput = @($ignoredPssaRulesOutput + $flaggedPssaRulesOutput + $requiredPssaRulesOutput)
 

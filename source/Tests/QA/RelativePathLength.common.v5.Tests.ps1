@@ -11,6 +11,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter(Mandatory = $true)]
@@ -57,11 +58,11 @@ BeforeDiscovery {
     #>
     $allModuleFiles = Get-ChildItem -Path $moduleBaseFullPath -Recurse
 
-    $moduleFileToTest = @()
-
-    $allModuleFiles | ForEach-Object -Process {
-        $moduleFileToTest += @{
-            RelativePath = Get-RelativePathFromModuleRoot -FilePath $_.FullName -ModuleRootFilePath $moduleBaseFullPath
+    $moduleFileToTest = foreach ($file in $allModuleFiles)
+    {
+        # Use the root of the module folder to extrapolate relative path.
+        @{
+            RelativePath = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $moduleBaseFullPath
         }
     }
 }

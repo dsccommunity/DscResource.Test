@@ -12,6 +12,7 @@
 
         Invoke-Pester -Container $container -Output Detailed
 #>
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', '')]
 param
 (
     [Parameter(Mandatory = $true)]
@@ -62,15 +63,11 @@ BeforeDiscovery {
         }
 
         #region Setup text file test cases.
-        $classBasedResource = @()
-
-        foreach ($resourceName in $classResourcesInModule)
+        $classBasedResource = foreach ($resourceName in $classResourcesInModule)
         {
-            $classBasedResource += @(
-                @{
-                    Name = $resourceName
-                }
-            )
+            @{
+                Name = $resourceName
+            }
         }
     }
 }
