@@ -58,8 +58,8 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
         }
     }
 
-    Context 'When module file contain class-based resources' {
-        It 'Should return $true' {
+    Context 'When module file contains class-based resources' {
+        It 'Should return $true when DscResource attribute has no parameters' {
             InModuleScope -ScriptBlock {
                 Set-StrictMode -Version 1.0
 
@@ -67,11 +67,56 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
                 [DscResource()]
                 class $mockResourceName1
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName1] Get() { return `$this }
                 }
 
                 [DscResource()]
                 class $mockResourceName2
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName2] Get() { return `$this }
+                }
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                $result = Test-FileContainsClassResource -FilePath $scriptPath
+                $result | Should -BeTrue
+            }
+        }
+
+        It 'Should return $true when DscResource attribute has parameters' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                "
+                [DscResource(RunAsCredential = 'NotSupported')]
+                class $mockResourceName1
+                {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName1] Get() { return `$this }
+                }
+
+                [DscResource()]
+                class $mockResourceName2
+                {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName2] Get() { return `$this }
                 }
                 " | Out-File -FilePath $scriptPath -Encoding ascii -Force
 
@@ -94,6 +139,40 @@ Describe 'Test-FileContainsClassResource' -Tag 'Private' {
 
                 $result = Test-FileContainsClassResource -FilePath $scriptPath
                 $result | Should -BeFalse
+            }
+        }
+    }
+
+    Context 'When module file has parsing errors' {
+        It 'Should throw an exception for syntax errors' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                # Create a file with syntax error
+                "
+                [DscResource()]
+                class $mockResourceName1
+                {
+                    # Missing closing brace
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                { Test-FileContainsClassResource -FilePath $scriptPath } | Should -Throw -ExpectedMessage "Parse error in file*"
+            }
+        }
+
+        It 'Should throw an exception for DSC validation errors' {
+            InModuleScope -ScriptBlock {
+                Set-StrictMode -Version 1.0
+
+                # Create a file with DSC validation error (invalid attribute property)
+                "
+                [DscResource(InvalidProperty = 'Test')]
+                class $mockResourceName1
+                {
+                }
+                " | Out-File -FilePath $scriptPath -Encoding ascii -Force
+
+                { Test-FileContainsClassResource -FilePath $scriptPath } | Should -Throw -ExpectedMessage "Parse error in file*"
             }
         }
     }

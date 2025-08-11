@@ -7,7 +7,7 @@
 
         $container = New-PesterContainer -Path "$pathToHQRMTests/ModuleManifest.common.*.Tests.ps1" -Data @{
             ModuleName = $dscResourceModuleName
-            ModuleBase = "./output/$dscResourceModuleName/*"
+            ModuleBase = "./output/builtModule/$dscResourceModuleName/*"
         }
 
         Invoke-Pester -Container $container -Output Detailed
@@ -44,23 +44,36 @@ if (-not $isPesterMinimum5)
     removed at the end of the script to avoid affecting other tests.
 #>
 $PSDefaultParameterValues['Context:AllowNullOrEmptyForEach'] = $true
+$PSDefaultParameterValues['It:AllowNullOrEmptyForEach'] = $true
 
 BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    $moduleFiles = Get-ChildItem -Path $ModuleBase -Filter '*.psm1' -Recurse
+    <#
+        Make sure relative path with wildcard are resolved to version folder,
+        e.g. ./output/builtModule/ModuleName/* -> ./output/builtModule/ModuleName/1.0.0
+    #>
+    $resolvedModuleBase = Resolve-Path -Path $ModuleBase -ErrorAction 'Stop'
 
-    $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
-    {
-        Get-ClassResourceNameFromFile -FilePath $moduleFile.FullName
-    }
+    # Check if module contains class-based resources for DSCv2 compatibility tests
+    $hasClassBasedResources = Test-ModuleContainsClassResource -ModulePath $resolvedModuleBase
 
-    #region Setup text file test cases.
-    $classBasedResource = foreach ($resourceName in $classResourcesInModule)
+    if ($hasClassBasedResources)
     {
-        @{
-            Name = $resourceName
+        $moduleFiles = Get-ChildItem -Path $resolvedModuleBase -Filter '*.psm1' -Recurse
+
+        $classResourcesInModule = foreach ($moduleFile in $moduleFiles)
+        {
+            Get-ClassResourceNameFromFile -FilePath $moduleFile.FullName
+        }
+
+        #region Setup text file test cases.
+        $classBasedResource = foreach ($resourceName in $classResourcesInModule)
+        {
+            @{
+                Name = $resourceName
+            }
         }
     }
 }
@@ -79,13 +92,13 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
     BeforeAll {
         $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
 
-        <#
-            ErrorAction specified as SilentlyContinue because this call will throw an error
-            on machines with an older PS version than the manifest requires. If a WMF 5.1
-            is not available modules that require 5.1 (e.g. PSDscResources) would always
-            crash this test.
-        #>
-        $moduleManifestProperties = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
+        $script:moduleManifestProperties = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
+    }
+
+    It 'Should have valid module manifest' {
+        $moduleManifest = Test-ModuleManifest -Path $moduleManifestPath -ErrorAction 'SilentlyContinue'
+
+        $moduleManifest | Should -Not -BeNullOrEmpty
     }
 
     It 'Should contain a PowerShellVersion property with a minimum value based on resource types' {
@@ -100,19 +113,28 @@ Describe 'Common Tests - Module Manifest' -Tag 'Common Tests - Module Manifest' 
             $minimumPSVersion = [Version] '4.0'
         }
 
-        $moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
+        $script:moduleManifestProperties.PowerShellVersion -ge $minimumPSVersion | Should -BeTrue -Because ('the test evaluated that the minimum version should be ''{0}''' -f $minimumPSVersion)
     }
 
-    Context 'When class-based resources <Name> exist' -ForEach $classBasedResource {
-        It 'Should explicitly export <Name> in DscResourcesToExport' {
-            <#
-                NOTE: In PowerShell 7.1.0 the cmdlet Test-ModuleManifest returns
-                $null for the property ExportedDscResources even if the property
-                have values in the module manifest.
-            #>
-            $moduleManifestProperties.ExportedDscResources | Should -Contain $Name
+    Context 'When class-based resources exist' -Skip:(-not $hasClassBasedResources) {
+        BeforeDiscovery {
+            $moduleManifestPath = Join-Path -Path $ModuleBase -ChildPath "$ModuleName.psd1"
+            $rawModuleManifest = Import-PowerShellDataFile -Path $moduleManifestPath -ErrorAction 'Stop'
+            $cmdletsToExportExists = $rawModuleManifest.ContainsKey('CmdletsToExport')
+        }
+
+        It 'Should explicitly export <Name> in DscResourcesToExport'  -ForEach $classBasedResource {
+            $script:moduleManifestProperties.DscResourcesToExport | Should -Contain $Name
+        }
+
+        # Using -ForEach to bring in the value from Discovery-phase to avoid reading Module Manifest a second time.
+        It 'Should have CmdletsToExport set to ''*'' for compatibility with DSCv2' -Skip:(-not $cmdletsToExportExists) -ForEach @($rawModuleManifest) {
+            $cmdletsToExport = $_.CmdletsToExport
+
+            $cmdletsToExport | Should -Be '*' -Because 'when CmdletsToExport is present in a module with class-based resources, it must be set to ''*'' for compatibility with PSDesiredStateConfiguration 2.0.7'
         }
     }
 }
 
 $PSDefaultParameterValues.Remove('Context:AllowNullOrEmptyForEach')
+$PSDefaultParameterValues.Remove('It:AllowNullOrEmptyForEach')
