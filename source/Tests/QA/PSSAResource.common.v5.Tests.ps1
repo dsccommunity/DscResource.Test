@@ -81,8 +81,8 @@ BeforeDiscovery {
 
     $sourceFiles = [System.Collections.Generic.List[System.Object]]::new()
 
-    $sourceFiles.AddRange((Get-ChildItem -Path $SourcePath -Filter '*.psm1' -File -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
-    $sourceFiles.AddRange((Get-ChildItem -Path $SourcePath -Filter '*.ps1' -File -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
+    $sourceFiles.AddRange(@(Get-ChildItem -Path $SourcePath -Filter '*.psm1' -File -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
+    $sourceFiles.AddRange(@(Get-ChildItem -Path $SourcePath -Filter '*.ps1' -File -Recurse | WhereSourceFileNotExcluded -ExcludeSourceFile $ExcludeSourceFile))
 
     if ($ProjectPath)
     {
@@ -96,12 +96,10 @@ BeforeDiscovery {
 
     $sourceFileToTest = foreach ($file in $sourceFiles)
     {
-        # Use the project folder to extrapolate relative path.
-        $descriptiveName = Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath
-
-        [PSCustomObject] @{
+        @{
             File            = $file
-            DescriptiveName = $descriptiveName
+            # Use the project folder to extrapolate relative path.
+            DescriptiveName = (Get-RelativePathFromModuleRoot -FilePath $file.FullName -ModuleRootFilePath $resolvedProjectPath)
         }
     }
 
@@ -144,6 +142,7 @@ Describe 'Common Tests - PS Script Analyzer on Source Files' -Tag @('DscPSSA', '
 
     Context 'When file ''<DescriptiveName>'' exists' -ForEach $sourceFileToTest {
         BeforeAll {
+            Write-Warning -Message "Running PSScriptAnalyzer tests on file: $($File.FullName)" -Verbose
             $invokeScriptAnalyzerParameters.Path = $File.FullName
 
             $PSSAErrors = Invoke-ScriptAnalyzer @invokeScriptAnalyzerParameters
