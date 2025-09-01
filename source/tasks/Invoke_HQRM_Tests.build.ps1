@@ -422,11 +422,9 @@ task Invoke_HQRM_Tests {
 
     $hqrmTestScripts = Get-ChildItem -Path $pathToHqrmTests
 
-    $pesterContainers = @()
-
-    foreach ($testScript in $hqrmTestScripts)
+    $pesterContainers = foreach ($testScript in $hqrmTestScripts)
     {
-        $pesterContainers += New-PesterContainer -Path $testScript.FullName -Data $pesterData.Clone()
+        New-PesterContainer -Path $testScript.FullName -Data $pesterData.Clone()
     }
 
     if ($BuildInfo.DscTest.Pester.Configuration -and $pesterConfiguration)

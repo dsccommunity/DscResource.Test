@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
 - Private function `Test-FileContainsClassResource`
   - Refactored to correctly find class-based resources (including parameterized attributes) and to throw detailed parse errors with file and position information.
+- `ExampleFiles.common.*` skip if on PowerShell 6+ [#169](https://github.com/dsccommunity/DscResource.Test/issues/169).
 
 ### Removed
 
@@ -49,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
   - Remove array addition.
   - Remove single use variable.
+  - Target all source files [#163](https://github.com/dsccommunity/DscResource.Test/issues/163).
 - `PublishExampleFiles.common.v5.Tests`
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
   - Remove array addition.
@@ -59,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Remove single use variable.
 - `ResourceSchema.common.v5.Tests`
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+- Remove array addition in following Public/Private functions.
+  - `Get-ClassResourceNameFromFile`
+  - `Get-ModuleScriptResourceName`
+  - `Get-SuppressedPSSARuleNameList`
+  - `Invoke-DscResourceTest`
+  - `Invoke_HQRM_Tests.build`
 
 ## [0.17.2] - 2025-02-28
 

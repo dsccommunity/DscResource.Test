@@ -23,6 +23,12 @@ if (-not $isPester5)
     return
 }
 
+# Do not run on PowerShell Core / PowerShell 6+.
+if ($PSEdition -ne 'Desktop')
+{
+    return
+}
+
 Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
 
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
