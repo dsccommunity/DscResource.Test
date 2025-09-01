@@ -142,7 +142,6 @@ Describe 'Common Tests - PS Script Analyzer on Source Files' -Tag @('DscPSSA', '
 
     Context 'When file ''<DescriptiveName>'' exists' -ForEach $sourceFileToTest {
         BeforeAll {
-            Write-Warning -Message "Running PSScriptAnalyzer tests on file: $($File.FullName)" -Verbose
             $invokeScriptAnalyzerParameters.Path = $File.FullName
 
             $PSSAErrors = Invoke-ScriptAnalyzer @invokeScriptAnalyzerParameters
