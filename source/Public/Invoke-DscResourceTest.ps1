@@ -370,11 +370,8 @@ function Invoke-DscResourceTest
             }
         }
 
-        $newTag = @()
-        $newExcludeTag = @()
-
         # foreach OptIns, add them to `-Tag`, unless in the ExcludeTags or already in Tag
-        foreach ($optInTag in $optIns)
+        $newTag = foreach ($optInTag in $optIns)
         {
             if (
                 $optInTag -notin $PSBoundParameters['ExcludeTagFilter'] `
@@ -382,7 +379,7 @@ function Invoke-DscResourceTest
             )
             {
                 Write-Debug -Message "Adding tag $optInTag."
-                $newTag += $optInTag
+                $optInTag
             }
         }
 
@@ -392,7 +389,7 @@ function Invoke-DscResourceTest
         }
 
         # foreach OptOuts, add them to `-ExcludeTag`, unless in `-Tag`
-        foreach ($optOutTag in $optOuts)
+        $newExcludeTag = foreach ($optOutTag in $optOuts)
         {
             if (
                 $optOutTag -notin $PSBoundParameters['TagFilter'] `
@@ -401,7 +398,7 @@ function Invoke-DscResourceTest
             {
                 Write-Debug -Message "Adding ExcludeTag $optOutTag."
 
-                $newExcludeTag += $optOutTag
+                $optOutTag
             }
         }
 
