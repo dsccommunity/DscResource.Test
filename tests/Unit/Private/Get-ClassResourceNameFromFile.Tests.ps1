@@ -67,11 +67,23 @@ Describe 'Get-ClassResourceNameFromFile' -Tag 'Private' {
                 [DscResource()]
                 class $mockResourceName1
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName1] Get() { return `$this }
                 }
 
                 [DscResource()]
                 class $mockResourceName2
                 {
+                    [DscProperty(Key)]
+                    [string] `$Name
+
+                    [void] Set() {}
+                    [bool] Test() { return `$true }
+                    [$mockResourceName2] Get() { return `$this }
                 }
                 " | Out-File -FilePath $mockScriptPath -Encoding ascii -Force
 
