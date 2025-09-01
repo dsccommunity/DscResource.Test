@@ -53,6 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Remove single use variable.
 - `ResourceSchema.common.v5.Tests`
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
+- Remove array addition in following Public/Private functions.
+  - `Get-ClassResourceNameFromFile`
+  - `Get-ModuleScriptResourceName`
+  - `Get-SuppressedPSSARuleNameList`
+  - `Invoke-DscResourceTest`
+  - `Invoke_HQRM_Tests.build`
 
 ## [0.17.2] - 2025-02-28
 
