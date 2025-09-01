@@ -17,15 +17,12 @@ function Get-ModuleScriptResourceName
         $ModulePath
     )
 
-    $scriptResourceNames = @()
-
     $dscResourcesFolderFilePath = Join-Path -Path $ModulePath -ChildPath 'DscResources'
     $mofSchemaFiles = Get-ChildItem -Path $dscResourcesFolderFilePath -Filter '*.schema.mof' -Recurse
 
-    foreach ($mofSchemaFile in $mofSchemaFiles)
+    $scriptResourceNames = foreach ($mofSchemaFile in $mofSchemaFiles)
     {
-        $scriptResourceName = $mofSchemaFile.BaseName -replace '.schema', ''
-        $scriptResourceNames += $scriptResourceName
+        ($mofSchemaFile.BaseName -replace '.schema', '')
     }
 
     return $scriptResourceNames
