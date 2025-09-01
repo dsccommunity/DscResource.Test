@@ -23,7 +23,7 @@ if (-not $isPester5)
     return
 }
 
-Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
+Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' -Skip:($PSEdition -ne 'Desktop') {
 
     $examplesPath = Join-Path -Path $SourcePath -ChildPath 'Examples'
     if (Test-Path -Path $examplesPath)

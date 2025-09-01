@@ -83,7 +83,7 @@ AfterAll {
     Import-Module -Name 'DscResource.Test' -Force
 }
 
-Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' {
+Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate Example Files' -Skip:($PSEdition -ne 'Desktop') {
     Context 'When the example ''<ExampleDescriptiveName>'' exist' -ForEach $exampleToTest {
         It 'Should compile the MOF schema for the example correctly' {
             {

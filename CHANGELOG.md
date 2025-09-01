@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Add ability to filter out files in `ExampleFiles.common.v4` [#120](https://github.com/dsccommunity/DscResource.Test/issues/120).
+- `ExampleFiles.common.*` skip if on PowerShell 6+ [#169](https://github.com/dsccommunity/DscResource.Test/issues/169).
 
 ### Removed
 
