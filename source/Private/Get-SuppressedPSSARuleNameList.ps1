@@ -23,13 +23,13 @@ function Get-SuppressedPSSARuleNameList
     $fileAst = [System.Management.Automation.Language.Parser]::ParseFile($FilePath, [ref]$null, [ref]$null)
 
     # Overall file attributes
-    $attributeAsts = $fileAst.FindAll( {$args[0] -is [System.Management.Automation.Language.AttributeAst]}, $true)
+    $attributeAsts = $fileAst.FindAll({ $args[0] -is [System.Management.Automation.Language.AttributeAst] }, $true)
 
-    foreach ($attributeAst in $attributeAsts)
+    $suppressedPSSARuleNames = foreach ($attributeAst in $attributeAsts)
     {
         if ([System.Diagnostics.CodeAnalysis.SuppressMessageAttribute].FullName.ToLower().Contains($attributeAst.TypeName.FullName.ToLower()))
         {
-            $suppressedPSSARuleNames += $attributeAst.PositionalArguments.Extent.Text
+            $attributeAst.PositionalArguments.Extent.Text
         }
     }
 

@@ -28,11 +28,12 @@ function Get-ClassResourceNameFromFile
         $fileAst = [System.Management.Automation.Language.Parser]::ParseFile($FilePath, [ref]$null, [ref]$null)
 
         $typeDefinitionAsts = $fileAst.FindAll( { $args[0] -is [System.Management.Automation.Language.TypeDefinitionAst] }, $false)
-        foreach ($typeDefinitionAst in $typeDefinitionAsts)
+
+        $classResourceNames = foreach ($typeDefinitionAst in $typeDefinitionAsts)
         {
             if ($typeDefinitionAst.Attributes.TypeName.Name -ieq 'DscResource')
             {
-                $classResourceNames += $typeDefinitionAst.Name
+                $typeDefinitionAst.Name
             }
         }
     }
