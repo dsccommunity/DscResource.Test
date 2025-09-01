@@ -88,7 +88,7 @@ Describe 'Common Tests - Validate Example Files' -Tag 'Common Tests - Validate E
         It 'Should compile the MOF schema for the example correctly' {
             {
                 $mockPassword = ConvertTo-SecureString '&iPm%M5q3K$Hhq=wcEK' -AsPlainText -Force
-                $mockCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @('username', $mockPassword)
+                $mockCredential = [System.Management.Automation.PSCredential]::new('username', $mockPassword)
 
                 $mockConfigurationData = @{
                     AllNodes = @(
