@@ -22,7 +22,7 @@ function Get-ModuleScriptResourceName
 
     $scriptResourceNames = foreach ($mofSchemaFile in $mofSchemaFiles)
     {
-        ($mofSchemaFile.BaseName -replace '.schema', '')
+        ($mofSchemaFile.BaseName -replace '\.schema', '')
     }
 
     return $scriptResourceNames
