@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
   - Remove array addition.
   - Remove single use variable.
+  - Target all source files [#163](https://github.com/dsccommunity/DscResource.Test/issues/163).
 - `PublishExampleFiles.common.v5.Tests`
   - Suppress 'PSUseDeclaredVarsMoreThanAssignments' ScriptAnalyzer rule.
   - Remove array addition.
