@@ -49,7 +49,7 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    # trim * from modulebase for -Depth to work
+    # trim * from ModuleBase for -Depth to work
     $localModuleBase = $ModuleBase.Replace('*', '')
 
     $moduleFiles = @(Get-ChildItem -Path $localModuleBase -Filter '*.psm1' -Depth 1)
@@ -167,10 +167,7 @@ BeforeDiscovery {
         $otherLanguageToTest = @()
 
         # Get all localization folders except the en-US (regardless of casing).
-        $localizationFolders = Get-ChildItem -Path $scriptTestProperties.File.Directory.FullName -Directory -Filter '*-*' |
-            Where-Object -FilterScript {
-                $_.Name -ne 'en-US'
-            }
+        $localizationFolders = (Get-ChildItem -Path $scriptTestProperties.File.Directory.FullName -Directory -Filter '*-*').Where({ $_.Name -ne 'en-US' })
 
         foreach ($localizationFolder in $localizationFolders)
         {
@@ -193,7 +190,7 @@ BeforeDiscovery {
                     -BindingVariable 'cultureLocalizedStrings' `
                     -FileName "$($scriptTestProperties.File.BaseName).strings.psd1" `
                     -BaseDirectory $cultureToTest.LocalizationFolderPath `
-                    -UICulture $otherLanguageToTest.LocalizationFolderName
+                    -UICulture $cultureToTest.LocalizationFolderName
 
                 foreach ($localizedKey in $cultureLocalizedStrings.Keys)
                 {
@@ -233,12 +230,13 @@ BeforeDiscovery {
 
             $localizedKeyToTest = @()
             $usedLocalizedKeyToTest = @()
+            $usedFileLocalizedKeyToTest = @()
 
             <#
-            Build test cases for all localized strings that are in the localized
-            string file and all that are used in the module file.
+                Build test cases for all localized strings that are in the localized
+                string file and all that are used in the module file.
 
-            Skips a file that do not exist yet (it are caught in a test)
+                Skips a file that do not exist yet (it are caught in a test)
             #>
             if (Test-Path -Path $classTestProperties.LocalizationFile)
             {
@@ -264,29 +262,89 @@ BeforeDiscovery {
 
                 $localizationStringConstantsAst = $class.FindAll($astFilter, $true)
 
+                $usedLocalizationKeys = @()
                 if ($localizationStringConstantsAst)
                 {
-                    $usedLocalizationKeys = $localizationStringConstantsAst.Value | Sort-Object -Unique
+                    $usedLocalizationKeys = $localizationStringConstantsAst.Value
+                }
 
-                    foreach ($localizedKey in $usedLocalizationKeys)
+                # Get the used localized keys from the whole class structure
+                $sb = {
+                    param (
+                        [Parameter()]
+                        $file,
+                        [Parameter()]
+                        $class
+                    )
+
+                    # Import module by full path and get the ModuleInfo object so
+                    # we can access the implementing assembly even when the module
+                    # is in a non-standard location.
+                    $mod = Import-Module -Name $file.FullName -Force -PassThru
+
+                    if (-not $mod -or -not $mod.ImplementingAssembly)
                     {
-                        $usedLocalizedKeyToTest += @{
-                            LocalizedKey = $localizedKey
+                        return @()
+                    }
+
+                    $current = $mod.ImplementingAssembly.DefinedTypes.Where(
+                        { $_.Name -eq $class.Name -and $_.IsPublic -and $_.BaseType.FullName -ne 'System.Object' }
+                    ).FullName
+
+                    if ($current)
+                    {
+                        # Try to get the parent type from the same assembly first,
+                        # fallback to GetType if necessary.
+                        $currentClass = $mod.ImplementingAssembly.GetType($current)
+                        if (-not $currentClass)
+                        {
+                            $currentClass = [System.Type]::GetType($current)
                         }
+
+                        if ($currentClass)
+                        {
+                            try
+                            {
+                                return @($currentClass::new().LocalizedData.Keys)
+                            }
+                            catch
+                            {
+                                return @()
+                            }
+                        }
+                    }
+
+                    return @()
+                }
+
+                $classLocalizedDataKeys = $sb.Invoke($file, $class)
+
+                $AllKeys = @($usedLocalizationKeys) + @($classLocalizedDataKeys) | Sort-Object -Unique
+                $FileKeys = @($usedLocalizationKeys) | Sort-Object -Unique
+
+                foreach ($localizedKey in $AllKeys)
+                {
+                    $usedLocalizedKeyToTest += @{
+                        LocalizedKey = $localizedKey
+                    }
+                }
+
+                foreach ($localizedKey in $FileKeys)
+                {
+                    $usedFileLocalizedKeyToTest += @{
+                        LocalizedKey = $localizedKey
                     }
                 }
             }
 
             $classTestProperties.EnUsLocalizedKeys = $localizedKeyToTest
             $classTestProperties.UsedLocalizedKeys = $usedLocalizedKeyToTest
+            $classTestProperties.FileUsedLocalizedKeys = $usedFileLocalizedKeyToTest
 
             $otherLanguageToTest = @()
 
             # Get all localization folders except the en-US (regardless of casing).
-            $localizationFolders = Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*' |
-                Where-Object -FilterScript {
-                    $_.Name -ne 'en-US'
-                }
+            $localizationFolders = (Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*').Where({ $_.Name -ne 'en-US' })
 
             foreach ($localizationFolder in $localizationFolders)
             {
@@ -297,12 +355,11 @@ BeforeDiscovery {
                 }
 
                 $localizedKeyToTest = @()
-
                 <#
-                Build test cases for all localized strings that are in the culture's
-                localized string file.
+                    Build test cases for all localized strings that are in the culture's
+                    localized string file.
 
-                Skips a file that do not exist yet (it are caught in a test)
+                    Skips a file that do not exist yet (it are caught in a test)
                 #>
                 $localizationFile = (Join-Path -Path $cultureToTest.LocalizationFolderPath -ChildPath "$($class.Name).strings.psd1")
                 $cultureToTest.LocalizationFile = $localizationFile
@@ -313,7 +370,7 @@ BeforeDiscovery {
                         -BindingVariable 'cultureLocalizedStrings' `
                         -FileName "$($class.Name).strings.psd1" `
                         -BaseDirectory $cultureToTest.LocalizationFolderPath `
-                        -UICulture $otherLanguageToTest.LocalizationFolderName
+                        -UICulture $cultureToTest.LocalizationFolderName
 
                     foreach ($localizedKey in $cultureLocalizedStrings.Keys)
                     {
@@ -364,7 +421,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             Test-Path -Path $LocalizationFile | Should -BeTrue -Because "the string resource file $LocalizationFile must exist in the localization folder en-US"
         }
 
-        Context 'When the en-US localized resource file have localized strings' {
+        Context 'When the en-US localized resource file has localized strings' {
             <#
                 This ForEach is using the key EnUsLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
@@ -432,7 +489,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             Test-Path -Path $LocalizationFile | Should -BeTrue -Because "the string resource file $LocalizationFile must exist in the localization folder en-US"
         }
 
-        Context 'When the en-US localized resource file have localized strings' {
+        Context 'When the en-US localized resource file has localized strings' {
             <#
                 This ForEach is using the key EnUsLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
@@ -445,7 +502,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
                 This ForEach is using the key UsedLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
             #>
-            It 'Should not be missing the localized string key ''<LocalizedKey>'' in the localization resource file' -ForEach $UsedLocalizedKeys {
+            It 'Should not be missing the localized string key ''<LocalizedKey>'' in the localization resource file' -ForEach $FileUsedLocalizedKeys {
                 $EnUsLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key is used in the resource/module script file so it should also exist in the localized string resource files'
             }
         }
