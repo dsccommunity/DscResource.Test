@@ -6,7 +6,7 @@ This module contains tasks and the HQRM (High Quality Resource Module) tests for
 ![Azure DevOps coverage (branch)](https://img.shields.io/azure-devops/coverage/dsccommunity/DscResource.Test/3/main)
 [![codecov](https://codecov.io/gh/dsccommunity/DscResource.Test/branch/main/graph/badge.svg)](https://codecov.io/gh/dsccommunity/DscResource.Test)
 [![Azure DevOps tests](https://img.shields.io/azure-devops/tests/dsccommunity/DscResource.Test/3/main)](https://dsccommunity.visualstudio.com/DscResource.Test/_test/analytics?definitionId=3&contextType=build)
-[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/vpre/DscResource.Test?label=DscResource.Test%20Preview)](https://www.powershellgallery.com/packages/DscResource.Test/)
+[![PowerShell Gallery (with prereleases)](https://img.shields.io/powershellgallery/v/DscResource.Test?label=DscResource.Test%20Preview&include_prerelease)](https://www.powershellgallery.com/packages/DscResource.Test/)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/v/DscResource.Test?label=DscResource.Test)](https://www.powershellgallery.com/packages/DscResource.Test/)
 
 ## Code of Conduct
