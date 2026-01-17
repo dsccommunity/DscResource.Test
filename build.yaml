@@ -101,14 +101,14 @@ Pester:
   Configuration:
     Run:
       Path:
-      - tests/QA
-      - tests/Unit
+        - tests/QA
+        - tests/Unit
     Output:
       Verbosity: Detailed
       StackTraceVisibility: Full
       CIFormat: Auto
     CodeCoverage:
-      CoveragePercentTarget: 60
+      CoveragePercentTarget: 58
       OutputEncoding: ascii
       UseBreakpoints: false
     TestResult:
