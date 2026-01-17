@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `Localization.builtModule.v5`
+  - Add support for overridden keys in class-based resources [issue #156](https://github.com/dsccommunity/DscResource.Test/issues/156).
+    - The tests now verify that keys used in the code file exist in the strings file, and that strings defined in the file exist in the instantiated class.
+
 ## [0.18.0] - 2025-09-01
 
 ### Added

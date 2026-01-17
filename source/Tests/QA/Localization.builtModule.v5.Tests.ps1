@@ -49,7 +49,7 @@ BeforeDiscovery {
     # Re-imports the private (and public) functions.
     Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath '../../DscResource.Test.psm1') -Force
 
-    # trim * from modulebase for -Depth to work
+    # trim * from ModuleBase for -Depth to work
     $localModuleBase = $ModuleBase.Replace('*', '')
 
     $moduleFiles = @(Get-ChildItem -Path $localModuleBase -Filter '*.psm1' -Depth 1)
@@ -167,10 +167,7 @@ BeforeDiscovery {
         $otherLanguageToTest = @()
 
         # Get all localization folders except the en-US (regardless of casing).
-        $localizationFolders = Get-ChildItem -Path $scriptTestProperties.File.Directory.FullName -Directory -Filter '*-*' |
-            Where-Object -FilterScript {
-                $_.Name -ne 'en-US'
-            }
+        $localizationFolders = (Get-ChildItem -Path $scriptTestProperties.File.Directory.FullName -Directory -Filter '*-*').Where({ $_.Name -ne 'en-US' })
 
         foreach ($localizationFolder in $localizationFolders)
         {
@@ -193,7 +190,7 @@ BeforeDiscovery {
                     -BindingVariable 'cultureLocalizedStrings' `
                     -FileName "$($scriptTestProperties.File.BaseName).strings.psd1" `
                     -BaseDirectory $cultureToTest.LocalizationFolderPath `
-                    -UICulture $otherLanguageToTest.LocalizationFolderName
+                    -UICulture $cultureToTest.LocalizationFolderName
 
                 foreach ($localizedKey in $cultureLocalizedStrings.Keys)
                 {
@@ -233,12 +230,13 @@ BeforeDiscovery {
 
             $localizedKeyToTest = @()
             $usedLocalizedKeyToTest = @()
+            $usedFileLocalizedKeyToTest = @()
 
             <#
-            Build test cases for all localized strings that are in the localized
-            string file and all that are used in the module file.
+                Build test cases for all localized strings that are in the localized
+                string file and all that are used in the module file.
 
-            Skips a file that do not exist yet (it are caught in a test)
+                Skips a file that do not exist yet (it are caught in a test)
             #>
             if (Test-Path -Path $classTestProperties.LocalizationFile)
             {
@@ -264,31 +262,41 @@ BeforeDiscovery {
 
                 $localizationStringConstantsAst = $class.FindAll($astFilter, $true)
 
+                $usedLocalizationKeys = @()
                 if ($localizationStringConstantsAst)
                 {
-                    $usedLocalizationKeys = $localizationStringConstantsAst.Value | Sort-Object -Unique
+                    $usedLocalizationKeys = $localizationStringConstantsAst.Value
+                }
 
-                    foreach ($localizedKey in $usedLocalizationKeys)
-                    {
-                        $usedLocalizedKeyToTest += @{
-                            LocalizedKey = $localizedKey
-                        }
+                # Get the used localized keys from the whole class structure
+                $classLocalizedDataKeys = Get-ClassInstanceLocalizedKeys -File $file -ClassName $class.Name
+
+                $AllKeys = @($usedLocalizationKeys) + @($classLocalizedDataKeys) | Sort-Object -Unique
+                $FileKeys = @($usedLocalizationKeys) | Sort-Object -Unique
+
+                $usedLocalizedKeyToTest = foreach ($localizedKey in $AllKeys)
+                {
+                    @{
+                        LocalizedKey = $localizedKey
+                    }
+                }
+
+                $usedFileLocalizedKeyToTest = foreach ($localizedKey in $FileKeys)
+                {
+                    @{
+                        LocalizedKey = $localizedKey
                     }
                 }
             }
 
             $classTestProperties.EnUsLocalizedKeys = $localizedKeyToTest
             $classTestProperties.UsedLocalizedKeys = $usedLocalizedKeyToTest
-
-            $otherLanguageToTest = @()
+            $classTestProperties.FileUsedLocalizedKeys = $usedFileLocalizedKeyToTest
 
             # Get all localization folders except the en-US (regardless of casing).
-            $localizationFolders = Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*' |
-                Where-Object -FilterScript {
-                    $_.Name -ne 'en-US'
-                }
+            $localizationFolders = (Get-ChildItem -Path $file.Directory.FullName -Directory -Filter '*-*').Where({ $_.Name -ne 'en-US' })
 
-            foreach ($localizationFolder in $localizationFolders)
+            $otherLanguageToTest = foreach ($localizationFolder in $localizationFolders)
             {
                 $cultureToTest = @{
                     LocalizationFolderName = Split-Path -Path $localizationFolder.FullName -Leaf
@@ -297,12 +305,11 @@ BeforeDiscovery {
                 }
 
                 $localizedKeyToTest = @()
-
                 <#
-                Build test cases for all localized strings that are in the culture's
-                localized string file.
+                    Build test cases for all localized strings that are in the culture's
+                    localized string file.
 
-                Skips a file that do not exist yet (it are caught in a test)
+                    Skips a file that do not exist yet (it are caught in a test)
                 #>
                 $localizationFile = (Join-Path -Path $cultureToTest.LocalizationFolderPath -ChildPath "$($class.Name).strings.psd1")
                 $cultureToTest.LocalizationFile = $localizationFile
@@ -313,11 +320,11 @@ BeforeDiscovery {
                         -BindingVariable 'cultureLocalizedStrings' `
                         -FileName "$($class.Name).strings.psd1" `
                         -BaseDirectory $cultureToTest.LocalizationFolderPath `
-                        -UICulture $otherLanguageToTest.LocalizationFolderName
+                        -UICulture $cultureToTest.LocalizationFolderName
 
-                    foreach ($localizedKey in $cultureLocalizedStrings.Keys)
+                    $localizedKeyToTest = foreach ($localizedKey in $cultureLocalizedStrings.Keys)
                     {
-                        $localizedKeyToTest += @{
+                        @{
                             CultureLocalizedKey = $localizedKey
                         }
                     }
@@ -325,7 +332,8 @@ BeforeDiscovery {
 
                 $cultureToTest.CultureLocalizedKeys = $localizedKeyToTest
 
-                $otherLanguageToTest += $cultureToTest
+                # Output to the loop variable
+                $cultureToTest
             }
 
             $classTestProperties.OtherLanguages = $otherLanguageToTest
@@ -364,7 +372,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             Test-Path -Path $LocalizationFile | Should -BeTrue -Because "the string resource file $LocalizationFile must exist in the localization folder en-US"
         }
 
-        Context 'When the en-US localized resource file have localized strings' {
+        Context 'When the en-US localized resource file has localized strings' {
             <#
                 This ForEach is using the key EnUsLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
@@ -432,7 +440,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
             Test-Path -Path $LocalizationFile | Should -BeTrue -Because "the string resource file $LocalizationFile must exist in the localization folder en-US"
         }
 
-        Context 'When the en-US localized resource file have localized strings' {
+        Context 'When the en-US localized resource file has localized strings' {
             <#
                 This ForEach is using the key EnUsLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
@@ -445,7 +453,7 @@ Describe 'BuiltModule Tests - Validate Localization' -Tag 'BuiltModule Tests - V
                 This ForEach is using the key UsedLocalizedKeys from inside the $fileToTest
                 that is set on the Context-block's ForEach above.
             #>
-            It 'Should not be missing the localized string key ''<LocalizedKey>'' in the localization resource file' -ForEach $UsedLocalizedKeys {
+            It 'Should not be missing the localized string key ''<LocalizedKey>'' in the localization resource file' -ForEach $FileUsedLocalizedKeys {
                 $EnUsLocalizedKeys.LocalizedKey | Should -Contain $LocalizedKey -Because 'the key is used in the resource/module script file so it should also exist in the localized string resource files'
             }
         }
