@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Refactored to correctly find class-based resources (including parameterized attributes) and to throw detailed parse errors with file and position information.
 - `ExampleFiles.common.*` skip if on PowerShell 6+ [#169](https://github.com/dsccommunity/DscResource.Test/issues/169).
 - `Localization.builtModule.v5`
-  - Add support for overridden keys in class-based resources [[#156](https://github.com/dsccommunity/DscResource.Test/issues/156)].
+  - Add support for overridden keys in class-based resources [#156](https://github.com/dsccommunity/DscResource.Test/issues/156).
     - The tests now verify that keys used in the code file exist in the strings file, and that strings defined in the file exist in the instantiated class.
 
 ### Removed
