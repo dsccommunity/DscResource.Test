@@ -14,11 +14,11 @@ function Get-ClassInstanceLocalizedKeys
     [CmdletBinding()]
     [OutputType([System.Object[]])]
     param (
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.IO.FileInfo]
         $File,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true)]
         [System.String]
         $ClassName
     )
