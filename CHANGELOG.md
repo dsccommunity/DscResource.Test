@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixes
+### Fixed
 
 - Added tag `AllowSuppressMessageAttribute` to test `Should not suppress the required rule` to allow usage of `SuppressMessageAttribute` [#135](https://github.com/dsccommunity/DscResource.Test/issues/135).
 
