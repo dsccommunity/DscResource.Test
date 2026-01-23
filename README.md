@@ -1174,6 +1174,37 @@ Invoke-Pester -Container $container -Output Detailed
 
 ### PSSAResource.common
 
+This test runs PSScriptAnalyzer against the source files and validates
+compliance with required and custom rules.
+
+#### Skipping tests that validate SuppressMessageAttribute usage
+
+The test `Should not suppress the required rule` validates that no required
+PSSA rules are suppressed using `SuppressMessageAttribute`. If you need to
+suppress a required rule in your module (which is generally not recommended),
+you can exclude this specific test by using the tag `AllowSuppressMessageAttribute`
+with the `ExcludeTagFilter` parameter.
+
+**Example using build.yaml:**
+
+```yaml
+DscTest:
+  Pester:
+    ExcludeTagFilter:
+      - AllowSuppressMessageAttribute
+```
+
+**Example using Invoke-Pester directly:**
+
+```powershell
+$container = New-PesterContainer -Path "$pathToHQRMTests/PSSAResource.common.*.Tests.ps1" -Data @{
+    ProjectPath = '.'
+    ModuleBase = "./output/$dscResourceModuleName/*"
+}
+
+Invoke-Pester -Container $container -ExcludeTagFilter 'AllowSuppressMessageAttribute'
+```
+
 #### Parameters
 
 <!-- markdownlint-disable MD013 - Line length -->

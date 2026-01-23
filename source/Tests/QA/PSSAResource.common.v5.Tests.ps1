@@ -166,7 +166,7 @@ Describe 'Common Tests - PS Script Analyzer on Source Files' -Tag @('DscPSSA', '
             }
         }
 
-        It 'Should not suppress the required rule ''<_>''' -ForEach $requiredRuleToTest -Tag @('Common Tests - Required Script Analyzer Rules', 'RequiredPSSA') {
+        It 'Should not suppress the required rule ''<_>''' -ForEach $requiredRuleToTest -Tag @('Common Tests - Required Script Analyzer Rules', 'RequiredPSSA', 'AllowSuppressMessageAttribute') {
             $_ | Should -Not -BeIn $suppressedRuleNames -Because 'no module script file should suppress a required Script Analyzer rule'
         }
 
