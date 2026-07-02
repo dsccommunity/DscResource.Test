@@ -97,6 +97,18 @@ task Fail_Build_If_HQRM_Tests_Failed {
     {
         $DscTestObject = Import-Clixml -Path $DscTestResultObjectClixml -ErrorAction 'Stop'
 
-        Assert-Build -Condition ($DscTestObject.FailedCount -eq 0) -Message ('Failed {0} tests. Aborting Build.' -f $DscTestObject.FailedCount)
+        <#
+            A discovery/container failure (for example an empty -ForEach, or a
+            parse error in a test file) does not increase FailedCount. It is
+            reported through FailedContainersCount/FailedBlocksCount and the
+            overall Result. Gating on FailedCount alone therefore lets such
+            failures slip through as a green build. Gate on Result instead, which
+            already accounts for failed tests, blocks and containers. This mirrors
+            the check already used in the Invoke_HQRM_Tests task.
+        #>
+        $assertMessage = "Pester result was '{0}'. Failed {1} test(s), {2} block(s) and {3} container(s). Aborting Build." -f
+            $DscTestObject.Result, $DscTestObject.FailedCount, $DscTestObject.FailedBlocksCount, $DscTestObject.FailedContainersCount
+
+        Assert-Build -Condition ($DscTestObject.Result -eq 'Passed') -Message $assertMessage
     }
 }
